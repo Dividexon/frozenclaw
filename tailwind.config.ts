@@ -1,4 +1,4 @@
-﻿import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
@@ -8,21 +8,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        arctic: {
-          50: "#f0f9ff",
-          100: "#e0f4ff",
-          200: "#bae8ff",
-          300: "#a8edff",
-          400: "#67d8f5",
-          500: "#22c4e8",
-          600: "#0099cc",
-          900: "#003a52",
+        ice: {
+          50: "#f0faff",
+          100: "#e0f5ff",
+          200: "#aee7f7",
+          300: "#0fb5d3",
+          400: "#0099bb",
+          500: "#007a99",
+          600: "#005c73",
+          900: "#020c15",
         },
-        frost: {
-          bg: "#02080f",
-          card: "#040f1a",
-          glass: "rgba(168, 237, 255, 0.04)",
-          border: "rgba(168, 237, 255, 0.12)",
+        cave: {
+          bg: "#020c15",
+          deep: "#041824",
+          glass: "rgba(10, 50, 80, 0.35)",
+          border: "rgba(15, 181, 211, 0.18)",
         },
       },
     },

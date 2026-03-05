@@ -1,14 +1,20 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 @config "../tailwind.config.ts";
 
 :root {
-  --bg: #02080f;
-  --glass: rgba(168, 237, 255, 0.04);
-  --border: rgba(168, 237, 255, 0.12);
-  --text: #e8f4ff;
-  --text-muted: rgba(168, 237, 255, 0.5);
-  --accent: #a8edff;
-  --glow: rgba(168, 237, 255, 0.15);
+  /* Ice Cave Palette */
+  --bg: #020c15;
+  --bg-2: #041824;
+  --glass: rgba(10, 50, 80, 0.35);
+  --glass-light: rgba(174, 231, 247, 0.06);
+  --border: rgba(15, 181, 211, 0.18);
+  --border-light: rgba(174, 231, 247, 0.12);
+  --text: #e8f6fb;
+  --text-muted: rgba(174, 231, 247, 0.55);
+  --accent: #0fb5d3;
+  --accent-light: #aee7f7;
+  --glow: rgba(15, 181, 211, 0.20);
+  --glow-deep: rgba(8, 51, 74, 0.8);
 }
 
 body {
@@ -17,24 +23,60 @@ body {
   font-family: "Inter", sans-serif;
 }
 
-.glass {
-  background: var(--glass);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-}
-
-.glow-text {
-  text-shadow: 0 0 40px rgba(168, 237, 255, 0.4);
-}
-
+/* Eishoehlen-Hintergrund Effect */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 20%, rgba(168, 237, 255, 0.03) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(100, 200, 255, 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse at 50% 0%, rgba(15, 181, 211, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 0% 50%, rgba(8, 51, 74, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 50%, rgba(4, 24, 36, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(15, 181, 211, 0.05) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
+}
+
+.glass {
+  position: relative;
+  overflow: hidden;
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.glass-light {
+  background: var(--glass-light);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+}
+
+/* Ice texture overlay auf Cards */
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(174, 231, 247, 0.04) 0%, transparent 50%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.glow-text {
+  text-shadow: 0 0 60px rgba(15, 181, 211, 0.5), 0 0 20px rgba(174, 231, 247, 0.3);
+}
+
+/* Ice stalactite animation im Hero */
+@keyframes iceShimmer {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
