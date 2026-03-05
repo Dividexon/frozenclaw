@@ -1,0 +1,40 @@
+﻿@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+:root {
+  --bg: #02080f;
+  --glass: rgba(168, 237, 255, 0.04);
+  --border: rgba(168, 237, 255, 0.12);
+  --text: #e8f4ff;
+  --text-muted: rgba(168, 237, 255, 0.5);
+  --accent: #a8edff;
+  --glow: rgba(168, 237, 255, 0.15);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
+}
+
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.glow-text {
+  text-shadow: 0 0 40px rgba(168, 237, 255, 0.4);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(168, 237, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(100, 200, 255, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
