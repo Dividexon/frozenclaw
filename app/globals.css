@@ -56,7 +56,7 @@ body::before {
 }
 
 /* Ice texture overlay auf Cards */
-.glass::after {
+.glass::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -79,4 +79,175 @@ body::before {
   50% {
     opacity: 1;
   }
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(4px, -20px, 0);
+  }
+}
+
+@keyframes floatMedium {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  35% {
+    transform: translate3d(-5px, -14px, 0);
+  }
+
+  70% {
+    transform: translate3d(3px, 10px, 0);
+  }
+}
+
+@keyframes floatFast {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  40% {
+    transform: translate3d(6px, -18px, 0);
+  }
+
+  75% {
+    transform: translate3d(-3px, 8px, 0);
+  }
+}
+
+@keyframes dripSlow {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(1.15);
+  }
+}
+
+@keyframes dripFast {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(1.15);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+
+  50% {
+    opacity: 0.22;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typewriter {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 8s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: floatMedium 6s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: floatFast 5s ease-in-out infinite;
+}
+
+.animate-drip-slow {
+  transform-origin: top;
+  animation: dripSlow 5s ease-in-out infinite;
+}
+
+.animate-drip-fast {
+  transform-origin: top;
+  animation: dripFast 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.animate-typewriter {
+  animation: typewriter 0.8s step-end infinite;
+}
+
+.reveal {
+  opacity: 0;
+}
+
+.reveal.visible {
+  animation: fadeSlideUp 0.6s ease-out forwards;
+}
+
+.shimmer-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(174, 231, 247, 0.18) 45%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-position: -200% 0;
+  opacity: 0;
+}
+
+.shimmer-card:hover::after {
+  opacity: 1;
+  animation: shimmer 1.5s linear infinite;
 }

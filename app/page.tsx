@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type CodeTab = "python" | "curl";
 
 type SchemaOption = "Auto" | "Pricing" | "Products" | "Custom";
 
 const fakeMarkdown = `# Example.com\n\n## Product Overview\n\n| Name | Price | Availability |\n|---|---:|---|\n| Polar Sensor X1 | $129 | In stock |\n| Frost Lens Pro | $89 | Limited |\n\n## Key Links\n- Docs: https://example.com/docs\n- API: https://example.com/api\n\n_Last scraped: 2026-03-05T11:34:00Z_`;
+const heroHeadline = "Grab any web data.\nFreeze it. Ship it.";
 
 const useCases = [
   {
@@ -66,6 +67,91 @@ const pricing = [
 export default function Home() {
   const [codeTab, setCodeTab] = useState<CodeTab>("python");
   const [schema, setSchema] = useState<SchemaOption>("Auto");
+  const [typedHeadline, setTypedHeadline] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
+  const [scrapeState, setScrapeState] = useState<"idle" | "loading" | "done">("idle");
+  const [streamedOutput, setStreamedOutput] = useState("");
+  const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const intervalRefs = useRef<ReturnType<typeof setInterval>[]>([]);
+
+  const registerTimeout = (callback: () => void, ms: number) => {
+    const timeoutId = setTimeout(callback, ms);
+    timeoutRefs.current.push(timeoutId);
+    return timeoutId;
+  };
+
+  const registerInterval = (callback: () => void, ms: number) => {
+    const intervalId = setInterval(callback, ms);
+    intervalRefs.current.push(intervalId);
+    return intervalId;
+  };
+
+  useEffect(() => {
+    setTypedHeadline("");
+    setShowCursor(true);
+    let charIndex = 0;
+
+    const typeInterval = registerInterval(() => {
+      charIndex += 1;
+      setTypedHeadline(heroHeadline.slice(0, charIndex));
+
+      if (charIndex >= heroHeadline.length) {
+        clearInterval(typeInterval);
+        registerTimeout(() => setShowCursor(false), 2000);
+      }
+    }, 60);
+  }, []);
+
+  useEffect(() => {
+    const revealElements = document.querySelectorAll<HTMLElement>(".reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    revealElements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      timeoutRefs.current.forEach((timeoutId) => clearTimeout(timeoutId));
+      intervalRefs.current.forEach((intervalId) => clearInterval(intervalId));
+    };
+  }, []);
+
+  const handleScrape = () => {
+    if (scrapeState === "loading") {
+      return;
+    }
+
+    setScrapeState("loading");
+    setStreamedOutput("");
+
+    registerTimeout(() => {
+      setScrapeState("done");
+      let charIndex = 0;
+      const streamInterval = registerInterval(() => {
+        charIndex += 1;
+        setStreamedOutput(fakeMarkdown.slice(0, charIndex));
+
+        if (charIndex >= fakeMarkdown.length) {
+          clearInterval(streamInterval);
+          setScrapeState("idle");
+        }
+      }, 20);
+    }, 1800);
+  };
+
+  const renderedMarkdown = streamedOutput || fakeMarkdown;
 
   return (
     <div className="relative z-10 min-h-screen bg-[#020c15] text-[#e8f6fb]">
@@ -95,19 +181,22 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-b from-[#020c15] via-[#041824] to-[#020c15]" />
 
             {/* Glowing Center: Licht aus der Hoehle */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(15,181,211,0.12)_0%,transparent_65%)]" />
+            <div className="animate-pulse-glow absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(15,181,211,0.12)_0%,transparent_65%)]" />
 
             {/* Eis-Stalaktiten Effect: vertikale Linien oben */}
             <div className="absolute left-0 right-0 top-0 h-48 overflow-hidden opacity-20">
               {[...Array(20)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute top-0 bg-gradient-to-b from-[#aee7f7] to-transparent"
+                  className={`absolute top-0 bg-gradient-to-b from-[#aee7f7] to-transparent ${
+                    i % 5 === 0 ? "animate-drip-fast" : i % 3 === 0 ? "animate-drip-slow" : ""
+                  }`}
                   style={{
                     left: `${5 + i * 5}%`,
                     height: `${40 + ((i * 17) % 80)}px`,
                     opacity: 0.3 + ((i * 7) % 7) / 10,
                     width: `${1 + (i % 3)}px`,
+                    animationDelay: `${i * 0.2}s`,
                   }}
                 />
               ))}
@@ -134,13 +223,20 @@ export default function Home() {
               {[...Array(12)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute rounded-full bg-[#0fb5d3]"
+                  className={`absolute rounded-full bg-[#0fb5d3] ${
+                    i % 3 === 0
+                      ? "animate-float-slow"
+                      : i % 3 === 1
+                        ? "animate-float-medium"
+                        : "animate-float-fast"
+                  }`}
                   style={{
                     left: `${(i * 13) % 100}%`,
                     top: `${(i * 19) % 100}%`,
                     width: `${2 + (i % 4)}px`,
                     height: `${2 + (i % 4)}px`,
                     opacity: 0.1 + (i % 3) / 10,
+                    animationDelay: `${i * 0.4}s`,
                   }}
                 />
               ))}
@@ -152,9 +248,13 @@ export default function Home() {
             <div className="space-y-8 text-left">
               <div className="max-w-3xl space-y-4">
                 <h1 className="glow-text text-4xl font-extrabold leading-tight text-white sm:text-6xl">
-                  Grab any web data.
-                  <br />
-                  Freeze it. Ship it.
+                  {typedHeadline.split("\n").map((line, index, lines) => (
+                    <span key={`${line}-${index}`}>
+                      {line}
+                      {index < lines.length - 1 ? <br /> : null}
+                    </span>
+                  ))}
+                  {showCursor ? <span className="animate-typewriter ml-1 inline-block">|</span> : null}
                 </h1>
                 <p className="max-w-2xl text-base text-[rgba(174,231,247,0.7)] sm:text-lg">
                   FrozenClaw scrapes any website and returns clean, structured markdown
@@ -188,22 +288,36 @@ export default function Home() {
                     <option>Products</option>
                     <option>Custom</option>
                   </select>
-                  <button className="rounded-xl bg-[#0fb5d3] px-5 py-3 text-sm font-bold text-[#020c15] transition hover:bg-[#1dbfd6]">
+                  <button
+                    onClick={handleScrape}
+                    disabled={scrapeState === "loading"}
+                    className="rounded-xl bg-[#0fb5d3] px-5 py-3 text-sm font-bold text-[#020c15] transition hover:bg-[#1dbfd6] disabled:cursor-not-allowed disabled:opacity-80"
+                  >
                     Scrape -&gt;
                   </button>
                 </div>
-                <pre className="overflow-x-auto rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(2,12,21,0.75)] p-4 text-xs text-[#aee7f7] sm:text-sm">
-                  <code>{fakeMarkdown}</code>
-                </pre>
+                {scrapeState === "loading" ? (
+                  <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(2,12,21,0.75)] p-4 text-[#aee7f7]">
+                    <span className="inline-block text-3xl animate-spin">❄️</span>
+                    <span className="text-sm sm:text-base">Freezing data...</span>
+                  </div>
+                ) : (
+                  <pre className="overflow-x-auto rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(2,12,21,0.75)] p-4 text-xs text-[#aee7f7] sm:text-sm">
+                    <code>{renderedMarkdown}</code>
+                  </pre>
+                )}
               </div>
             </div>
           </div>
         </section>
 
-        <section className="space-y-6">
+        <section className="reveal space-y-6">
           <h2 className="text-2xl font-bold text-white sm:text-3xl">How it works</h2>
           <div className="grid gap-4 md:grid-cols-3">
-            <article className="glass border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl">
+            <article
+              className="glass shimmer-card reveal border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
+              style={{ animationDelay: "0.1s" }}
+            >
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#0fb5d3]">Step 1</p>
               <h3 className="mb-2 text-lg font-semibold text-white">Paste any URL</h3>
               <p className="text-sm text-[rgba(174,231,247,0.7)]">
@@ -211,14 +325,20 @@ export default function Home() {
                 bot detection.
               </p>
             </article>
-            <article className="glass border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl">
+            <article
+              className="glass shimmer-card reveal border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
+              style={{ animationDelay: "0.2s" }}
+            >
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#0fb5d3]">Step 2</p>
               <h3 className="mb-2 text-lg font-semibold text-white">We extract and freeze</h3>
               <p className="text-sm text-[rgba(174,231,247,0.7)]">
                 Playwright renders the page. GPT-4o extracts clean, structured markdown.
               </p>
             </article>
-            <article className="glass border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl">
+            <article
+              className="glass shimmer-card reveal border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
+              style={{ animationDelay: "0.3s" }}
+            >
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#0fb5d3]">Step 3</p>
               <h3 className="mb-2 text-lg font-semibold text-white">Ship structured data</h3>
               <p className="text-sm text-[rgba(174,231,247,0.7)]">
@@ -228,13 +348,14 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="space-y-6">
+        <section className="reveal space-y-6">
           <h2 className="text-2xl font-bold text-white sm:text-3xl">Use cases</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            {useCases.map((item) => (
+            {useCases.map((item, index) => (
               <article
                 key={item.title}
-                className="glass border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
+                className="glass shimmer-card reveal border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
+                style={{ animationDelay: `${0.1 + index * 0.1}s` }}
               >
                 <h3 className="mb-2 text-lg font-semibold text-white">{item.title}</h3>
                 <p className="text-sm text-[rgba(174,231,247,0.7)]">{item.description}</p>
@@ -243,15 +364,16 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="pricing" className="space-y-6">
+        <section id="pricing" className="reveal space-y-6">
           <h2 className="text-2xl font-bold text-white sm:text-3xl">Pricing</h2>
           <div className="grid gap-4 lg:grid-cols-3">
-            {pricing.map((plan) => (
+            {pricing.map((plan, index) => (
               <article
                 key={plan.tier}
-                className={`glass flex flex-col border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-6 backdrop-blur-2xl ${
+                className={`glass shimmer-card reveal flex flex-col border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-6 backdrop-blur-2xl ${
                   plan.featured ? "ring-1 ring-[rgba(15,181,211,0.6)]" : ""
                 }`}
+                style={{ animationDelay: `${0.1 + index * 0.1}s` }}
               >
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-xl font-bold text-white">{plan.tier}</h3>
@@ -283,7 +405,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="docs" className="space-y-6">
+        <section id="docs" className="reveal space-y-6">
           <h2 className="text-2xl font-bold text-white sm:text-3xl">API in seconds</h2>
           <div className="glass border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl sm:p-6">
             <div className="mb-4 flex gap-2">
