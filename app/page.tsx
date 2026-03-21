@@ -88,6 +88,97 @@ const faqs = [
   },
 ];
 
+function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
+  const glowId = `${idPrefix}-glow`;
+  const iceId = `${idPrefix}-ice`;
+  const edgeId = `${idPrefix}-edge`;
+
+  return (
+    <svg
+      viewBox="0 0 96 96"
+      className="h-11 w-11 shrink-0"
+      aria-hidden="true"
+      role="presentation"
+    >
+      <defs>
+        <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#69d8ff" stopOpacity="0.95" />
+          <stop offset="55%" stopColor="#1d86ff" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="#0a1020" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={iceId} x1="18%" y1="10%" x2="82%" y2="86%">
+          <stop offset="0%" stopColor="#f6fdff" />
+          <stop offset="35%" stopColor="#7fdcff" />
+          <stop offset="70%" stopColor="#4b8cff" />
+          <stop offset="100%" stopColor="#163f8f" />
+        </linearGradient>
+        <linearGradient id={edgeId} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#8ce6ff" stopOpacity="0.35" />
+        </linearGradient>
+        <filter id={`${idPrefix}-blur`} x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="4.5" />
+        </filter>
+      </defs>
+
+      <circle
+        cx="48"
+        cy="48"
+        r="33"
+        fill={`url(#${glowId})`}
+        filter={`url(#${idPrefix}-blur)`}
+        opacity="0.9"
+      />
+
+      <path
+        d="M66 13c-9 1-18 5-25 12-9 9-13 20-12 31 1 10 6 18 14 24-6-1-12-3-17-7-10-8-15-18-15-30 0-15 8-27 21-35 9-6 21-8 34-6z"
+        fill={`url(#${iceId})`}
+      />
+      <path
+        d="M66 13c-9 1-18 5-25 12-9 9-13 20-12 31 1 10 6 18 14 24-6-1-12-3-17-7-10-8-15-18-15-30 0-15 8-27 21-35 9-6 21-8 34-6z"
+        fill="none"
+        stroke={`url(#${edgeId})`}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M70 18c9 7 14 16 15 27 1 13-4 24-14 33-8 8-18 12-31 13 9-5 17-11 22-19 6-8 9-17 9-27 0-9-3-18-8-27 2 0 5 0 7 0z"
+        fill={`url(#${iceId})`}
+      />
+      <path
+        d="M70 18c9 7 14 16 15 27 1 13-4 24-14 33-8 8-18 12-31 13 9-5 17-11 22-19 6-8 9-17 9-27 0-9-3-18-8-27 2 0 5 0 7 0z"
+        fill="none"
+        stroke={`url(#${edgeId})`}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M30 60c5 7 13 12 22 13-8 4-18 5-27 1 1-5 2-10 5-14z"
+        fill={`url(#${iceId})`}
+        opacity="0.9"
+      />
+      <path
+        d="M57 20c4 3 7 8 8 13-7-2-15-2-22 0 3-6 8-10 14-13z"
+        fill={`url(#${iceId})`}
+        opacity="0.85"
+      />
+
+      <path
+        d="M75 22l4-8 3 9 9 4-9 2-3 8-3-8-8-2z"
+        fill="#dffbff"
+        opacity="0.95"
+      />
+      <path
+        d="M18 60l4-7 2 8 8 3-8 2-2 8-4-7-8-3z"
+        fill="#c9f8ff"
+        opacity="0.75"
+      />
+    </svg>
+  );
+}
+
 export default function Home() {
   return (
     <main className="min-h-screen overflow-x-hidden bg-[var(--fc-bg)] text-[var(--fc-text)]">
@@ -100,7 +191,9 @@ export default function Home() {
       <div className="relative z-10">
         <header className="mx-auto flex w-[94%] max-w-7xl items-center justify-between border-b border-[var(--fc-border-strong)] py-5">
           <a href="#" className="flex items-center gap-3 text-[var(--fc-text)]">
-            <span className="brand-mark" aria-hidden="true" />
+            <span className="brand-lockup">
+              <FrozenclawIcon idPrefix="header-mark" />
+            </span>
             <span className="font-display text-2xl uppercase tracking-[0.18em]">
               Frozenclaw
             </span>
@@ -401,7 +494,12 @@ export default function Home() {
 
         <footer className="mx-auto grid w-[94%] max-w-7xl gap-6 border-t border-[var(--fc-border-strong)] py-8 text-sm uppercase tracking-[0.14em] text-[var(--fc-text-muted)] md:grid-cols-[1fr_auto] md:items-center">
           <div>
-            <p className="font-display text-3xl text-[var(--fc-text)]">Frozenclaw</p>
+            <div className="flex items-center gap-3">
+              <span className="brand-lockup">
+                <FrozenclawIcon idPrefix="footer-mark" />
+              </span>
+              <p className="font-display text-3xl text-[var(--fc-text)]">Frozenclaw</p>
+            </div>
             <p className="mt-2 max-w-xl text-xs leading-6 text-[var(--fc-text-muted)]">
               Hosted OpenClaw infrastructure with a black-and-red vault language, built for
               a focused beta instead of soft generic SaaS.
