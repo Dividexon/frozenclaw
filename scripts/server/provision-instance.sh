@@ -51,6 +51,7 @@ SERVER_TIMEZONE="${SERVER_TIMEZONE:-Europe/Berlin}"
 APP_BASE_URL="${APP_BASE_URL:-http://46.225.143.215}"
 APP_SYSTEM_USER="${APP_SYSTEM_USER:-frozenclaw}"
 APP_SYSTEM_GROUP="${APP_SYSTEM_GROUP:-frozenclaw}"
+OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH="${OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH:-true}"
 CONTAINER_NAME="frozenclaw-${SLUG}"
 CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
 CONFIG_DIR="${CUSTOMER_DIR}/config"
@@ -89,7 +90,8 @@ cat > "$OPENCLAW_CONFIG_JSON" <<EOF
 {
   "gateway": {
     "controlUi": {
-      "allowedOrigins": ["$APP_BASE_URL"]
+      "allowedOrigins": ["$APP_BASE_URL"],
+      "dangerouslyDisableDeviceAuth": $OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH
     }
   }
 }

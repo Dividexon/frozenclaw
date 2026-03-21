@@ -37,6 +37,7 @@ npm run dev
 - `PROVISIONING_STALE_MINUTES`: ab wann hängende Provisionierungen erneut angefasst werden
 - `AGENT_BASE_PATH`: öffentlicher Pfad vor dem Instanz-Slug, standardmäßig `/agent`
 - `APP_SYSTEM_USER` und `APP_SYSTEM_GROUP`: Besitzer der kundenbezogenen Konfigurationsdateien auf dem Host
+- `OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH`: setzt für die Browser-Control-UI den OpenClaw-Break-Glass-Modus
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`: SMTP-Zugang für Transaktionsmails
 - `MAIL_FROM`: sichtbarer Absender, bei Gmail am besten dieselbe Adresse wie `SMTP_USER`
 - `SUPPORT_EMAIL`: Reply-To für Rückfragen
@@ -73,6 +74,10 @@ Auf einem Linux-Host sollte die Web-App selbst weiterhin als unprivilegierter Nu
 ## Mailversand
 
 Frozenclaw kann nach erfolgreicher Bereitstellung und bei fehlgeschlagener Provisionierung automatisch E-Mails versenden. Für Gmail funktioniert das mit `smtp.gmail.com`, Port `587`, `SMTP_SECURE=false` und einem Google-App-Passwort.
+
+## Control UI
+
+OpenClaw verlangt für die Browser-Control-UI standardmäßig zusätzlich Device-Auth/Pairing. Für die aktuelle Beta kann pro Instanz `OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH=true` gesetzt werden, damit der Zugriff ausschließlich über Gateway-Token läuft. Das ist bewusst ein Sicherheits-Downgrade und sollte nur verwendet werden, solange keine saubere Geräte-Pairing- oder Session-Lösung davorsteht.
 
 ## Nächste echte Produktionsschritte
 
