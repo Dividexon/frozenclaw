@@ -69,6 +69,8 @@ if ! docker image inspect "$OPENCLAW_IMAGE" >/dev/null 2>&1; then
   /opt/frozenclaw/app/scripts/server/install-openclaw-base.sh
 fi
 
+/opt/frozenclaw/app/scripts/server/write-workspace-files.sh "$WORKSPACE_DIR"
+
 if [[ ! -f "$PROVIDER_ENV" ]]; then
   cat > "$PROVIDER_ENV" <<EOF
 OPENCLAW_GATEWAY_TOKEN=$TOKEN
