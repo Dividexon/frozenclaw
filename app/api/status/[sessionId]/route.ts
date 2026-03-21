@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { buildActivationUrl, startRuntimeRecovery } from "@/lib/provisioning";
+
+export const runtime = "nodejs";
 
 type RouteContext = {
   params: Promise<{
@@ -8,6 +11,8 @@ type RouteContext = {
 };
 
 export async function GET(_request: Request, context: RouteContext) {
+  startRuntimeRecovery();
+
   const { sessionId } = await context.params;
   const db = getDb();
 
@@ -52,6 +57,7 @@ export async function GET(_request: Request, context: RouteContext) {
     paymentStatus: order.payment_status,
     instanceState: order.instance_state,
     instanceSlug: order.instance_slug,
+    activationUrl: buildActivationUrl(order.instance_slug),
     createdAt: order.created_at,
     updatedAt: order.updated_at,
   });

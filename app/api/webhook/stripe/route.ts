@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { getDb, logOrderEvent } from "@/lib/db";
+import { queueProvisioning, startRuntimeRecovery } from "@/lib/provisioning";
 import { getStripe } from "@/lib/stripe";
 import { isPlanId, plans, type UsageMode } from "@/lib/plans";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
+  startRuntimeRecovery();
+
   const signature = request.headers.get("stripe-signature");
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -80,6 +85,10 @@ export async function POST(request: Request) {
         planId,
         usageMode,
       });
+
+      if (order?.id) {
+        queueProvisioning(order.id);
+      }
     } else {
       logOrderEvent(null, "webhook_ignored", {
         stripeEventId: event.id,

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OrderStatusPanel } from "@/components/order-status-panel";
 
 type SuccessPageProps = {
   searchParams: Promise<{
@@ -22,6 +23,7 @@ async function loadStatus(sessionId: string) {
       instanceState: string;
       usageMode: string;
       plan: string;
+      activationUrl?: string | null;
     };
   } catch {
     return null;
@@ -38,26 +40,11 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
         <p className="section-kicker">Checkout</p>
         <h1 className="section-title mt-3 text-5xl">Bestellung eingegangen.</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
-          Stripe hat deinen Checkout abgeschlossen. Die Bestellung liegt jetzt in Frozenclaw
-          vor und kann für die Provisionierung weiterverarbeitet werden.
+          Stripe hat deinen Checkout abgeschlossen. Die Bestellung liegt jetzt in Frozenclaw vor
+          und wird für die Bereitstellung der Instanz verarbeitet.
         </p>
 
-        {sessionId ? (
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <div className="signal-row">
-              <span className="signal-index">#</span>
-              <span>{sessionId}</span>
-            </div>
-            <div className="signal-row">
-              <span className="signal-index">+</span>
-              <span>
-                {status
-                  ? `${status.plan} / ${status.paymentStatus} / ${status.instanceState}`
-                  : "Status wird lokal noch nicht geladen"}
-              </span>
-            </div>
-          </div>
-        ) : null}
+        {sessionId ? <OrderStatusPanel sessionId={sessionId} initialStatus={status} /> : null}
 
         <div className="mt-8 flex flex-wrap gap-4">
           <Link href="/" className="fc-button fc-button-primary">

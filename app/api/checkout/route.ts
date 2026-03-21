@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, logOrderEvent } from "@/lib/db";
+import { getBaseUrlFromRequest } from "@/lib/env";
+import { startRuntimeRecovery } from "@/lib/provisioning";
 import { getStripe } from "@/lib/stripe";
 import { isPlanId, plans } from "@/lib/plans";
 
@@ -7,11 +9,11 @@ type CheckoutBody = {
   planId?: string;
 };
 
-function getBaseUrl(request: Request) {
-  return process.env.NEXT_PUBLIC_URL ?? new URL(request.url).origin;
-}
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  startRuntimeRecovery();
+
   let body: CheckoutBody = {};
 
   try {
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
 
   try {
     const stripe = getStripe();
-    const baseUrl = getBaseUrl(request);
+    const baseUrl = getBaseUrlFromRequest(request);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],

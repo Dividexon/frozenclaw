@@ -7,7 +7,6 @@ import Database from "better-sqlite3";
 type DbInstance = Database.Database;
 
 declare global {
-  // eslint-disable-next-line no-var
   var __frozenclawDb: DbInstance | undefined;
 }
 

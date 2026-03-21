@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frozenclaw
 
-## Getting Started
+Frozenclaw ist eine Landing Page plus Beta-Checkout für gehostete OpenClaw-Instanzen. Der aktuelle Fokus liegt auf `Hosted BYOK`: Der Kunde bringt seinen eigenen Modell-Key mit, Frozenclaw übernimmt Hosting, Bereitstellung und den technischen Betrieb.
 
-First, run the development server:
+## Technischer Stand
+
+- Next.js App Router
+- Stripe Checkout und Webhook-Persistenz
+- SQLite als Source of Truth
+- asynchrone Provisionierung mit Recovery für hängende Jobs
+- `mock`-Provisionierung für lokale Tests
+- Platzhalterseiten für Impressum, Datenschutz und Beta-Bedingungen
+
+## Lokale Einrichtung
+
+1. `.env.example` nach `.env.local` kopieren
+2. Stripe-Testwerte eintragen
+3. Abhängigkeiten installieren
+4. Entwicklungsserver starten
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Wichtige Umgebungsvariablen
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `NEXT_PUBLIC_URL`: öffentliche Basis-URL für Frontend und Success-Seite
+- `APP_BASE_URL`: Basis-URL für erzeugte Instanz-Links
+- `STRIPE_SECRET_KEY`: Stripe Secret Key
+- `STRIPE_WEBHOOK_SECRET`: Webhook Secret
+- `PROVISIONING_MODE`: `mock` oder `script`
+- `PROVISIONING_SCRIPT`: Skriptpfad für echte Provisionierung im `script`-Modus
+- `PROVISIONING_PORT_START`: Start des Portbereichs
+- `PROVISIONING_PORT_END`: Ende des Portbereichs
+- `PROVISIONING_STALE_MINUTES`: ab wann hängende Provisionierungen erneut angefasst werden
+- `AGENT_BASE_PATH`: öffentlicher Pfad vor dem Instanz-Slug, standardmäßig `/agent`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Provisionierungsmodi
 
-## Learn More
+### `mock`
 
-To learn more about Next.js, take a look at the following resources:
+Standard für lokale Entwicklung. Nach erfolgreichem Webhook wird eine lokale Instanzbeschreibung unter `data/customers/<slug>/instance.json` angelegt und der Auftrag auf `ready` gesetzt.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### `script`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Für echte Server-Provisionierung. Frozenclaw ruft ein externes Skript mit diesen Argumenten auf:
 
-## Deploy on Vercel
+```text
+--order-id <id>
+--slug <slug>
+--port <port>
+--token <gateway_token>
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Das Skript muss Container, Reverse Proxy und Health Check selbst umsetzen. Bei Fehlern wird der Auftrag auf `failed` gesetzt.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Statusfluss
+
+1. `POST /api/checkout` erstellt eine Stripe-Session und speichert den Auftrag
+2. `POST /api/webhook/stripe` schreibt die Bezahlung idempotent in SQLite
+3. der Auftrag wird asynchron provisioniert
+4. `/success?session_id=...` pollt den Status, bis die Instanz bereit oder fehlgeschlagen ist
+5. beim App-Start werden `pending`- und veraltete `provisioning`-Aufträge erneut eingeplant
+
+## Nächste echte Produktionsschritte
+
+- Server-Skript für Provisionierung anbinden
+- echte Impressumsdaten eintragen
+- Stripe-Testmodus komplett durchspielen
+- E-Mail-Versand für Bereitstellung und Warnungen ergänzen
