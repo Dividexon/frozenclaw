@@ -39,12 +39,14 @@ fi
 OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-frozenclaw/openclaw:latest}"
 CUSTOMER_ROOT_DIR="${CUSTOMER_ROOT_DIR:-/opt/frozenclaw/customers}"
 SERVER_TIMEZONE="${SERVER_TIMEZONE:-Europe/Berlin}"
+APP_BASE_URL="${APP_BASE_URL:-http://46.225.143.215}"
 CONTAINER_NAME="frozenclaw-${SLUG}"
 CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
 CONFIG_DIR="${CUSTOMER_DIR}/config"
 WORKSPACE_DIR="${CUSTOMER_DIR}/workspace"
 INSTANCE_ENV="${CUSTOMER_DIR}/instance.env"
 PROVIDER_ENV="${CONFIG_DIR}/.env"
+OPENCLAW_CONFIG_JSON="${CONFIG_DIR}/openclaw.json"
 CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 
 mkdir -p "$CONFIG_DIR" "$WORKSPACE_DIR" /etc/caddy/customers.d
@@ -70,6 +72,16 @@ INSTANCE_PORT=$PORT
 GATEWAY_TOKEN=$TOKEN
 CONTAINER_NAME=$CONTAINER_NAME
 OPENCLAW_IMAGE=$OPENCLAW_IMAGE
+EOF
+
+cat > "$OPENCLAW_CONFIG_JSON" <<EOF
+{
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": ["$APP_BASE_URL"]
+    }
+  }
+}
 EOF
 
 cat > "$CADDY_SNIPPET" <<EOF
