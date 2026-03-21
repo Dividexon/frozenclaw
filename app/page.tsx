@@ -128,7 +128,6 @@ const faqs = [
 function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
   const auraId = `${idPrefix}-aura`;
   const iceId = `${idPrefix}-ice`;
-  const frostId = `${idPrefix}-frost`;
   const rustId = `${idPrefix}-rust`;
   const enamelId = `${idPrefix}-enamel`;
   const edgeId = `${idPrefix}-edge`;
@@ -137,7 +136,9 @@ function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
   return (
     <svg
       viewBox="0 0 160 160"
-      className="h-13 w-13 shrink-0"
+      width="48"
+      height="48"
+      className="h-12 w-12 shrink-0"
       aria-hidden="true"
       role="presentation"
     >
@@ -153,12 +154,6 @@ function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
           <stop offset="28%" stopColor="#d4eeff" />
           <stop offset="64%" stopColor="#8dd5ff" />
           <stop offset="100%" stopColor="#3472b7" />
-        </linearGradient>
-        <linearGradient id={frostId} x1="18%" y1="4%" x2="82%" y2="96%">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="36%" stopColor="#ebf9ff" />
-          <stop offset="76%" stopColor="#78cfff" />
-          <stop offset="100%" stopColor="#b7efff" />
         </linearGradient>
         <linearGradient id={rustId} x1="20%" y1="10%" x2="82%" y2="94%">
           <stop offset="0%" stopColor="#6e2d16" />
