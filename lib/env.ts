@@ -20,6 +20,13 @@ export type AppConfig = {
   openClawImage: string;
   openClawRepoDir: string;
   serverTimezone: string;
+  smtpHost: string | null;
+  smtpPort: number;
+  smtpSecure: boolean;
+  smtpUser: string | null;
+  smtpPass: string | null;
+  mailFrom: string | null;
+  supportEmail: string | null;
 };
 
 let cachedConfig: AppConfig | null = null;
@@ -40,6 +47,20 @@ function parseBoolean(value: string | undefined, fallback: boolean) {
   }
 
   throw new Error("Boolesche Umgebungswerte müssen true/false, 1/0, yes/no oder on/off sein.");
+}
+
+function parsePort(value: string | undefined, fallback: number, name: string) {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+
+  if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 65535) {
+    throw new Error(`${name} muss ein gÃ¼ltiger Port sein.`);
+  }
+
+  return parsed;
 }
 
 function parsePositiveInt(value: string | undefined, fallback: number, name: string) {
@@ -102,6 +123,13 @@ export function getAppConfig() {
       openClawImage: process.env.OPENCLAW_IMAGE ?? "frozenclaw/openclaw:latest",
       openClawRepoDir: process.env.OPENCLAW_REPO_DIR ?? "/opt/frozenclaw/vendor/openclaw",
       serverTimezone: process.env.SERVER_TIMEZONE ?? "Europe/Berlin",
+      smtpHost: process.env.SMTP_HOST ?? null,
+      smtpPort: parsePort(process.env.SMTP_PORT, 587, "SMTP_PORT"),
+      smtpSecure: parseBoolean(process.env.SMTP_SECURE, false),
+      smtpUser: process.env.SMTP_USER ?? null,
+      smtpPass: process.env.SMTP_PASS ?? null,
+      mailFrom: process.env.MAIL_FROM ?? null,
+      supportEmail: process.env.SUPPORT_EMAIL ?? null,
     };
   }
 

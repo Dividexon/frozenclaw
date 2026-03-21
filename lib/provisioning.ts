@@ -8,6 +8,11 @@ import { promisify } from "node:util";
 import { getDb, logOrderEvent } from "@/lib/db";
 import { getAppConfig } from "@/lib/env";
 import { ensureCustomerDirectories } from "@/lib/customer-instances";
+import {
+  isMailConfigured,
+  sendProvisioningFailedMail,
+  sendProvisioningReadyMail,
+} from "@/lib/mail";
 
 const execFileAsync = promisify(execFile);
 const processingOrders = new Set<number>();
@@ -354,11 +359,56 @@ export async function provisionOrder(orderId: number) {
       slug: readyOrder?.instance_slug ?? null,
       port: readyOrder?.instance_port ?? null,
     });
+
+    if (
+      readyOrder?.email &&
+      readyOrder.instance_slug &&
+      readyOrder.gateway_token &&
+      isMailConfigured()
+    ) {
+      try {
+        await sendProvisioningReadyMail({
+          to: readyOrder.email,
+          slug: readyOrder.instance_slug,
+          setupUrl: buildSetupUrl(readyOrder.instance_slug, readyOrder.gateway_token)!,
+          agentUrl: buildAgentUrl(readyOrder.instance_slug, readyOrder.gateway_token)!,
+        });
+        logOrderEvent(orderId, "mail_ready_sent", {
+          to: readyOrder.email,
+        });
+      } catch (mailError) {
+        logOrderEvent(orderId, "mail_ready_failed", {
+          message: mailError instanceof Error ? mailError.message : "Unbekannter Mailfehler",
+          to: readyOrder.email,
+        });
+      }
+    }
   } catch (error) {
     markFailed(orderId);
+    const failedOrder = getOrderById(orderId);
+    const failureMessage = error instanceof Error ? error.message : "Unbekannter Fehler";
+
     logOrderEvent(orderId, "provisioning_failed", {
-      message: error instanceof Error ? error.message : "Unbekannter Fehler",
+      message: failureMessage,
     });
+
+    if (failedOrder?.email && isMailConfigured()) {
+      try {
+        await sendProvisioningFailedMail({
+          to: failedOrder.email,
+          orderId,
+          message: failureMessage,
+        });
+        logOrderEvent(orderId, "mail_failed_sent", {
+          to: failedOrder.email,
+        });
+      } catch (mailError) {
+        logOrderEvent(orderId, "mail_failed_delivery_failed", {
+          message: mailError instanceof Error ? mailError.message : "Unbekannter Mailfehler",
+          to: failedOrder.email,
+        });
+      }
+    }
   } finally {
     processingOrders.delete(orderId);
   }

@@ -37,6 +37,9 @@ npm run dev
 - `PROVISIONING_STALE_MINUTES`: ab wann hängende Provisionierungen erneut angefasst werden
 - `AGENT_BASE_PATH`: öffentlicher Pfad vor dem Instanz-Slug, standardmäßig `/agent`
 - `APP_SYSTEM_USER` und `APP_SYSTEM_GROUP`: Besitzer der kundenbezogenen Konfigurationsdateien auf dem Host
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`: SMTP-Zugang für Transaktionsmails
+- `MAIL_FROM`: sichtbarer Absender, bei Gmail am besten dieselbe Adresse wie `SMTP_USER`
+- `SUPPORT_EMAIL`: Reply-To für Rückfragen
 
 ## Provisionierungsmodi
 
@@ -66,6 +69,10 @@ Auf einem Linux-Host sollte die Web-App selbst weiterhin als unprivilegierter Nu
 3. der Auftrag wird asynchron provisioniert
 4. `/success?session_id=...` pollt den Status, bis die Instanz bereit oder fehlgeschlagen ist
 5. beim App-Start werden `pending`- und veraltete `provisioning`-Aufträge erneut eingeplant
+
+## Mailversand
+
+Frozenclaw kann nach erfolgreicher Bereitstellung und bei fehlgeschlagener Provisionierung automatisch E-Mails versenden. Für Gmail funktioniert das mit `smtp.gmail.com`, Port `587`, `SMTP_SECURE=false` und einem Google-App-Passwort.
 
 ## Nächste echte Produktionsschritte
 
