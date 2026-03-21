@@ -44,7 +44,7 @@ type OpenClawConfig = {
   };
   agents?: {
     defaults?: {
-      models?: Record<string, Record<string, never>>;
+      models?: Record<string, { alias?: string }>;
     };
   };
 };
@@ -241,7 +241,12 @@ async function syncOpenClawModelAllowlist(slug: string) {
 
   if (allowedModels.size > 0) {
     nextConfig.agents!.defaults!.models = Object.fromEntries(
-      Array.from(allowedModels).map((model) => [model, {}]),
+      Array.from(allowedModels).map((model) => [
+        model,
+        {
+          alias: model.includes("/") ? model.split("/").slice(1).join("/") : model,
+        },
+      ]),
     );
   } else if (nextConfig.agents?.defaults?.models) {
     delete nextConfig.agents.defaults.models;
