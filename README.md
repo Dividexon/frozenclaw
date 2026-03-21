@@ -30,11 +30,13 @@ npm run dev
 - `STRIPE_SECRET_KEY`: Stripe Secret Key
 - `STRIPE_WEBHOOK_SECRET`: Webhook Secret
 - `PROVISIONING_MODE`: `mock` oder `script`
+- `PROVISIONING_USE_SUDO`: setzt Skriptaufrufe auf `sudo -n`, sinnvoll auf dem Server
 - `PROVISIONING_SCRIPT`: Skriptpfad für echte Provisionierung im `script`-Modus
 - `PROVISIONING_PORT_START`: Start des Portbereichs
 - `PROVISIONING_PORT_END`: Ende des Portbereichs
 - `PROVISIONING_STALE_MINUTES`: ab wann hängende Provisionierungen erneut angefasst werden
 - `AGENT_BASE_PATH`: öffentlicher Pfad vor dem Instanz-Slug, standardmäßig `/agent`
+- `APP_SYSTEM_USER` und `APP_SYSTEM_GROUP`: Besitzer der kundenbezogenen Konfigurationsdateien auf dem Host
 
 ## Provisionierungsmodi
 
@@ -54,6 +56,8 @@ Für echte Server-Provisionierung. Frozenclaw ruft ein externes Skript mit diese
 ```
 
 Das Skript muss Container, Reverse Proxy und Health Check selbst umsetzen. Bei Fehlern wird der Auftrag auf `failed` gesetzt.
+
+Auf einem Linux-Host sollte die Web-App selbst weiterhin als unprivilegierter Nutzer laufen. Für Docker- und Caddy-Zugriffe wird deshalb `PROVISIONING_USE_SUDO=true` plus eine passende `sudoers`-Whitelist empfohlen; ein Template liegt unter [`ops/frozenclaw-provisioning.sudoers`](/C:/Users/Mariu/clawd/apps/frozenclaw/ops/frozenclaw-provisioning.sudoers).
 
 ## Statusfluss
 

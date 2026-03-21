@@ -7,6 +7,7 @@ export type ProvisioningMode = "mock" | "script";
 export type AppConfig = {
   appBaseUrl: string | null;
   provisioningMode: ProvisioningMode;
+  provisioningUseSudo: boolean;
   provisioningScript: string | null;
   restartScript: string | null;
   deprovisionScript: string | null;
@@ -22,6 +23,24 @@ export type AppConfig = {
 };
 
 let cachedConfig: AppConfig | null = null;
+
+function parseBoolean(value: string | undefined, fallback: boolean) {
+  if (value === undefined) {
+    return fallback;
+  }
+
+  const normalized = value.trim().toLowerCase();
+
+  if (["1", "true", "yes", "on"].includes(normalized)) {
+    return true;
+  }
+
+  if (["0", "false", "no", "off"].includes(normalized)) {
+    return false;
+  }
+
+  throw new Error("Boolesche Umgebungswerte müssen true/false, 1/0, yes/no oder on/off sein.");
+}
 
 function parsePositiveInt(value: string | undefined, fallback: number, name: string) {
   if (!value) {
@@ -65,6 +84,7 @@ export function getAppConfig() {
     cachedConfig = {
       appBaseUrl: process.env.APP_BASE_URL ?? process.env.NEXT_PUBLIC_URL ?? null,
       provisioningMode: parseProvisioningMode(process.env.PROVISIONING_MODE),
+      provisioningUseSudo: parseBoolean(process.env.PROVISIONING_USE_SUDO, false),
       provisioningScript: process.env.PROVISIONING_SCRIPT ?? null,
       restartScript: process.env.RESTART_INSTANCE_SCRIPT ?? null,
       deprovisionScript: process.env.DEPROVISION_SCRIPT ?? null,

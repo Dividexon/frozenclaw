@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -f /etc/frozenclaw/frozenclaw.env ]]; then
+  # shellcheck disable=SC1091
+  source /etc/frozenclaw/frozenclaw.env
+fi
+
 OPENCLAW_REPO_DIR="${OPENCLAW_REPO_DIR:-/opt/frozenclaw/vendor/openclaw}"
 OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-frozenclaw/openclaw:latest}"
 OPENCLAW_GIT_REF="${OPENCLAW_GIT_REF:-main}"

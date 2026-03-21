@@ -1,0 +1,4 @@
+Defaults:frozenclaw !requiretty
+frozenclaw ALL=(root) NOPASSWD: /opt/frozenclaw/app/scripts/server/provision-instance.sh
+frozenclaw ALL=(root) NOPASSWD: /opt/frozenclaw/app/scripts/server/restart-instance.sh
+frozenclaw ALL=(root) NOPASSWD: /opt/frozenclaw/app/scripts/server/deprovision-instance.sh

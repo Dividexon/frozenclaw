@@ -218,7 +218,7 @@ async function runScriptProvisioning(order: ProvisionableOrder) {
 
   const identity = ensureIdentity(order.id);
 
-  await execFileAsync(config.provisioningScript, [
+  await execManagedScript(config.provisioningScript, [
     "--order-id",
     String(order.id),
     "--slug",
@@ -246,7 +246,22 @@ export async function restartProvisionedInstance(slug: string) {
     throw new Error("RESTART_INSTANCE_SCRIPT fehlt.");
   }
 
-  await execFileAsync(config.restartScript, ["--slug", slug]);
+  await execManagedScript(config.restartScript, ["--slug", slug]);
+}
+
+async function execManagedScript(scriptPath: string, args: string[]) {
+  const config = getAppConfig();
+
+  if (config.provisioningUseSudo) {
+    await execFileAsync("sudo", ["-n", scriptPath, ...args], {
+      env: process.env,
+    });
+    return;
+  }
+
+  await execFileAsync(scriptPath, args, {
+    env: process.env,
+  });
 }
 
 function claimOrder(orderId: number) {

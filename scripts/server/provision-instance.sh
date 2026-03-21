@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -f /etc/frozenclaw/frozenclaw.env ]]; then
+  # shellcheck disable=SC1091
+  source /etc/frozenclaw/frozenclaw.env
+fi
+
 ORDER_ID=""
 SLUG=""
 PORT=""
@@ -40,6 +45,8 @@ OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-frozenclaw/openclaw:latest}"
 CUSTOMER_ROOT_DIR="${CUSTOMER_ROOT_DIR:-/opt/frozenclaw/customers}"
 SERVER_TIMEZONE="${SERVER_TIMEZONE:-Europe/Berlin}"
 APP_BASE_URL="${APP_BASE_URL:-http://46.225.143.215}"
+APP_SYSTEM_USER="${APP_SYSTEM_USER:-frozenclaw}"
+APP_SYSTEM_GROUP="${APP_SYSTEM_GROUP:-frozenclaw}"
 CONTAINER_NAME="frozenclaw-${SLUG}"
 CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
 CONFIG_DIR="${CUSTOMER_DIR}/config"
@@ -94,11 +101,16 @@ handle_path /agent/$SLUG/* {
 }
 EOF
 
+chown -R "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$CUSTOMER_DIR"
+chmod 750 "$CUSTOMER_DIR" "$CONFIG_DIR" "$WORKSPACE_DIR"
+chmod 640 "$INSTANCE_ENV" "$PROVIDER_ENV" "$OPENCLAW_CONFIG_JSON"
+
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
 
 docker run -d \
   --name "$CONTAINER_NAME" \
   --restart unless-stopped \
+  --user "0:0" \
   -p "127.0.0.1:${PORT}:18789" \
   -e HOME=/home/node \
   -e TERM=xterm-256color \

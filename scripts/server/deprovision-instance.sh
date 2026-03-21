@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ -f /etc/frozenclaw/frozenclaw.env ]]; then
+  # shellcheck disable=SC1091
+  source /etc/frozenclaw/frozenclaw.env
+fi
+
 SLUG=""
 
 while [[ $# -gt 0 ]]; do
