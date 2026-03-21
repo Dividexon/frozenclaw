@@ -2,7 +2,7 @@ import "server-only";
 
 import crypto from "node:crypto";
 import { getDb, logOrderEvent } from "@/lib/db";
-import { getManagedUsageSummary } from "@/lib/managed";
+import { getManagedUsageSummary, type ManagedUsageSummary } from "@/lib/managed";
 import { buildAgentUrl, buildSetupUrl } from "@/lib/provisioning";
 
 type LoginTarget = {
@@ -16,6 +16,22 @@ type LoginTarget = {
   gateway_token: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type ResolvedLoginToken = {
+  orderId: number;
+  email: string | null;
+  plan: string;
+  usageMode: string;
+  paymentStatus: string;
+  instanceState: string;
+  instanceSlug: string | null;
+  activationUrl: string | null;
+  agentUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt: string;
+  managed: ManagedUsageSummary | null;
 };
 
 function hashToken(token: string) {
@@ -69,7 +85,7 @@ export function createLoginToken(orderId: number, email: string) {
   return token;
 }
 
-export function resolveLoginToken(rawToken: string) {
+export function resolveLoginToken(rawToken: string): ResolvedLoginToken | null {
   const db = getDb();
   const tokenHash = hashToken(rawToken);
 
