@@ -30,4 +30,16 @@ else
   fi
 fi
 
+python3 - <<'PY' "$OPENCLAW_REPO_DIR/src/auto-reply/reply/agent-runner-execution.ts"
+from pathlib import Path
+import sys
+
+target = Path(sys.argv[1])
+content = target.read_text(encoding="utf-8")
+patched = content.replace("\u26a0\ufe0f Agent failed before reply:", "Agent failed before reply:")
+
+if content != patched:
+    target.write_text(patched, encoding="utf-8")
+PY
+
 DOCKER_BUILDKIT=1 docker build -t "$OPENCLAW_IMAGE" "$OPENCLAW_REPO_DIR"
