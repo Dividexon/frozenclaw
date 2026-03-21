@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { CheckoutButton } from "@/components/checkout-button";
 
@@ -125,208 +126,16 @@ const faqs = [
   },
 ];
 
-function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
-  const auraId = `${idPrefix}-aura`;
-  const iceId = `${idPrefix}-ice`;
-  const rustId = `${idPrefix}-rust`;
-  const enamelId = `${idPrefix}-enamel`;
-  const edgeId = `${idPrefix}-edge`;
-  const shardId = `${idPrefix}-shard`;
-
+function FrozenclawIcon() {
   return (
-    <svg
-      viewBox="0 0 160 160"
-      width="48"
-      height="48"
-      className="h-12 w-12 shrink-0"
-      aria-hidden="true"
-      role="presentation"
-    >
-      <defs>
-        <radialGradient id={auraId} cx="52%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#edf9ff" stopOpacity="0.95" />
-          <stop offset="42%" stopColor="#b7dfff" stopOpacity="0.72" />
-          <stop offset="72%" stopColor="#4f9bdb" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#08101a" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id={iceId} x1="8%" y1="14%" x2="94%" y2="88%">
-          <stop offset="0%" stopColor="#f5fcff" />
-          <stop offset="28%" stopColor="#d4eeff" />
-          <stop offset="64%" stopColor="#8dd5ff" />
-          <stop offset="100%" stopColor="#3472b7" />
-        </linearGradient>
-        <linearGradient id={rustId} x1="20%" y1="10%" x2="82%" y2="94%">
-          <stop offset="0%" stopColor="#6e2d16" />
-          <stop offset="26%" stopColor="#a14520" />
-          <stop offset="56%" stopColor="#6f2f18" />
-          <stop offset="100%" stopColor="#2b120d" />
-        </linearGradient>
-        <linearGradient id={enamelId} x1="0%" y1="14%" x2="100%" y2="86%">
-          <stop offset="0%" stopColor="#fff8f1" />
-          <stop offset="38%" stopColor="#c88963" />
-          <stop offset="100%" stopColor="#5a2415" />
-        </linearGradient>
-        <linearGradient id={edgeId} x1="10%" y1="0%" x2="86%" y2="100%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#94e4ff" stopOpacity="0.42" />
-        </linearGradient>
-        <linearGradient id={shardId} x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#faffff" />
-          <stop offset="100%" stopColor="#6fb8ff" />
-        </linearGradient>
-        <filter id={`${idPrefix}-blur`} x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="11" />
-        </filter>
-        <filter id={`${idPrefix}-grain`} x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="2" seed="7" />
-          <feColorMatrix
-            type="matrix"
-            values="1 0 0 0 0
-                    0 1 0 0 0
-                    0 0 1 0 0
-                    0 0 0 0.18 0"
-          />
-          <feBlend in="SourceGraphic" mode="overlay" />
-        </filter>
-      </defs>
-
-      <ellipse
-        cx="80"
-        cy="80"
-        rx="58"
-        ry="52"
-        fill={`url(#${auraId})`}
-        filter={`url(#${idPrefix}-blur)`}
-        opacity="0.95"
-      />
-
-      <path
-        d="M119 34c8 2 15 7 20 14 5 8 6 15 3 22-2 5-7 10-13 13 2-6 2-12 0-19-2-8-7-15-15-23 1-3 3-5 5-7z"
-        fill={`url(#${iceId})`}
-        opacity="0.42"
-      />
-      <path
-        d="M112 39c6 6 10 13 11 20 1 8-1 16-5 23-6 9-15 15-27 18-10 3-20 2-29-2-8-4-14-10-17-18-3-8-3-16 1-24 4-8 10-14 19-19 8-4 17-6 27-5 8 0 15 3 20 7z"
-        fill={`url(#${rustId})`}
-        filter={`url(#${idPrefix}-grain)`}
-      />
-      <path
-        d="M112 39c6 6 10 13 11 20 1 8-1 16-5 23-6 9-15 15-27 18-10 3-20 2-29-2-8-4-14-10-17-18-3-8-3-16 1-24 4-8 10-14 19-19 8-4 17-6 27-5 8 0 15 3 20 7z"
-        fill="none"
-        stroke={`url(#${edgeId})`}
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M103 47c-8-1-17 1-25 7-11 7-21 17-31 30-8 10-18 16-30 20-10 4-19 5-25 3 4-7 11-15 21-24 8-7 15-15 20-23 6-10 13-17 22-22 8-5 16-8 24-9 12-2 22 1 31 8 4 4 6 7 7 10-4-1-8-1-14 0z"
-        fill={`url(#${enamelId})`}
-        filter={`url(#${idPrefix}-grain)`}
-      />
-      <path
-        d="M103 47c-8-1-17 1-25 7-11 7-21 17-31 30-8 10-18 16-30 20-10 4-19 5-25 3 4-7 11-15 21-24 8-7 15-15 20-23 6-10 13-17 22-22 8-5 16-8 24-9 12-2 22 1 31 8 4 4 6 7 7 10-4-1-8-1-14 0z"
-        fill="none"
-        stroke={`url(#${edgeId})`}
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M90 55c6 8 9 16 10 24"
-        stroke="#f7fcff"
-        strokeWidth="2.1"
-        strokeLinecap="round"
-        opacity="0.72"
-      />
-      <path
-        d="M64 80c10-2 20-1 31 3"
-        stroke="#f7fcff"
-        strokeWidth="2.1"
-        strokeLinecap="round"
-        opacity="0.76"
-      />
-      <path
-        d="M52 57c7-8 15-14 24-18"
-        stroke="#d7efff"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        opacity="0.68"
-      />
-      <path
-        d="M33 100c5 4 13 6 22 7 13 2 28 0 43-4 12-4 23-4 34 1-7 7-17 12-30 14-18 4-34 4-49 0-11-3-19-8-25-15 1-1 3-2 5-3z"
-        fill={`url(#${rustId})`}
-        filter={`url(#${idPrefix}-grain)`}
-      />
-      <path
-        d="M33 100c5 4 13 6 22 7 13 2 28 0 43-4 12-4 23-4 34 1-7 7-17 12-30 14-18 4-34 4-49 0-11-3-19-8-25-15 1-1 3-2 5-3z"
-        fill="none"
-        stroke={`url(#${edgeId})`}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M18 92l12-8 6 16-9 15-10-16z"
-        fill={`url(#${shardId})`}
-        opacity="0.88"
-      />
-      <path
-        d="M28 101l8-6 5 12-7 15-9-11z"
-        fill={`url(#${shardId})`}
-        opacity="0.85"
-      />
-      <path
-        d="M44 110l10-4 5 12-7 18-10-11z"
-        fill={`url(#${shardId})`}
-        opacity="0.94"
-      />
-      <path
-        d="M61 115l9-2 3 11-6 16-8-10z"
-        fill={`url(#${shardId})`}
-        opacity="0.88"
-      />
-      <path
-        d="M78 114l9-1 2 10-5 15-8-9z"
-        fill={`url(#${shardId})`}
-        opacity="0.88"
-      />
-      <path
-        d="M96 112l8 0 2 9-5 13-7-8z"
-        fill={`url(#${shardId})`}
-        opacity="0.82"
-      />
-      <path
-        d="M112 108l8 1 1 8-4 11-7-7z"
-        fill={`url(#${shardId})`}
-        opacity="0.82"
-      />
-      <path
-        d="M124 39l9-8 2 13-6 9-9-7z"
-        fill={`url(#${shardId})`}
-        opacity="0.84"
-      />
-      <path
-        d="M131 51l7-3 1 9-6 12-6-9z"
-        fill={`url(#${shardId})`}
-        opacity="0.78"
-      />
-      <path
-        d="M118 30l6-8 2 9-5 7-6-4z"
-        fill={`url(#${shardId})`}
-        opacity="0.7"
-      />
-      <path
-        d="M100 31c4 0 8 1 13 3"
-        stroke="#f3fbff"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        opacity="0.66"
-      />
-      <path
-        d="M39 101c8 4 20 5 36 3"
-        stroke="#f3fbff"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        opacity="0.66"
-      />
-    </svg>
+    <Image
+      src="/frozenclaw-logo.png.png"
+      alt=""
+      width={48}
+      height={48}
+      className="h-12 w-12 shrink-0 object-contain"
+      priority
+    />
   );
 }
 
@@ -343,7 +152,7 @@ export default function Home() {
         <header className="mx-auto flex w-[94%] max-w-7xl items-center justify-between border-b border-[var(--fc-border-strong)] py-5">
           <a href="#" className="flex items-center gap-3 text-[var(--fc-text)]">
             <span className="brand-lockup">
-              <FrozenclawIcon idPrefix="header-mark" />
+              <FrozenclawIcon />
             </span>
             <span className="font-display text-2xl uppercase tracking-[0.18em]">
               Frozenclaw
@@ -731,7 +540,7 @@ export default function Home() {
           <div>
             <div className="flex items-center gap-3">
               <span className="brand-lockup">
-                <FrozenclawIcon idPrefix="footer-mark" />
+                <FrozenclawIcon />
               </span>
               <p className="font-display text-3xl text-[var(--fc-text)]">Frozenclaw</p>
             </div>
