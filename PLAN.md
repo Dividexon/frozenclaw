@@ -50,13 +50,15 @@ this document is a target architecture and delivery plan, not a description of w
 
 ### Launch scope
 
-- one plan only: `Founding Member`
+- one public plan: `Hosted BYOK`
+- one limited pilot plan: `Managed Beta`
 - one OpenClaw instance per customer
 - one region only: Hetzner Germany
 - path-based access on `app.frozenclaw.com`
 - email support only
 - no custom domains at launch
 - no multi-user teams at launch
+- Managed Beta is capped to a small fixed number of pilot slots
 
 ### Explicit non-goals for launch
 
@@ -88,6 +90,8 @@ Requirements:
 - manual fallback is possible if automation fails
 - backup runs daily
 - Impressum, Privacy Policy, and simple Beta Terms are online before first paying customer
+- `Hosted BYOK` can launch publicly
+- `Managed Beta` does not launch until usage tracking is verified end-to-end
 
 What is acceptable in this phase:
 
@@ -102,6 +106,7 @@ What is not acceptable in this phase:
 - in-memory-only job state
 - provisioning before persistent order state exists
 - launch without legal basics for a German commercial site
+- selling managed model usage before usage measurement exists
 
 ### Phase 2 - Hardening Before Customer 10
 
@@ -115,6 +120,7 @@ Requirements:
 - retention policy defined
 - better retry/reconciliation tooling
 - decision made on recurring billing model
+- managed usage warnings at 80 percent / 100 percent / 120 percent work if Managed Beta is active
 
 ### Phase 3 - Production Baseline
 
@@ -135,12 +141,29 @@ Do not market the service as production-ready before this phase is complete.
 
 ### Recommended near-term model
 
-Use a deposit-first launch model for Beta, then manually convert customers until recurring billing is worth formalizing.
+Use two clear product lines:
+
+- `Hosted BYOK` as the public default
+- `Managed Beta` only after verified usage tracking exists
 
 Why this is recommended:
 
-- the previous "5 EUR now, then manual subscription link later" flow is operationally possible
-- it is acceptable for Beta, but it is not a durable billing architecture
+- BYOK keeps model cost risk with the customer
+- Managed only becomes credible once usage is measured
+- this keeps launch risk low without hiding the future managed offer
+
+### Recommended launch pricing
+
+- `Hosted BYOK`: `EUR 19 / month`
+- `Managed Beta`: `EUR 39 / month`, limited pilot, not public-scale on day 1
+
+Managed Beta initial guardrails:
+
+- target allowance starts conservatively at `600 credits / month`
+- cron usage is capped separately, for example `max 10 cron runs / day`
+- only a small number of pilot slots are opened at first, e.g. `5 slots`
+
+These numbers can change after real usage data exists. They should not be treated as permanent public promises until measured against actual cost.
 
 ### Not acceptable as final-state billing
 
@@ -177,6 +200,11 @@ Next.js app / API
     |- returns 200 to Stripe
     `- triggers async provisioning in-process
 
+Usage tracking layer
+    |- ingests provider usage data for Managed customers
+    |- writes usage events and credit consumption
+    `- enforces managed warnings and limits
+
 Docker
     `- one OpenClaw container per customer
 
@@ -193,6 +221,8 @@ Backups
 - provisioning does not run inline inside the webhook response path
 - initial async provisioning runs in the same process after the Stripe response is sent
 - startup recovery requeues stuck `provisioning` rows
+- Managed is gated behind verified usage tracking
+- if OpenClaw does not expose usable usage logs, introduce a provider proxy before activating Managed
 - customer access path uses `/agent/<slug>` instead of `/c/<id>`
 - generated route slug is random and URL-safe
 - reserved words are checked by exact slug match, not substring match
@@ -242,6 +272,21 @@ Recommended `instance_state` values:
 Purpose:
 basic auditability without introducing a larger schema too early.
 
+### `usage_events`
+
+- `id`
+- `order_id`
+- `provider`
+- `model`
+- `source`
+- `input_tokens`
+- `output_tokens`
+- `credits_charged`
+- `created_at`
+
+Purpose:
+required for any Managed offer. Without this table or an equivalent measurement layer, credit limits are not real.
+
 When the product grows beyond the simple 1:1 model, split `instances` out into its own table.
 
 ---
@@ -253,7 +298,7 @@ When the product grows beyond the simple 1:1 model, split `instances` out into i
 ```text
 Landing page CTA
     -> POST /api/checkout
-    -> Stripe Checkout (deposit or first payment)
+    -> Stripe Checkout for Hosted BYOK
     -> Stripe webhook verifies signature
     -> store stripe_event_id and order state in SQLite
     -> return 200 to Stripe
@@ -262,6 +307,18 @@ Landing page CTA
     -> customer sees ready state on success/status page
     -> customer receives activation email
 ```
+
+### Managed Beta gate
+
+`Managed Beta` is not active until all of the following are true:
+
+- provider usage can be measured per customer
+- usage events land in SQLite
+- credit consumption can be calculated deterministically
+- 80 percent / 100 percent / 120 percent warning logic works
+- cron caps can be enforced
+
+If any of these are missing, Managed stays waitlist-only or disabled.
 
 ### Rules
 
@@ -283,6 +340,8 @@ Guardrails:
 - token reset must be possible
 - token must not grant broader admin/server access
 - move away from email delivery in Phase 3
+- if customer is on BYOK, they provide their own model key
+- if customer is on Managed, provider usage must be tracked before the plan can be sold
 
 ---
 
@@ -385,6 +444,7 @@ That is essential for restore and recovery.
 - Caddy
 - app service
 - Docker
+- usage tracking job or ingestion path if Managed Beta is active
 
 ### Minimum health checks
 
@@ -412,6 +472,7 @@ Required alerts:
 - provisioning failure
 - backup failure
 - disk or memory threshold crossed
+- managed customers approaching or exceeding usage thresholds if Managed Beta is active
 
 ---
 
@@ -462,6 +523,8 @@ For an EU-focused SaaS, this is mandatory work, not optional polish.
 - firewall only exposes 22, 80, 443
 - secrets only in server-side environment files or secret store
 - no real API keys or key fragments inside docs
+
+For `Hosted BYOK`, customer-provided model keys must remain isolated per instance. For `Managed Beta`, provider credentials must never be exposed in customer-facing output.
 
 For a German commercial site, the Impressum should be treated as a launch blocker. Since 2024-05-14, the relevant German provider-identification rule is no longer `TMG`, but `DDG` (`section 5 DDG`).
 
@@ -517,7 +580,8 @@ Do not present break-even math publicly until a simple spreadsheet includes:
 
 ### Step 1 - Stabilize product framing
 
-- reduce offer to one launch plan
+- set `Hosted BYOK` as the public default offer
+- position `Managed Beta` as limited pilot, not mass-market launch
 - rewrite landing page copy around one concrete outcome
 - remove claims that imply enterprise-grade readiness
 
@@ -527,6 +591,7 @@ Do not present break-even math publicly until a simple spreadsheet includes:
 - add email provider dependency if needed
 - add SQLite dependency and migration strategy
 - add internal config loading and validation
+- add fields for `usage_mode` and future managed usage states
 
 ### Step 3 - Build Beta payment path first
 
@@ -536,6 +601,7 @@ Do not present break-even math publicly until a simple spreadsheet includes:
 - send payment confirmation email
 - return Stripe response before starting provisioning
 - trigger provisioning async in the same process
+- launch `Hosted BYOK` first if managed usage tracking is not ready
 
 ### Step 4 - Build provisioning and recovery
 
@@ -543,6 +609,7 @@ Do not present break-even math publicly until a simple spreadsheet includes:
 - add instance status page
 - add Caddy validation before reload
 - add startup recovery for stale `provisioning` rows
+- verify where usage data can be measured for future Managed customers
 
 ### Step 5 - Add operational baseline
 
@@ -551,6 +618,7 @@ Do not present break-even math publicly until a simple spreadsheet includes:
 - backup
 - log rotation
 - minimal alerting if feasible
+- if Managed Beta is activated: usage ingestion plus threshold warnings
 
 ### Step 6 - Launch gate review
 
@@ -559,6 +627,7 @@ Do not present break-even math publicly until a simple spreadsheet includes:
 - verify failed provisioning path
 - verify manual fallback path
 - verify legal pages are live
+- do not activate Managed Beta before usage tracking is verified
 
 ---
 
@@ -575,6 +644,7 @@ Launch is `NO-GO` if any of the following are false:
 - backups are running
 - Impressum, Privacy Policy, and Beta Terms are published
 - no real secrets are present in repo or docs
+- Managed Beta is disabled unless usage tracking is verifiably working
 
 Launch is `GO` only when all are true.
 
@@ -588,13 +658,15 @@ Launch is `GO` only when all are true.
 - provision Hetzner server only after the billing path decision is made
 - prepare Impressum, Privacy Policy, and simple Beta Terms
 - remove any real key fragments from documentation
+- decide how many Managed Beta pilot slots to expose publicly
 
 ### Build work
 
 - add missing backend dependencies to the app
-- create DB schema for `orders` and `event_log`
+- create DB schema for `orders`, `event_log`, and future `usage_events`
 - implement checkout and order persistence first
 - do not start with Docker automation before order state exists
+- verify whether OpenClaw exposes reliable token usage logs
 
 ### Later, before customer 10
 
@@ -613,11 +685,14 @@ Valid claims for the near term:
 - EU-hosted
 - beta hosted OpenClaw
 - early access / founding member
+- bring your own key by default
+- limited managed pilot once usage tracking is active
 
 Not yet valid without more work:
 
 - production-ready SaaS
 - fully automated recurring hosting platform
 - low-touch support at scale
+- unlimited managed model usage
 
 This plan is intentionally narrower and more pragmatic than the earlier versions. That is a strength, not a downgrade.

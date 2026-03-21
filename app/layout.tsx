@@ -14,13 +14,13 @@ const body = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://frozenclaw.com"),
-  title: "Frozenclaw | Your AI agent behind the vault",
+  title: "Frozenclaw | Dein KI-Agent hinter dem Tor",
   description:
-    "Hosted OpenClaw in a black-and-red industrial shell: private instance, EU hosting, founding member beta.",
+    "Hosted OpenClaw aus Deutschland: eigene Instanz, EU-Hosting, BYOK als Standard und Managed als begrenzter Pilot.",
   openGraph: {
     title: "Frozenclaw",
     description:
-      "Your AI agent behind the vault. Hosted OpenClaw with EU infrastructure and a focused beta launch.",
+      "Dein KI-Agent hinter dem Tor. Hosted OpenClaw mit EU-Infrastruktur, BYOK als Startangebot und Managed als begrenzter Pilot.",
     url: "https://frozenclaw.com",
     siteName: "Frozenclaw",
     type: "website",
@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="de">
       <body className={`${display.variable} ${body.variable} antialiased`}>{children}</body>
     </html>
   );

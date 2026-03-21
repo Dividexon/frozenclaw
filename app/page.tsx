@@ -1,90 +1,99 @@
 const launchSignals = [
-  "EU hosted in Germany",
-  "One private OpenClaw instance per customer",
-  "Provisioned in minutes, not days",
-  "Built for Beta launch, hardened before scale",
+  "EU-Hosting in Deutschland",
+  "Eigene OpenClaw-Instanz pro Kunde",
+  "Provisionierung in Minuten statt Tagen",
+  "BYOK sofort, Managed nur kontrolliert",
 ];
 
 const steps = [
   {
     id: "01",
-    title: "Reserve your slot",
+    title: "Zugang sichern",
     copy:
-      "Join the Founding Member beta and secure a private hosted instance before the public rollout gets noisy.",
+      "Du buchst deinen Slot und erhältst eine eigene gehostete OpenClaw-Instanz statt einer geteilten Spielzeug-Oberfläche.",
   },
   {
     id: "02",
-    title: "We provision the gate",
+    title: "Instanz wird bereitgestellt",
     copy:
-      "Frozenclaw deploys your own hosted OpenClaw environment on EU infrastructure with a dedicated access path.",
+      "Frozenclaw deployt deine Umgebung auf EU-Infrastruktur und legt einen eigenen Zugangspfad für deine Instanz an.",
   },
   {
     id: "03",
-    title: "Bring your model key",
+    title: "Mit eigenem oder gestelltem Key nutzen",
     copy:
-      "You connect your provider key, tune the agent, and keep it running without local setup or home-lab babysitting.",
+      "Im Startmodus bringst du deinen eigenen Modell-Key mit. Managed kommt als begrenzte Beta dazu, sobald Usage-Tracking aktiv ist.",
   },
 ];
 
 const features = [
   {
-    kicker: "Private Runtime",
-    title: "Your own agent, not a shared toy box.",
+    kicker: "Private Instanz",
+    title: "Dein Agent, nicht ein gemeinsam benutzter Container.",
     copy:
-      "Each customer gets a separate hosted instance with its own route, token, and operational state.",
+      "Jeder Kunde bekommt eine eigene gehostete Instanz mit eigenem Pfad, Token und sauberem Betriebszustand.",
   },
   {
-    kicker: "Industrial Simplicity",
-    title: "No local setup. No Docker spelunking.",
+    kicker: "Klarer Start",
+    title: "Kein Home-Lab. Kein Docker-Gefrickel.",
     copy:
-      "The value proposition is brutal in the best way: pay, get provisioned, configure your agent, keep working.",
+      "Der Nutzen ist bewusst direkt: buchen, bereitstellen, Schlüssel hinterlegen, Agent laufen lassen.",
   },
   {
-    kicker: "Operator Visibility",
-    title: "Built for controlled rollout, not fake scale theater.",
+    kicker: "Kontrollierter Rollout",
+    title: "Erst belastbar starten, dann ausbauen.",
     copy:
-      "The launch path is optimized for real customers, manual fallback, and sane operational recovery instead of hype architecture.",
+      "Frozenclaw wird nicht als fertige Enterprise-Maschine verkauft, sondern als ehrlicher Beta-Launch mit klarer Roadmap.",
   },
 ];
 
-const included = [
-  "1 hosted OpenClaw instance",
-  "EU hosting footprint",
-  "Gateway token delivery",
-  "Founding Member pricing lock",
-  "Direct support during beta",
-  "Launch-focused onboarding",
+const byokIncludes = [
+  "1 gehostete OpenClaw-Instanz",
+  "Eigener API-Key des Kunden",
+  "EU-Hosting-Footprint in Deutschland",
+  "Direkter Support waehrend der Beta",
+  "Schnelle Provisionierung",
+  "Beste Startoption fuer den Launch",
+];
+
+const managedIncludes = [
+  "1 gehostete OpenClaw-Instanz",
+  "Modell-Key wird von uns gestellt",
+  "Pilot mit 5 verfuegbaren Plaetzen",
+  "Zunaechst konservatives Usage-Limit",
+  "Separates Cron-Limit vorgesehen",
+  "Freischaltung erst mit aktivem Tracking",
 ];
 
 const specRows = [
-  ["Region", "Germany"],
-  ["Access", "app.frozenclaw.com/agent/..."],
-  ["Mode", "Beta hosted deployment"],
-  ["Provisioning", "Automatic with manual fallback"],
-  ["Billing", "Founding Member"],
-  ["Support", "Direct operator support"],
+  ["Region", "Deutschland"],
+  ["Zugang", "app.frozenclaw.com/agent/..."],
+  ["Modus", "OpenClaw Hosting Beta"],
+  ["Provisionierung", "Automatisch mit manuellem Fallback"],
+  ["Oeffentlich", "BYOK"],
+  ["Pilot", "Managed Beta mit 5 Slots"],
 ];
 
 const faqs = [
   {
-    question: "Is this a shared agent platform?",
+    question: "Muss ich meinen eigenen API-Key mitbringen?",
     answer:
-      "No. The positioning is one hosted OpenClaw instance per customer, not a multi-tenant chat surface pretending to be private.",
+      "Beim oeffentlichen Start ja. Hosted BYOK ist das Standardangebot. Managed wird als begrenzter Pilot angeboten, sobald wir den Verbrauch sauber pro Kunde messen koennen.",
   },
   {
-    question: "Do I need to self-host anything?",
+    question: "Was bedeutet Managed Beta konkret?",
     answer:
-      "No local server is required. The point is to remove home-lab friction and keep the agent available without your machine staying online.",
+      "Wir stellen den Modell-Key, aber nur in einem kleinen Pilot mit festen Plaetzen und klaren Nutzungsgrenzen. Ohne verifiziertes Credit-Tracking wird dieser Modus nicht breit freigeschaltet.",
   },
   {
-    question: "Is this already a fully mature SaaS?",
+    question: "Brauche ich eigene Server oder Docker-Kenntnisse?",
     answer:
-      "No. The launch is framed as a beta: functional, paid, and useful, but still being hardened operationally before larger customer volume.",
+      "Nein. Der Sinn von Frozenclaw ist gerade, dir das Hosting und den Betriebsaufwand abzunehmen.",
   },
   {
-    question: "Can I get in before the broader launch?",
+    question: "Ist das schon ein komplett ausgereiftes SaaS?",
     answer:
-      "Yes. The current page is tuned for founding members who want the hosted setup early and can tolerate a sharper-edged product phase.",
+      "Nein. Es ist eine bezahlte Beta: nuetzlich, hostbar und klar fokussiert, aber noch bewusst vor dem grossen Ausbau.",
   },
 ];
 
@@ -152,7 +161,6 @@ function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
         strokeWidth="2"
         strokeLinejoin="round"
       />
-
       <path
         d="M73 27c-8 2-15 6-21 12-6 6-8 13-6 20 2 5 5 8 11 11 5 2 13 4 23 4 11 0 19-2 25-7-4 11-12 20-23 26-11 6-23 7-35 3-11-3-19-10-24-20-4-10-4-20 0-31 4-11 11-19 22-25 9-5 19-6 28-4z"
         fill={`url(#${iceId})`}
@@ -164,7 +172,6 @@ function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
         strokeWidth="2"
         strokeLinejoin="round"
       />
-
       <path
         d="M23 77l11-8 2 13 10 8-13 2-5 12-5-11-14-1 10-8z"
         fill={`url(#${iceId})`}
@@ -180,7 +187,6 @@ function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
         fill={`url(#${iceId})`}
         opacity="0.9"
       />
-
       <path
         d="M31 33c8 3 14 7 19 12"
         stroke="#ffffff"
@@ -226,18 +232,18 @@ export default function Home() {
             </span>
           </a>
           <nav className="hidden items-center gap-8 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)] md:flex">
-            <a href="#how" className="transition hover:text-[var(--fc-text)]">
-              Process
+            <a href="#ablauf" className="transition hover:text-[var(--fc-text)]">
+              Ablauf
             </a>
-            <a href="#pricing" className="transition hover:text-[var(--fc-text)]">
-              Pricing
+            <a href="#preise" className="transition hover:text-[var(--fc-text)]">
+              Preise
             </a>
             <a href="#faq" className="transition hover:text-[var(--fc-text)]">
-              FAQ
+              Fragen
             </a>
           </nav>
-          <a href="#pricing" className="fc-button fc-button-secondary hidden md:inline-flex">
-            Secure Access
+          <a href="#preise" className="fc-button fc-button-secondary hidden md:inline-flex">
+            Zugang sichern
           </a>
         </header>
 
@@ -245,30 +251,30 @@ export default function Home() {
           <div className="space-y-8">
             <div className="fc-chip">
               <span className="fc-chip-dot" />
-              Beta hosted OpenClaw infrastructure
+              Hosted OpenClaw Beta aus Deutschland
             </div>
 
             <div className="space-y-5">
               <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                Metal. Gate. Control.
+                Frost. Kontrolle. Infrastruktur.
               </p>
               <h1 className="font-display text-6xl uppercase leading-[0.88] text-[var(--fc-text)] sm:text-7xl lg:text-[7.5rem]">
-                Your AI agent
-                <span className="block text-[var(--fc-accent)]">behind the vault.</span>
+                Dein KI-Agent
+                <span className="block text-[var(--fc-accent)]">hinter dem Tor.</span>
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
-                Frozenclaw turns OpenClaw into a hosted product: private instance, EU
-                infrastructure, fast provisioning, and a visual language that feels like
-                sealed machinery instead of soft SaaS wallpaper.
+                Frozenclaw macht aus OpenClaw ein gehostetes Produkt: eigene Instanz,
+                EU-Infrastruktur, schnelle Bereitstellung und ein Setup, das nicht nach
+                Bastelkeller aussieht.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <a href="#pricing" className="fc-button fc-button-primary">
-                Join Founding Member
+              <a href="#preise" className="fc-button fc-button-primary">
+                BYOK starten
               </a>
-              <a href="#overview" className="fc-button fc-button-secondary">
-                Inspect The System
+              <a href="#ueberblick" className="fc-button fc-button-secondary">
+                System ansehen
               </a>
             </div>
 
@@ -285,8 +291,8 @@ export default function Home() {
           <div className="relative">
             <div className="vault-panel panel-cut">
               <div className="vault-topline">
-                <span>SITE STATUS</span>
-                <span>LOCKED / LIVE</span>
+                <span>SYSTEMSTATUS</span>
+                <span>VERSIEGELT / AKTIV</span>
               </div>
 
               <div className="vault-core-wrap">
@@ -297,7 +303,7 @@ export default function Home() {
                   <div className="vault-spoke vault-spoke-c" />
                   <div className="vault-center">
                     <span className="font-display text-xs uppercase tracking-[0.35em] text-[var(--fc-accent-soft)]">
-                      agent core
+                      kern
                     </span>
                   </div>
                   {Array.from({ length: 8 }).map((_, index) => (
@@ -313,39 +319,39 @@ export default function Home() {
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="stat-block">
-                  <span className="stat-label">Provisioning</span>
+                  <span className="stat-label">Provisionierung</span>
                   <strong className="stat-value">~5 min</strong>
                 </div>
                 <div className="stat-block">
-                  <span className="stat-label">Footprint</span>
-                  <strong className="stat-value">EU only</strong>
+                  <span className="stat-label">Standort</span>
+                  <strong className="stat-value">Nur EU</strong>
                 </div>
                 <div className="stat-block">
-                  <span className="stat-label">Mode</span>
-                  <strong className="stat-value">Private</strong>
+                  <span className="stat-label">Modus</span>
+                  <strong className="stat-value">Privat</strong>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="overview" className="mx-auto w-[94%] max-w-7xl pb-10">
+        <section id="ueberblick" className="mx-auto w-[94%] max-w-7xl pb-10">
           <div className="data-strip">
-            <span>Hosted OpenClaw</span>
-            <span>Black / Red industrial UI</span>
-            <span>Germany-based deployment</span>
-            <span>Founding Member beta</span>
-            <span>Manual fallback available</span>
+            <span>OpenClaw Hosting</span>
+            <span>Schwarz / Eisblau / Rot</span>
+            <span>BYOK zuerst</span>
+            <span>Managed als Pilot</span>
+            <span>Manueller Fallback vorhanden</span>
           </div>
         </section>
 
-        <section id="how" className="mx-auto w-[94%] max-w-7xl py-14">
+        <section id="ablauf" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
-            <p className="section-kicker">Deployment Sequence</p>
-            <h2 className="section-title">The launch path is simple on purpose.</h2>
+            <p className="section-kicker">Ablauf</p>
+            <h2 className="section-title">Der Startpfad ist absichtlich direkt.</h2>
             <p className="section-copy">
-              The product should feel like opening a secure gate, not assembling a hobby
-              stack in the dark.
+              Frozenclaw soll sich anfuehlen wie ein sicheres Tor, nicht wie ein loses
+              Bastelprojekt mit zu vielen beweglichen Teilen.
             </p>
           </div>
 
@@ -368,8 +374,8 @@ export default function Home() {
 
         <section className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
-            <p className="section-kicker">Design Direction</p>
-            <h2 className="section-title">Industrial pressure outside. Clear control inside.</h2>
+            <p className="section-kicker">Richtung</p>
+            <h2 className="section-title">Aussen Druck. Innen klare Kontrolle.</h2>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
@@ -377,13 +383,13 @@ export default function Home() {
               <div className="mb-8 flex items-center justify-between gap-4 border-b border-[var(--fc-border)] pb-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.24em] text-[var(--fc-accent-soft)]">
-                    Visual system
+                    Produktlogik
                   </p>
                   <h3 className="mt-2 font-display text-4xl uppercase text-[var(--fc-text)]">
-                    Gate aesthetics
+                    Frostige Klarheit
                   </h3>
                 </div>
-                <span className="fc-chip">Black / steel / red</span>
+                <span className="fc-chip">BYOK / Managed Pilot</span>
               </div>
 
               <div className="grid gap-5">
@@ -399,7 +405,7 @@ export default function Home() {
 
             <div className="grid gap-5">
               <div className="panel-cut fc-panel">
-                <p className="section-kicker">Signal stack</p>
+                <p className="section-kicker">Signalprofil</p>
                 <div className="mt-4 space-y-4">
                   {specRows.map(([label, value]) => (
                     <div
@@ -414,35 +420,34 @@ export default function Home() {
               </div>
 
               <div className="panel-cut fc-panel">
-                <p className="section-kicker">Built for launch</p>
+                <p className="section-kicker">Launch-Prinzip</p>
                 <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
-                  Enough ceremony to feel premium. Not enough to feel fake.
+                  Erst sauber starten. Dann teuren Betrieb freischalten.
                 </h3>
                 <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  This is the right balance for Frozenclaw: visually aggressive, technically
-                  restrained, and oriented around a private hosted agent instead of generic AI
-                  marketing haze.
+                  Deshalb ist BYOK das oeffentliche Kernangebot. Managed bleibt ein kleiner
+                  Pilot, bis Verbrauch und Limits pro Kunde wirklich messbar sind.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="pricing" className="mx-auto w-[94%] max-w-7xl py-14">
+        <section id="preise" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
-            <p className="section-kicker">Founding Member</p>
-            <h2 className="section-title">One clear offer beats three weak tiers.</h2>
+            <p className="section-kicker">Preise</p>
+            <h2 className="section-title">Zwei Linien. Eine oeffentlich, eine kontrolliert.</h2>
           </div>
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="mt-8 grid gap-5 lg:grid-cols-2">
             <article className="panel-cut fc-panel pricing-panel">
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Beta access
+                    Oeffentlich buchbar
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Founding Member
+                    Hosted BYOK
                   </h3>
                 </div>
                 <div className="text-right">
@@ -450,13 +455,13 @@ export default function Home() {
                     EUR 19
                   </p>
                   <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
-                    per month
+                    pro Monat
                   </p>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {included.map((item) => (
+                {byokIncludes.map((item) => (
                   <div key={item} className="signal-row">
                     <span className="signal-index">+</span>
                     <span>{item}</span>
@@ -465,44 +470,91 @@ export default function Home() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
-                <a href="#pricing" className="fc-button fc-button-primary">
-                  Reserve Founding Slot
+                <a href="#preise" className="fc-button fc-button-primary">
+                  BYOK reservieren
                 </a>
                 <a href="#faq" className="fc-button fc-button-secondary">
-                  Read Beta Conditions
+                  Fragen klaeren
                 </a>
               </div>
             </article>
 
-            <aside className="grid gap-5">
-              <div className="panel-cut fc-panel">
-                <p className="section-kicker">Launch note</p>
-                <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
-                  Start narrow. Start hard. Expand later.
-                </h3>
-                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  The page is intentionally focused on one paid path, one promise, and one
-                  technical story. That keeps the product believable.
-                </p>
+            <article className="panel-cut fc-panel">
+              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
+                    Begrenzt / Pilot
+                  </p>
+                  <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
+                    Managed Beta
+                  </h3>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
+                    EUR 39
+                  </p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+                    pro Monat
+                  </p>
+                </div>
               </div>
 
-              <div className="panel-cut fc-panel">
-                <p className="section-kicker">What happens next</p>
-                <ol className="mt-4 space-y-4 text-base text-[var(--fc-text-muted)]">
-                  <li>01. Checkout captures the order.</li>
-                  <li>02. Provisioning allocates your instance.</li>
-                  <li>03. Access details are delivered for setup.</li>
-                  <li>04. The agent moves from beta utility to production hardening.</li>
-                </ol>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {managedIncludes.map((item) => (
+                  <div key={item} className="signal-row">
+                    <span className="signal-index">+</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
               </div>
-            </aside>
+
+              <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+                Managed wird erst aktiv verkauft, wenn Usage-Tracking, Credit-Logik und
+                Warnschwellen technisch verifiziert sind. Vorher bleibt es ein sichtbarer
+                Pilot mit fester Kapazitaetsgrenze.
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-4">
+                <a href="#preise" className="fc-button fc-button-secondary">
+                  Managed anfragen
+                </a>
+                <a href="#faq" className="fc-button fc-button-secondary">
+                  Pilot verstehen
+                </a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section className="mx-auto w-[94%] max-w-7xl py-14">
+          <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="panel-cut fc-panel">
+              <p className="section-kicker">Launch-Hinweis</p>
+              <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
+                BYOK ist das Hauptprodukt. Managed ist absichtlich gebremst.
+              </h3>
+              <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
+                Das ist kein Nachteil, sondern Kostenkontrolle. Erst wenn Verbrauch pro Kunde
+                sauber messbar ist, wird aus Managed ein ernsthaft belastbares Angebot.
+              </p>
+            </div>
+
+            <div className="panel-cut fc-panel">
+              <p className="section-kicker">Was danach passiert</p>
+              <ol className="mt-4 space-y-4 text-base text-[var(--fc-text-muted)]">
+                <li>01. Checkout erfasst die Bestellung.</li>
+                <li>02. Provisionierung legt deine Instanz an.</li>
+                <li>03. Du verbindest deinen eigenen Modell-Key oder wartest auf Managed-Freigabe.</li>
+                <li>04. Frozenclaw wird von Beta-Nutzen zu belastbarerem Betrieb weitergezogen.</li>
+              </ol>
+            </div>
           </div>
         </section>
 
         <section id="faq" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
-            <p className="section-kicker">Questions</p>
-            <h2 className="section-title">No fluff. Just the sharp edges.</h2>
+            <p className="section-kicker">FAQ</p>
+            <h2 className="section-title">Keine Weichzeichnung. Nur die wichtigen Kanten.</h2>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
@@ -528,8 +580,8 @@ export default function Home() {
               <p className="font-display text-3xl text-[var(--fc-text)]">Frozenclaw</p>
             </div>
             <p className="mt-2 max-w-xl text-xs leading-6 text-[var(--fc-text-muted)]">
-              Hosted OpenClaw infrastructure with a black-and-red vault language, built for
-              a focused beta instead of soft generic SaaS.
+              Hosted OpenClaw aus Deutschland: BYOK zuerst, Managed nur als begrenzter
+              Pilot mit echtem Verbrauchstracking.
             </p>
           </div>
           <div className="flex flex-wrap gap-4 md:justify-end">
@@ -537,10 +589,10 @@ export default function Home() {
               Impressum
             </a>
             <a href="#" className="transition hover:text-[var(--fc-text)]">
-              Privacy
+              Datenschutz
             </a>
             <a href="#" className="transition hover:text-[var(--fc-text)]">
-              Beta Terms
+              Beta-Bedingungen
             </a>
           </div>
         </footer>
