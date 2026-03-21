@@ -42,4 +42,18 @@ if content != patched:
     target.write_text(patched, encoding="utf-8")
 PY
 
+python3 - <<'PY' "$OPENCLAW_REPO_DIR/src/agents/model-selection.ts"
+from pathlib import Path
+import sys
+
+target = Path(sys.argv[1])
+content = target.read_text(encoding="utf-8")
+old = """export function resolveAllowedModelRef(params: {\n  cfg: OpenClawConfig;\n  catalog: ModelCatalogEntry[];\n  raw: string;\n  defaultProvider: string;\n  defaultModel?: string;\n}):\n  | { ref: ModelRef; key: string }\n  | {\n      error: string;\n    } {\n  const trimmed = params.raw.trim();\n  if (!trimmed) {\n    return { error: \"invalid model: empty\" };\n  }\n\n  const aliasIndex = buildModelAliasIndex({\n    cfg: params.cfg,\n    defaultProvider: params.defaultProvider,\n  });\n  const resolved = resolveModelRefFromString({\n    raw: trimmed,\n    defaultProvider: params.defaultProvider,\n    aliasIndex,\n  });\n"""
+new = """export function resolveAllowedModelRef(params: {\n  cfg: OpenClawConfig;\n  catalog: ModelCatalogEntry[];\n  raw: string;\n  defaultProvider: string;\n  defaultModel?: string;\n}):\n  | { ref: ModelRef; key: string }\n  | {\n      error: string;\n    } {\n  const trimmed = params.raw.trim();\n  if (!trimmed) {\n    return { error: \"invalid model: empty\" };\n  }\n\n  const inferredProvider = !trimmed.includes(\"/\")\n    ? inferUniqueProviderFromConfiguredModels({\n        cfg: params.cfg,\n        model: trimmed,\n      })\n    : undefined;\n\n  const aliasIndex = buildModelAliasIndex({\n    cfg: params.cfg,\n    defaultProvider: inferredProvider ?? params.defaultProvider,\n  });\n  const resolved = resolveModelRefFromString({\n    raw: trimmed,\n    defaultProvider: inferredProvider ?? params.defaultProvider,\n    aliasIndex,\n  });\n"""
+patched = content.replace(old, new)
+
+if content != patched:
+    target.write_text(patched, encoding="utf-8")
+PY
+
 DOCKER_BUILDKIT=1 docker build -t "$OPENCLAW_IMAGE" "$OPENCLAW_REPO_DIR"
