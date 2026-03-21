@@ -9,6 +9,7 @@
 		X-Frame-Options "SAMEORIGIN"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 	}
 
 	import /etc/caddy/customers.d/*.caddy
@@ -19,9 +20,13 @@
 }
 
 http://{$IP_SITE_ADDRESS:46.225.143.215} {
-	import frozenclaw_app
+	redir https://{$CANONICAL_HOST:frozenclaw.com}{uri} permanent
 }
 
 {$CANONICAL_HOST:frozenclaw.com} {
 	import frozenclaw_app
+}
+
+www.{$CANONICAL_HOST:frozenclaw.com} {
+	redir https://{$CANONICAL_HOST:frozenclaw.com}{uri} permanent
 }
