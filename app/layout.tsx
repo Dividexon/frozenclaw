@@ -14,13 +14,13 @@ const body = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://frozenclaw.com"),
-  title: "Frozenclaw | Dein KI-Agent hinter dem Tor",
+  title: "Frozenclaw | Gehostetes OpenClaw aus Deutschland",
   description:
-    "Hosted OpenClaw aus Deutschland: eigene Instanz, EU-Hosting, BYOK als Standard und Managed als begrenzter Pilot.",
+    "Gehostetes OpenClaw aus Deutschland: eigene Instanz, schneller Start und Hosting mit eigenem Modell-Key als öffentliches Hauptangebot.",
   openGraph: {
     title: "Frozenclaw",
     description:
-      "Dein KI-Agent hinter dem Tor. Hosted OpenClaw mit EU-Infrastruktur, BYOK als Startangebot und Managed als begrenzter Pilot.",
+      "Gehostetes OpenClaw mit deutscher Infrastruktur, eigener Instanz und klarem Startangebot für Kunden mit eigenem Modell-Key.",
     url: "https://frozenclaw.com",
     siteName: "Frozenclaw",
     type: "website",

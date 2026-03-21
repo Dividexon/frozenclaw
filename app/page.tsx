@@ -2,101 +2,101 @@ import Link from "next/link";
 import { CheckoutButton } from "@/components/checkout-button";
 
 const launchSignals = [
-  "EU-Hosting in Deutschland",
   "Eigene OpenClaw-Instanz pro Kunde",
-  "Provisionierung in Minuten statt Tagen",
-  "BYOK sofort, Managed nur kontrolliert",
+  "Hosting in Deutschland",
+  "Start mit eigenem Modell-Key",
+  "Managed später als begrenzter Pilot",
 ];
 
 const steps = [
   {
     id: "01",
-    title: "Zugang sichern",
+    title: "Plan auswählen",
     copy:
-      "Du buchst deinen Slot und erhältst eine eigene gehostete OpenClaw-Instanz statt einer geteilten Spielzeug-Oberfläche.",
+      "Du wählst das passende Hosting-Modell und startest mit einer klaren, verständlichen Bestellstrecke.",
   },
   {
     id: "02",
     title: "Instanz wird bereitgestellt",
     copy:
-      "Frozenclaw deployt deine Umgebung auf EU-Infrastruktur und legt einen eigenen Zugangspfad für deine Instanz an.",
+      "Frozenclaw legt deine private OpenClaw-Instanz auf deutscher Infrastruktur an und richtet den Zugriff für dich ein.",
   },
   {
     id: "03",
-    title: "Mit eigenem oder gestelltem Key nutzen",
+    title: "Konfigurieren und nutzen",
     copy:
-      "Im Startmodus bringst du deinen eigenen Modell-Key mit. Managed kommt als begrenzte Beta dazu, sobald Usage-Tracking aktiv ist.",
+      "Zum Start verbindest du deinen eigenen Modell-Key. Später kann zusätzlich ein Managed-Modell mit von uns gestelltem Key dazukommen.",
   },
 ];
 
 const features = [
   {
-    kicker: "Private Instanz",
-    title: "Dein Agent, nicht ein gemeinsam benutzter Container.",
+    kicker: "Eigene Instanz",
+    title: "Du bekommst eine private OpenClaw-Instanz.",
     copy:
-      "Jeder Kunde bekommt eine eigene gehostete Instanz mit eigenem Pfad, Token und sauberem Betriebszustand.",
+      "Kein Shared Frontend, keine unklare Multi-Tenant-Logik. Jede Bestellung bekommt ihren eigenen Laufzeitkontext.",
   },
   {
-    kicker: "Klarer Start",
-    title: "Kein Home-Lab. Kein Docker-Gefrickel.",
+    kicker: "Einfacher Betrieb",
+    title: "Du musst den Server nicht selbst betreiben.",
     copy:
-      "Der Nutzen ist bewusst direkt: buchen, bereitstellen, Schlüssel hinterlegen, Agent laufen lassen.",
+      "Frozenclaw nimmt dir Hosting, Provisionierung und Erreichbarkeit ab, damit du dich auf den Agenten statt auf Infrastruktur konzentrieren kannst.",
   },
   {
-    kicker: "Kontrollierter Rollout",
-    title: "Erst belastbar starten, dann ausbauen.",
+    kicker: "Sauberer Ausbau",
+    title: "Der Start ist bewusst schmal und verständlich.",
     copy:
-      "Frozenclaw wird nicht als fertige Enterprise-Maschine verkauft, sondern als ehrlicher Beta-Launch mit klarer Roadmap.",
+      "Öffentlich startet zuerst das Hosting mit eigenem Modell-Key. Managed wird erst geöffnet, wenn Verbrauch und Limits sauber messbar sind.",
   },
 ];
 
 const byokIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "Eigener API-Key des Kunden",
-  "EU-Hosting-Footprint in Deutschland",
+  "Hosting in Deutschland",
   "Direkter Support während der Beta",
   "Schnelle Provisionierung",
-  "Beste Startoption für den Launch",
+  "Standardangebot zum Start",
 ];
 
 const managedIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "Modell-Key wird von uns gestellt",
   "Pilot mit 5 verfügbaren Plätzen",
-  "Zunächst konservatives Usage-Limit",
-  "Separates Cron-Limit vorgesehen",
-  "Freischaltung erst mit aktivem Tracking",
+  "Konservatives Nutzungsbudget zum Start",
+  "Separates Cron-Limit geplant",
+  "Freischaltung erst nach aktivem Verbrauchstracking",
 ];
 
 const specRows = [
   ["Region", "Deutschland"],
   ["Zugang", "app.frozenclaw.com/agent/..."],
   ["Modus", "OpenClaw Hosting Beta"],
-  ["Provisionierung", "Automatisch mit manuellem Fallback"],
-  ["Öffentlich", "BYOK"],
-  ["Pilot", "Managed Beta mit 5 Slots"],
+  ["Provisionierung", "Automatisch, mit manuellem Fallback"],
+  ["Öffentlich", "Hosting mit eigenem Modell-Key"],
+  ["Pilot", "Managed mit 5 Slots"],
 ];
 
 const faqs = [
   {
     question: "Muss ich meinen eigenen API-Key mitbringen?",
     answer:
-      "Beim öffentlichen Start ja. Hosted BYOK ist das Standardangebot. Managed wird als begrenzter Pilot angeboten, sobald wir den Verbrauch sauber pro Kunde messen können.",
+      "Zum öffentlichen Start ja. Das Hauptangebot ist Hosting mit eigenem Modell-Key. So bleiben Nutzung und Modellkosten zunächst klar getrennt.",
   },
   {
-    question: "Was bedeutet Managed Beta konkret?",
+    question: "Was bedeutet Managed konkret?",
     answer:
-      "Wir stellen den Modell-Key, aber nur in einem kleinen Pilot mit festen Plätzen und klaren Nutzungsgrenzen. Ohne verifiziertes Credit-Tracking wird dieser Modus nicht breit freigeschaltet.",
+      "Wir stellen den Modell-Key, aber nur in einem kleinen Pilot mit festen Plätzen und klaren Nutzungsgrenzen. Dieser Modus wird erst geöffnet, wenn wir den Verbrauch pro Kunde technisch sauber messen können.",
   },
   {
     question: "Brauche ich eigene Server oder Docker-Kenntnisse?",
     answer:
-      "Nein. Der Sinn von Frozenclaw ist gerade, dir das Hosting und den Betriebsaufwand abzunehmen.",
+      "Nein. Du musst keinen eigenen Server betreiben und keine Infrastruktur rund um die Uhr am Laufen halten.",
   },
   {
     question: "Ist das schon ein komplett ausgereiftes SaaS?",
     answer:
-      "Nein. Es ist eine bezahlte Beta: nützlich, hostbar und klar fokussiert, aber noch bewusst vor dem großen Ausbau.",
+      "Nein. Es ist eine bezahlte Beta mit klarem Nutzen und bewusst begrenztem Scope. Genau deshalb starten wir mit einem verständlichen Kernangebot.",
   },
 ];
 
@@ -254,27 +254,27 @@ export default function Home() {
           <div className="space-y-8">
             <div className="fc-chip">
               <span className="fc-chip-dot" />
-              Hosted OpenClaw Beta aus Deutschland
+              Gehostetes OpenClaw aus Deutschland
             </div>
 
             <div className="space-y-5">
               <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                Frost. Kontrolle. Infrastruktur.
+                Gehostetes OpenClaw aus Deutschland
               </p>
               <h1 className="font-display text-6xl uppercase leading-[0.88] text-[var(--fc-text)] sm:text-7xl lg:text-[7.5rem]">
-                Dein KI-Agent
-                <span className="block text-[var(--fc-accent)]">hinter dem Tor.</span>
+                Dein eigener
+                <span className="block text-[var(--fc-accent)]">OpenClaw-Agent.</span>
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
-                Frozenclaw macht aus OpenClaw ein gehostetes Produkt: eigene Instanz,
-                EU-Infrastruktur, schnelle Bereitstellung und ein Setup, das nicht nach
-                Bastelkeller aussieht.
+                Frozenclaw hostet deine private OpenClaw-Instanz auf deutscher Infrastruktur.
+                Du bekommst einen festen Zugang, eine schnelle Bereitstellung und musst den
+                Server nicht selbst betreiben.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-4">
               <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
-                BYOK starten
+                Jetzt starten
               </CheckoutButton>
               <a href="#ueberblick" className="fc-button fc-button-secondary">
                 System ansehen
@@ -294,8 +294,8 @@ export default function Home() {
           <div className="relative">
             <div className="vault-panel panel-cut">
               <div className="vault-topline">
-                <span>SYSTEMSTATUS</span>
-                <span>VERSIEGELT / AKTIV</span>
+                <span>INSTANZSTATUS</span>
+                <span>BETA / BEREIT</span>
               </div>
 
               <div className="vault-core-wrap">
@@ -306,7 +306,7 @@ export default function Home() {
                   <div className="vault-spoke vault-spoke-c" />
                   <div className="vault-center">
                     <span className="font-display text-xs uppercase tracking-[0.35em] text-[var(--fc-accent-soft)]">
-                      kern
+                      online
                     </span>
                   </div>
                   {Array.from({ length: 8 }).map((_, index) => (
@@ -341,20 +341,20 @@ export default function Home() {
         <section id="ueberblick" className="mx-auto w-[94%] max-w-7xl pb-10">
           <div className="data-strip">
             <span>OpenClaw Hosting</span>
-            <span>Schwarz / Eisblau / Rot</span>
-            <span>BYOK zuerst</span>
-            <span>Managed als Pilot</span>
-            <span>Manueller Fallback vorhanden</span>
+            <span>Private Instanz</span>
+            <span>Bereitstellung in Minuten</span>
+            <span>Hosting in Deutschland</span>
+            <span>Managed nur als Pilot</span>
           </div>
         </section>
 
         <section id="ablauf" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
             <p className="section-kicker">Ablauf</p>
-            <h2 className="section-title">Der Startpfad ist absichtlich direkt.</h2>
+            <h2 className="section-title">So startet Frozenclaw.</h2>
             <p className="section-copy">
-              Frozenclaw soll sich anfühlen wie ein sicheres Tor, nicht wie ein loses
-              Bastelprojekt mit zu vielen beweglichen Teilen.
+              Die Seite soll in wenigen Sätzen erklären, was du bekommst, was es kostet und
+              wie du loslegst. Genau so ist der Ablauf aufgebaut.
             </p>
           </div>
 
@@ -377,8 +377,8 @@ export default function Home() {
 
         <section className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
-            <p className="section-kicker">Richtung</p>
-            <h2 className="section-title">Aussen Druck. Innen klare Kontrolle.</h2>
+            <p className="section-kicker">Angebot</p>
+            <h2 className="section-title">Was du hier tatsächlich kaufst.</h2>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
@@ -386,13 +386,13 @@ export default function Home() {
               <div className="mb-8 flex items-center justify-between gap-4 border-b border-[var(--fc-border)] pb-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.24em] text-[var(--fc-accent-soft)]">
-                    Produktlogik
+                    Produktversprechen
                   </p>
                   <h3 className="mt-2 font-display text-4xl uppercase text-[var(--fc-text)]">
-                    Frostige Klarheit
+                    Gehostetes OpenClaw
                   </h3>
                 </div>
-                <span className="fc-chip">BYOK / Managed Pilot</span>
+                <span className="fc-chip">Private Instanz pro Kunde</span>
               </div>
 
               <div className="grid gap-5">
@@ -423,13 +423,14 @@ export default function Home() {
               </div>
 
               <div className="panel-cut fc-panel">
-                <p className="section-kicker">Launch-Prinzip</p>
+                <p className="section-kicker">Startlogik</p>
                 <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
-                  Erst sauber starten. Dann teuren Betrieb freischalten.
+                  Erst das verständliche Angebot. Danach der teurere Ausbau.
                 </h3>
                 <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  Deshalb ist BYOK das öffentliche Kernangebot. Managed bleibt ein kleiner
-                  Pilot, bis Verbrauch und Limits pro Kunde wirklich messbar sind.
+                  Deshalb ist Hosting mit eigenem Modell-Key das öffentliche Standardangebot.
+                  Managed bleibt ein kleiner Pilot, bis Verbrauch und Limits technisch sauber
+                  gemessen werden können.
                 </p>
               </div>
             </div>
@@ -439,7 +440,7 @@ export default function Home() {
         <section id="preise" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
             <p className="section-kicker">Preise</p>
-            <h2 className="section-title">Zwei Linien. Eine öffentlich, eine kontrolliert.</h2>
+            <h2 className="section-title">Ein Hauptangebot zum Start. Ein Managed-Pilot danach.</h2>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
@@ -447,10 +448,10 @@ export default function Home() {
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Öffentlich buchbar
+                    Jetzt buchbar
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Hosted BYOK
+                    Hosting mit eigenem Key
                   </h3>
                 </div>
                 <div className="text-right">
@@ -474,7 +475,7 @@ export default function Home() {
 
               <div className="mt-8 flex flex-wrap gap-4">
                 <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
-                  BYOK reservieren
+                  Jetzt starten
                 </CheckoutButton>
                 <a href="#faq" className="fc-button fc-button-secondary">
                   Fragen klären
@@ -486,10 +487,10 @@ export default function Home() {
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Begrenzt / Pilot
+                    Später im Pilot
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Managed Beta
+                    Hosting mit gestelltem Key
                   </h3>
                 </div>
                 <div className="text-right">
@@ -512,17 +513,17 @@ export default function Home() {
               </div>
 
               <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Managed wird erst aktiv verkauft, wenn Usage-Tracking, Credit-Logik und
-                Warnschwellen technisch verifiziert sind. Vorher bleibt es ein sichtbarer
-                Pilot mit fester Kapazitätsgrenze.
+                Dieses Angebot wird erst geöffnet, wenn Verbrauchstracking, Limits und
+                Warnschwellen technisch sauber stehen. Bis dahin bleibt es ein kleiner Pilot
+                mit fester Kapazitätsgrenze.
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
                 <a href="#preise" className="fc-button fc-button-secondary">
-                  Managed anfragen
+                  Interesse vormerken
                 </a>
                 <a href="#faq" className="fc-button fc-button-secondary">
-                  Pilot verstehen
+                  Mehr dazu
                 </a>
               </div>
             </article>
@@ -534,21 +535,21 @@ export default function Home() {
             <div className="panel-cut fc-panel">
               <p className="section-kicker">Launch-Hinweis</p>
               <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
-                BYOK ist das Hauptprodukt. Managed ist absichtlich gebremst.
+                Der Start ist bewusst einfach gehalten.
               </h3>
               <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                Das ist kein Nachteil, sondern Kostenkontrolle. Erst wenn Verbrauch pro Kunde
-                sauber messbar ist, wird aus Managed ein ernsthaft belastbares Angebot.
+                Du sollst auf der Startseite sofort verstehen, welches Angebot heute verfügbar
+                ist. Deshalb steht das Hosting mit eigenem Modell-Key klar im Vordergrund.
               </p>
             </div>
 
             <div className="panel-cut fc-panel">
-              <p className="section-kicker">Was danach passiert</p>
+              <p className="section-kicker">Nach der Bestellung</p>
               <ol className="mt-4 space-y-4 text-base text-[var(--fc-text-muted)]">
                 <li>01. Checkout erfasst die Bestellung.</li>
                 <li>02. Provisionierung legt deine Instanz an.</li>
-                <li>03. Du verbindest deinen eigenen Modell-Key oder wartest auf Managed-Freigabe.</li>
-                <li>04. Frozenclaw wird von Beta-Nutzen zu belastbarerem Betrieb weitergezogen.</li>
+                <li>03. Du hinterlegst deinen eigenen Modell-Key.</li>
+                <li>04. Danach kannst du deine Instanz direkt nutzen.</li>
               </ol>
             </div>
           </div>
@@ -583,8 +584,8 @@ export default function Home() {
               <p className="font-display text-3xl text-[var(--fc-text)]">Frozenclaw</p>
             </div>
             <p className="mt-2 max-w-xl text-xs leading-6 text-[var(--fc-text-muted)]">
-              Hosted OpenClaw aus Deutschland: BYOK zuerst, Managed nur als begrenzter
-              Pilot mit echtem Verbrauchstracking.
+              Gehostetes OpenClaw aus Deutschland: private Instanz, schneller Start und ein
+              klarer Fokus auf das öffentliche Hauptangebot mit eigenem Modell-Key.
             </p>
           </div>
           <div className="flex flex-wrap gap-4 md:justify-end">
