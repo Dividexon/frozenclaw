@@ -28,6 +28,7 @@ type ProvisionableOrder = {
 
 declare global {
   var __frozenclawRuntimeStarted: boolean | undefined;
+  var __frozenclawRecoveryInterval: NodeJS.Timeout | undefined;
 }
 
 function formatSqliteDate(date: Date) {
@@ -354,13 +355,7 @@ export function queueProvisioning(orderId: number) {
   });
 }
 
-export function startRuntimeRecovery() {
-  if (global.__frozenclawRuntimeStarted) {
-    return;
-  }
-
-  global.__frozenclawRuntimeStarted = true;
-
+function scanRecoverableOrders() {
   const db = getDb();
   const staleBefore = formatSqliteDate(
     new Date(Date.now() - getAppConfig().staleProvisioningMinutes * 60_000)
@@ -380,6 +375,15 @@ export function startRuntimeRecovery() {
   for (const row of rows) {
     queueProvisioning(row.id);
   }
+}
+
+export function startRuntimeRecovery() {
+  if (!global.__frozenclawRuntimeStarted) {
+    global.__frozenclawRuntimeStarted = true;
+    global.__frozenclawRecoveryInterval = setInterval(scanRecoverableOrders, 30_000);
+  }
+
+  scanRecoverableOrders();
 }
 
 export function buildActivationUrl(slug: string | null, token: string | null) {
