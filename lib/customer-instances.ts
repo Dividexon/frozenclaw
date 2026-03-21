@@ -35,6 +35,41 @@ type AuthProfileStore = {
   usageStats?: Record<string, unknown>;
 };
 
+type OpenClawConfig = {
+  gateway?: {
+    controlUi?: {
+      allowedOrigins?: string[];
+      dangerouslyDisableDeviceAuth?: boolean;
+    };
+  };
+  agents?: {
+    defaults?: {
+      models?: Record<string, Record<string, never>>;
+    };
+  };
+};
+
+const providerAllowedModels: Record<ProviderId, string[]> = {
+  anthropic: [
+    "anthropic/claude-opus-4-6",
+    "anthropic/claude-sonnet-4-6",
+    "anthropic/claude-sonnet-4-5",
+    "anthropic/claude-haiku-3-5",
+  ],
+  openai: [
+    "openai/gpt-5.2",
+    "openai/gpt-5.1",
+    "openai/gpt-4.1",
+    "openai/gpt-4o",
+  ],
+  gemini: [
+    "google/gemini-3-pro",
+    "google/gemini-3-flash",
+    "google/gemini-2.5-pro",
+    "google/gemini-2.5-flash",
+  ],
+};
+
 function parseEnv(content: string) {
   const values = new Map<string, string>();
 
@@ -103,6 +138,10 @@ export function getCustomerProviderEnvPath(slug: string) {
   return path.join(getCustomerConfigDir(slug), ".env");
 }
 
+export function getCustomerOpenClawConfigPath(slug: string) {
+  return path.join(getCustomerConfigDir(slug), "openclaw.json");
+}
+
 export function getCustomerAgentDir(slug: string) {
   return path.join(getCustomerConfigDir(slug), "agents", "main", "agent");
 }
@@ -132,6 +171,15 @@ async function readAuthProfileStore(slug: string): Promise<AuthProfileStore> {
 async function writeAuthProfileStore(slug: string, store: AuthProfileStore) {
   const content = `${JSON.stringify(store, null, 2)}\n`;
   await fs.writeFile(getCustomerAuthProfilesPath(slug), content, "utf8");
+}
+
+async function readOpenClawConfig(slug: string): Promise<OpenClawConfig> {
+  return readJsonFile<OpenClawConfig>(getCustomerOpenClawConfigPath(slug), {});
+}
+
+async function writeOpenClawConfig(slug: string, config: OpenClawConfig) {
+  const content = `${JSON.stringify(config, null, 2)}\n`;
+  await fs.writeFile(getCustomerOpenClawConfigPath(slug), content, "utf8");
 }
 
 function hasProviderProfile(store: AuthProfileStore, provider: ProviderId) {
@@ -166,9 +214,46 @@ async function migrateLegacyProviderEnvToAuthStore(slug: string) {
   }
 }
 
+async function syncOpenClawModelAllowlist(slug: string) {
+  const authStore = await readAuthProfileStore(slug);
+  const allowedModels = new Set<string>();
+
+  for (const provider of Object.keys(providerEnvMap) as ProviderId[]) {
+    if (!hasProviderProfile(authStore, provider)) {
+      continue;
+    }
+
+    for (const model of providerAllowedModels[provider]) {
+      allowedModels.add(model);
+    }
+  }
+
+  const config = await readOpenClawConfig(slug);
+  const nextConfig: OpenClawConfig = {
+    ...config,
+    agents: {
+      ...config.agents,
+      defaults: {
+        ...config.agents?.defaults,
+      },
+    },
+  };
+
+  if (allowedModels.size > 0) {
+    nextConfig.agents!.defaults!.models = Object.fromEntries(
+      Array.from(allowedModels).map((model) => [model, {}]),
+    );
+  } else if (nextConfig.agents?.defaults?.models) {
+    delete nextConfig.agents.defaults.models;
+  }
+
+  await writeOpenClawConfig(slug, nextConfig);
+}
+
 export async function readProviderStatus(slug: string): Promise<ProviderStatus> {
   await ensureCustomerDirectories(slug);
   await migrateLegacyProviderEnvToAuthStore(slug);
+  await syncOpenClawModelAllowlist(slug);
 
   const values = await readEnvFile(getCustomerProviderEnvPath(slug));
   const authStore = await readAuthProfileStore(slug);
@@ -192,6 +277,7 @@ export async function writeProviderKey(slug: string, provider: ProviderId, apiKe
     key: trimmedApiKey,
   };
   await writeAuthProfileStore(slug, authStore);
+  await syncOpenClawModelAllowlist(slug);
 
   const providerEnvPath = getCustomerProviderEnvPath(slug);
   const currentEnv = await readEnvFile(providerEnvPath);
