@@ -63,11 +63,12 @@ const byokIncludes = [
 
 const managedIncludes = [
   "1 gehostete OpenClaw-Instanz",
-  "Modell-Key wird von uns gestellt",
-  "Pilot mit 5 verfügbaren Plätzen",
-  "Konservatives Nutzungsbudget zum Start",
-  "Separates Cron-Limit geplant",
-  "Freischaltung erst nach aktivem Verbrauchstracking",
+  "GPT-5.2 als festes Modell",
+  "3 Mio. Standard-Tokens pro Monat",
+  "Modellzugang wird von Frozenclaw gestellt",
+  "Verbrauch wird automatisch mitgerechnet",
+  "Pilot mit wenigen Plätzen zum Start",
+  "Nachbuchung später zubuchbar",
 ];
 
 const useCases = [
@@ -100,7 +101,7 @@ const specRows = [
   ["Modell-Key", "Zum Start vom Kunden gestellt"],
   ["Support", "E-Mail + Startanleitung"],
   ["Bereitstellung", "In der Regel am selben Tag"],
-  ["Managed", "Später als Pilot mit 5 Slots"],
+  ["Managed", "GPT-5.2 Pilot mit 3 Mio. Standard-Tokens"],
 ];
 
 const faqs = [
@@ -112,7 +113,12 @@ const faqs = [
   {
     question: "Was bedeutet Managed konkret?",
     answer:
-      "Später kann es einen begrenzten Plan mit von uns gestelltem Modell-Key geben. Dieser wird aber erst geöffnet, wenn wir Verbrauch und Limits pro Kunde technisch sauber messen können.",
+      "Managed ist der Plan für Nutzer, die keinen eigenen API-Key verwalten möchten. Frozenclaw stellt dafür GPT-5.2 bereit, rechnet den Verbrauch automatisch mit und startet zunächst mit einem klar begrenzten Tokenkontingent pro Monat.",
+  },
+  {
+    question: "Wie funktioniert die Nutzung im Managed-Plan?",
+    answer:
+      "Der Start ist mit einem festen Modell und einem festen Monatskontingent geplant. Für die erste Variante testen wir GPT-5.2 mit 3 Mio. Standard-Tokens pro Monat. So bleiben Angebot, Kosten und Nachbuchung sauber steuerbar.",
   },
   {
     question: "Brauche ich eigene Server oder Docker-Kenntnisse?",
@@ -446,10 +452,10 @@ export default function Home() {
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Später im Pilot
+                    Pilot in Vorbereitung
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Managed
+                    Managed Beta
                   </h3>
                 </div>
                 <div className="text-right">
@@ -472,9 +478,9 @@ export default function Home() {
               </div>
 
               <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Dieses Angebot wird erst geöffnet, wenn Verbrauchstracking, Limits und
-                Warnschwellen technisch sauber stehen. Bis dahin bleibt es ein kleiner Pilot
-                mit fester Kapazitätsgrenze.
+                Für die erste Managed-Variante testen wir GPT-5.2 als festes Modell mit
+                3 Mio. Standard-Tokens pro Monat. Der Verbrauch wird automatisch
+                mitgerechnet, damit spätere Nachbuchungen sauber zubuchbar sind.
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
