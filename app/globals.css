@@ -71,18 +71,19 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3.35rem;
-  height: 3.35rem;
-  border-radius: 999px;
-  border: 1px solid rgba(127, 220, 255, 0.24);
+  width: 3.8rem;
+  height: 3.8rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(182, 230, 255, 0.26);
   background:
-    radial-gradient(circle at 35% 30%, rgba(141, 235, 255, 0.28), transparent 46%),
-    radial-gradient(circle at 50% 70%, rgba(32, 93, 255, 0.22), transparent 58%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(10, 16, 32, 0.72)),
-    rgba(7, 10, 18, 0.9);
+    radial-gradient(circle at 50% 48%, rgba(235, 247, 255, 0.26), transparent 40%),
+    radial-gradient(circle at 66% 60%, rgba(118, 183, 255, 0.2), transparent 56%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(9, 15, 24, 0.78)),
+    rgba(8, 10, 16, 0.92);
   box-shadow:
-    0 0 28px rgba(69, 179, 255, 0.22),
-    inset 0 0 24px rgba(127, 220, 255, 0.1);
+    0 0 34px rgba(126, 195, 255, 0.18),
+    inset 0 0 26px rgba(185, 233, 255, 0.08);
+  overflow: hidden;
 }
 
 .fc-chip {

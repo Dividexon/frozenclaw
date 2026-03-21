@@ -126,115 +126,210 @@ const faqs = [
 ];
 
 function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
-  const glowId = `${idPrefix}-glow`;
+  const auraId = `${idPrefix}-aura`;
   const iceId = `${idPrefix}-ice`;
+  const frostId = `${idPrefix}-frost`;
+  const rustId = `${idPrefix}-rust`;
+  const enamelId = `${idPrefix}-enamel`;
   const edgeId = `${idPrefix}-edge`;
-  const darkId = `${idPrefix}-dark`;
+  const shardId = `${idPrefix}-shard`;
 
   return (
     <svg
-      viewBox="0 0 120 120"
-      className="h-12 w-12 shrink-0"
+      viewBox="0 0 160 160"
+      className="h-13 w-13 shrink-0"
       aria-hidden="true"
       role="presentation"
     >
       <defs>
-        <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#b9f8ff" stopOpacity="0.95" />
-          <stop offset="45%" stopColor="#37b3ff" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#061325" stopOpacity="0" />
+        <radialGradient id={auraId} cx="52%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#edf9ff" stopOpacity="0.95" />
+          <stop offset="42%" stopColor="#b7dfff" stopOpacity="0.72" />
+          <stop offset="72%" stopColor="#4f9bdb" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#08101a" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id={iceId} x1="12%" y1="8%" x2="88%" y2="92%">
+        <linearGradient id={iceId} x1="8%" y1="14%" x2="94%" y2="88%">
+          <stop offset="0%" stopColor="#f5fcff" />
+          <stop offset="28%" stopColor="#d4eeff" />
+          <stop offset="64%" stopColor="#8dd5ff" />
+          <stop offset="100%" stopColor="#3472b7" />
+        </linearGradient>
+        <linearGradient id={frostId} x1="18%" y1="4%" x2="82%" y2="96%">
           <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="24%" stopColor="#d7fbff" />
-          <stop offset="52%" stopColor="#79deff" />
-          <stop offset="78%" stopColor="#468eff" />
-          <stop offset="100%" stopColor="#1a2c78" />
+          <stop offset="36%" stopColor="#ebf9ff" />
+          <stop offset="76%" stopColor="#78cfff" />
+          <stop offset="100%" stopColor="#b7efff" />
         </linearGradient>
-        <linearGradient id={edgeId} x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={rustId} x1="20%" y1="10%" x2="82%" y2="94%">
+          <stop offset="0%" stopColor="#6e2d16" />
+          <stop offset="26%" stopColor="#a14520" />
+          <stop offset="56%" stopColor="#6f2f18" />
+          <stop offset="100%" stopColor="#2b120d" />
+        </linearGradient>
+        <linearGradient id={enamelId} x1="0%" y1="14%" x2="100%" y2="86%">
+          <stop offset="0%" stopColor="#fff8f1" />
+          <stop offset="38%" stopColor="#c88963" />
+          <stop offset="100%" stopColor="#5a2415" />
+        </linearGradient>
+        <linearGradient id={edgeId} x1="10%" y1="0%" x2="86%" y2="100%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#8ce6ff" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#94e4ff" stopOpacity="0.42" />
         </linearGradient>
-        <linearGradient id={darkId} x1="20%" y1="0%" x2="80%" y2="100%">
-          <stop offset="0%" stopColor="#11244a" />
-          <stop offset="100%" stopColor="#071124" />
+        <linearGradient id={shardId} x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#faffff" />
+          <stop offset="100%" stopColor="#6fb8ff" />
         </linearGradient>
         <filter id={`${idPrefix}-blur`} x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="6.5" />
+          <feGaussianBlur stdDeviation="11" />
+        </filter>
+        <filter id={`${idPrefix}-grain`} x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="2" seed="7" />
+          <feColorMatrix
+            type="matrix"
+            values="1 0 0 0 0
+                    0 1 0 0 0
+                    0 0 1 0 0
+                    0 0 0 0.18 0"
+          />
+          <feBlend in="SourceGraphic" mode="overlay" />
         </filter>
       </defs>
 
-      <circle
-        cx="60"
-        cy="60"
-        r="40"
-        fill={`url(#${glowId})`}
+      <ellipse
+        cx="80"
+        cy="80"
+        rx="58"
+        ry="52"
+        fill={`url(#${auraId})`}
         filter={`url(#${idPrefix}-blur)`}
-        opacity="0.9"
+        opacity="0.95"
       />
 
       <path
-        d="M76 16c12 2 24 9 31 21 6 11 7 21 2 31-5 9-13 15-25 18 5-6 9-12 11-20 2-8 1-16-4-25-4-7-11-13-20-19 2-3 3-5 5-6z"
-        fill={`url(#${darkId})`}
-        opacity="0.5"
-      />
-      <path
-        d="M36 18c13-4 29-4 41 2 10 5 16 12 19 22 2 8 1 15-4 21-3 4-7 7-12 9-7 3-15 4-23 4 4-7 6-13 5-20-1-7-5-13-11-19-7-6-15-10-24-13 2-2 5-4 9-6z"
+        d="M119 34c8 2 15 7 20 14 5 8 6 15 3 22-2 5-7 10-13 13 2-6 2-12 0-19-2-8-7-15-15-23 1-3 3-5 5-7z"
         fill={`url(#${iceId})`}
+        opacity="0.42"
       />
       <path
-        d="M36 18c13-4 29-4 41 2 10 5 16 12 19 22 2 8 1 15-4 21-3 4-7 7-12 9-7 3-15 4-23 4 4-7 6-13 5-20-1-7-5-13-11-19-7-6-15-10-24-13 2-2 5-4 9-6z"
+        d="M112 39c6 6 10 13 11 20 1 8-1 16-5 23-6 9-15 15-27 18-10 3-20 2-29-2-8-4-14-10-17-18-3-8-3-16 1-24 4-8 10-14 19-19 8-4 17-6 27-5 8 0 15 3 20 7z"
+        fill={`url(#${rustId})`}
+        filter={`url(#${idPrefix}-grain)`}
+      />
+      <path
+        d="M112 39c6 6 10 13 11 20 1 8-1 16-5 23-6 9-15 15-27 18-10 3-20 2-29-2-8-4-14-10-17-18-3-8-3-16 1-24 4-8 10-14 19-19 8-4 17-6 27-5 8 0 15 3 20 7z"
+        fill="none"
+        stroke={`url(#${edgeId})`}
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M103 47c-8-1-17 1-25 7-11 7-21 17-31 30-8 10-18 16-30 20-10 4-19 5-25 3 4-7 11-15 21-24 8-7 15-15 20-23 6-10 13-17 22-22 8-5 16-8 24-9 12-2 22 1 31 8 4 4 6 7 7 10-4-1-8-1-14 0z"
+        fill={`url(#${enamelId})`}
+        filter={`url(#${idPrefix}-grain)`}
+      />
+      <path
+        d="M103 47c-8-1-17 1-25 7-11 7-21 17-31 30-8 10-18 16-30 20-10 4-19 5-25 3 4-7 11-15 21-24 8-7 15-15 20-23 6-10 13-17 22-22 8-5 16-8 24-9 12-2 22 1 31 8 4 4 6 7 7 10-4-1-8-1-14 0z"
+        fill="none"
+        stroke={`url(#${edgeId})`}
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M90 55c6 8 9 16 10 24"
+        stroke="#f7fcff"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        opacity="0.72"
+      />
+      <path
+        d="M64 80c10-2 20-1 31 3"
+        stroke="#f7fcff"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        opacity="0.76"
+      />
+      <path
+        d="M52 57c7-8 15-14 24-18"
+        stroke="#d7efff"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        opacity="0.68"
+      />
+      <path
+        d="M33 100c5 4 13 6 22 7 13 2 28 0 43-4 12-4 23-4 34 1-7 7-17 12-30 14-18 4-34 4-49 0-11-3-19-8-25-15 1-1 3-2 5-3z"
+        fill={`url(#${rustId})`}
+        filter={`url(#${idPrefix}-grain)`}
+      />
+      <path
+        d="M33 100c5 4 13 6 22 7 13 2 28 0 43-4 12-4 23-4 34 1-7 7-17 12-30 14-18 4-34 4-49 0-11-3-19-8-25-15 1-1 3-2 5-3z"
         fill="none"
         stroke={`url(#${edgeId})`}
         strokeWidth="2"
         strokeLinejoin="round"
       />
       <path
-        d="M73 27c-8 2-15 6-21 12-6 6-8 13-6 20 2 5 5 8 11 11 5 2 13 4 23 4 11 0 19-2 25-7-4 11-12 20-23 26-11 6-23 7-35 3-11-3-19-10-24-20-4-10-4-20 0-31 4-11 11-19 22-25 9-5 19-6 28-4z"
-        fill={`url(#${iceId})`}
+        d="M18 92l12-8 6 16-9 15-10-16z"
+        fill={`url(#${shardId})`}
+        opacity="0.88"
       />
       <path
-        d="M73 27c-8 2-15 6-21 12-6 6-8 13-6 20 2 5 5 8 11 11 5 2 13 4 23 4 11 0 19-2 25-7-4 11-12 20-23 26-11 6-23 7-35 3-11-3-19-10-24-20-4-10-4-20 0-31 4-11 11-19 22-25 9-5 19-6 28-4z"
-        fill="none"
-        stroke={`url(#${edgeId})`}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M23 77l11-8 2 13 10 8-13 2-5 12-5-11-14-1 10-8z"
-        fill={`url(#${iceId})`}
+        d="M28 101l8-6 5 12-7 15-9-11z"
+        fill={`url(#${shardId})`}
         opacity="0.85"
       />
       <path
-        d="M88 18l7-9 3 11 11 5-11 2-4 10-4-10-10-2z"
-        fill={`url(#${iceId})`}
-        opacity="0.9"
+        d="M44 110l10-4 5 12-7 18-10-11z"
+        fill={`url(#${shardId})`}
+        opacity="0.94"
       />
       <path
-        d="M60 14l4-8 3 8 8 3-8 2-3 8-4-7-8-2z"
-        fill={`url(#${iceId})`}
-        opacity="0.9"
+        d="M61 115l9-2 3 11-6 16-8-10z"
+        fill={`url(#${shardId})`}
+        opacity="0.88"
       />
       <path
-        d="M31 33c8 3 14 7 19 12"
-        stroke="#ffffff"
-        strokeWidth="2"
+        d="M78 114l9-1 2 10-5 15-8-9z"
+        fill={`url(#${shardId})`}
+        opacity="0.88"
+      />
+      <path
+        d="M96 112l8 0 2 9-5 13-7-8z"
+        fill={`url(#${shardId})`}
+        opacity="0.82"
+      />
+      <path
+        d="M112 108l8 1 1 8-4 11-7-7z"
+        fill={`url(#${shardId})`}
+        opacity="0.82"
+      />
+      <path
+        d="M124 39l9-8 2 13-6 9-9-7z"
+        fill={`url(#${shardId})`}
+        opacity="0.84"
+      />
+      <path
+        d="M131 51l7-3 1 9-6 12-6-9z"
+        fill={`url(#${shardId})`}
+        opacity="0.78"
+      />
+      <path
+        d="M118 30l6-8 2 9-5 7-6-4z"
+        fill={`url(#${shardId})`}
+        opacity="0.7"
+      />
+      <path
+        d="M100 31c4 0 8 1 13 3"
+        stroke="#f3fbff"
+        strokeWidth="1.7"
         strokeLinecap="round"
-        opacity="0.8"
+        opacity="0.66"
       />
       <path
-        d="M47 22c8 0 15 2 23 6"
-        stroke="#d8fdff"
-        strokeWidth="2"
+        d="M39 101c8 4 20 5 36 3"
+        stroke="#f3fbff"
+        strokeWidth="1.9"
         strokeLinecap="round"
-        opacity="0.75"
-      />
-      <path
-        d="M50 84c10 2 20 1 31-5"
-        stroke="#d8fdff"
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.8"
+        opacity="0.66"
       />
     </svg>
   );
