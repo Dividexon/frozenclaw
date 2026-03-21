@@ -1,0 +1,22 @@
+[Unit]
+Description=Frozenclaw Next.js App
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=frozenclaw
+Group=frozenclaw
+WorkingDirectory=/opt/frozenclaw/app
+EnvironmentFile=/etc/frozenclaw/frozenclaw.env
+Environment=NODE_ENV=production
+Environment=HOSTNAME=127.0.0.1
+Environment=PORT=3000
+ExecStart=/usr/bin/npm run start -- --hostname 127.0.0.1 --port 3000
+Restart=always
+RestartSec=5
+StandardOutput=append:/opt/frozenclaw/logs/app.log
+StandardError=append:/opt/frozenclaw/logs/app-error.log
+
+[Install]
+WantedBy=multi-user.target
