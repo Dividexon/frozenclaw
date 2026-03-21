@@ -17,7 +17,7 @@ async function loadInstance(slug: string, token: string) {
       `${baseUrl}/api/instances/${slug}?token=${encodeURIComponent(token)}`,
       {
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -33,6 +33,18 @@ async function loadInstance(slug: string, token: string) {
         openai: boolean;
         gemini: boolean;
       };
+      managed: {
+        provider: string;
+        model: string;
+        includedStandardTokens: number;
+        topUpStandardTokens: number;
+        usedStandardTokens: number;
+        remainingStandardTokens: number;
+        includedBudgetCents: number;
+        topUpBudgetCents: number;
+        usedCostMicros: number;
+        managedApiKeyConfigured: boolean;
+      } | null;
       agentUrl: string | null;
     };
   } catch {
@@ -51,8 +63,9 @@ export default async function ZugangPage({ params, searchParams }: AccessPagePro
         <p className="section-kicker">Zugang</p>
         <h1 className="section-title mt-3 text-5xl">Deine Instanz wird eingerichtet.</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
-          Für den BYOK-Start hinterlegst du hier deinen eigenen API-Key. Danach wird deine
-          OpenClaw-Instanz neu gestartet und ist direkt nutzbar.
+          {instance?.usageMode === "managed"
+            ? "Managed-Instanzen nutzen den zentralen Betreiber-Zugang. Hier siehst du den aktuellen Stand deines Kontingents und kommst direkt in OpenClaw."
+            : "Für den BYOK-Start hinterlegst du hier deinen eigenen API-Key. Danach wird deine OpenClaw-Instanz neu gestartet und ist direkt nutzbar."}
         </p>
 
         <div className="mt-8 flex flex-wrap gap-4">

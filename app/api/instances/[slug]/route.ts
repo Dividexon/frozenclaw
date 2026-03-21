@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { getManagedUsageSummary } from "@/lib/managed";
 import { readProviderStatus } from "@/lib/customer-instances";
 import { buildAgentUrl, buildSetupUrl, startRuntimeRecovery } from "@/lib/provisioning";
 
@@ -15,11 +16,11 @@ function findOrderBySlug(slug: string) {
   return getDb()
     .prepare(`
       SELECT
-        id,
-        instance_slug,
-        gateway_token,
-        usage_mode,
-        instance_state
+      id,
+      instance_slug,
+      gateway_token,
+      usage_mode,
+      instance_state
       FROM orders
       WHERE instance_slug = ?
     `)
@@ -50,12 +51,15 @@ export async function GET(request: Request, context: RouteContext) {
   }
 
   const providerStatus = await readProviderStatus(slug);
+  const managed =
+    order.usage_mode === "managed" ? getManagedUsageSummary(order.id) : null;
 
   return NextResponse.json({
     slug,
     usageMode: order.usage_mode,
     instanceState: order.instance_state,
     providerStatus,
+    managed,
     setupUrl: buildSetupUrl(order.instance_slug, order.gateway_token),
     agentUrl: buildAgentUrl(order.instance_slug, order.gateway_token),
   });

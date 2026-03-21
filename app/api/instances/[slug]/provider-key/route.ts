@@ -83,7 +83,7 @@ export async function POST(request: Request, context: RouteContext) {
 
   const order = getDb()
     .prepare(`
-      SELECT id, gateway_token, instance_slug
+      SELECT id, gateway_token, instance_slug, usage_mode
       FROM orders
       WHERE instance_slug = ?
     `)
@@ -92,6 +92,7 @@ export async function POST(request: Request, context: RouteContext) {
         id: number;
         gateway_token: string | null;
         instance_slug: string;
+        usage_mode: string;
       }
     | undefined;
 
@@ -101,6 +102,16 @@ export async function POST(request: Request, context: RouteContext) {
 
   if (token !== order.gateway_token) {
     return NextResponse.json({ error: "Ungültiger Zugriffstoken." }, { status: 403 });
+  }
+
+  if (order.usage_mode === "managed") {
+    return NextResponse.json(
+      {
+        error:
+          "Managed-Instanzen verwenden den zentralen Betreiber-Zugang und keinen eigenen API-Key.",
+      },
+      { status: 409 },
+    );
   }
 
   await writeProviderKey(slug, body.provider, apiKey);

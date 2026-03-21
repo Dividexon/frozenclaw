@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb, logOrderEvent } from "@/lib/db";
+import { buildManagedOrderSeed } from "@/lib/managed";
 import { queueProvisioning, startRuntimeRecovery } from "@/lib/provisioning";
 import { getStripe } from "@/lib/stripe";
 import { isPlanId, plans, type UsageMode } from "@/lib/plans";
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
       const planId = isPlanId(rawPlanId) ? rawPlanId : "hosted_byok";
       const usageMode = (session.metadata?.usageMode as UsageMode | undefined) ?? plans[planId].usageMode;
       const email = session.customer_details?.email ?? session.customer_email ?? null;
+      const managedSeed = usageMode === "managed" ? buildManagedOrderSeed() : null;
 
       db.prepare(`
         INSERT INTO orders (
@@ -48,7 +50,11 @@ export async function POST(request: Request) {
           plan,
           usage_mode,
           payment_status,
-          instance_state
+          instance_state,
+          managed_provider,
+          managed_model,
+          included_standard_tokens,
+          included_budget_cents
         )
         VALUES (
           @eventId,
@@ -57,13 +63,21 @@ export async function POST(request: Request) {
           @plan,
           @usageMode,
           'paid',
-          'pending'
+          'pending',
+          @managedProvider,
+          @managedModel,
+          @includedStandardTokens,
+          @includedBudgetCents
         )
         ON CONFLICT(stripe_session_id) DO UPDATE SET
           stripe_event_id = excluded.stripe_event_id,
           email = COALESCE(excluded.email, orders.email),
           plan = excluded.plan,
           usage_mode = excluded.usage_mode,
+          managed_provider = excluded.managed_provider,
+          managed_model = excluded.managed_model,
+          included_standard_tokens = excluded.included_standard_tokens,
+          included_budget_cents = excluded.included_budget_cents,
           payment_status = 'paid',
           updated_at = datetime('now')
       `).run({
@@ -72,6 +86,10 @@ export async function POST(request: Request) {
         email,
         plan: planId,
         usageMode,
+        managedProvider: managedSeed?.managedProvider ?? null,
+        managedModel: managedSeed?.managedModel ?? null,
+        includedStandardTokens: managedSeed?.includedStandardTokens ?? 0,
+        includedBudgetCents: managedSeed?.includedBudgetCents ?? 0,
       });
 
       const order = db

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { resolveLoginToken } from "@/lib/login-links";
+import { formatStandardTokens } from "@/lib/managed";
 
 type KontoPageProps = {
   searchParams: Promise<{
@@ -64,6 +65,39 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 <span>Gültig bis {access.expiresAt}</span>
               </div>
             </div>
+
+            {access.managed ? (
+              <div className="mt-8 border border-[var(--fc-border)] bg-black/20 p-5">
+                <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+                  Managed Beta
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="signal-row">
+                    <span className="signal-index">+</span>
+                    <span>{access.managed.model}</span>
+                  </div>
+                  <div className="signal-row">
+                    <span className="signal-index">+</span>
+                    <span>
+                      {formatStandardTokens(access.managed.remainingStandardTokens)} Standard-Tokens
+                      verbleibend
+                    </span>
+                  </div>
+                  <div className="signal-row">
+                    <span className="signal-index">+</span>
+                    <span>
+                      {formatStandardTokens(access.managed.includedStandardTokens)} inklusive Tokens
+                    </span>
+                  </div>
+                  <div className="signal-row">
+                    <span className="signal-index">+</span>
+                    <span>
+                      {formatStandardTokens(access.managed.topUpStandardTokens)} Tokens nachgebucht
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             <div className="mt-8 flex flex-wrap gap-4">
               {access.activationUrl ? (

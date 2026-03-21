@@ -10,6 +10,7 @@ Frozenclaw ist eine Landing Page plus Beta-Checkout für gehostete OpenClaw-Inst
 - asynchrone Provisionierung mit Recovery für hängende Jobs
 - `mock`-Provisionierung für lokale Tests
 - Platzhalterseiten für Impressum, Datenschutz und Beta-Bedingungen
+- vorbereiteter Managed-Unterbau für `GPT-5.2`
 
 ## Lokale Einrichtung
 
@@ -41,6 +42,7 @@ npm run dev
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`: SMTP-Zugang für Transaktionsmails
 - `MAIL_FROM`: sichtbarer Absender, bei Gmail am besten dieselbe Adresse wie `SMTP_USER`
 - `SUPPORT_EMAIL`: Reply-To für Rückfragen
+- `OPENAI_MANAGED_API_KEY`: zentraler Betreiber-Key für den späteren Managed-Beta-Pfad
 
 ## Provisionierungsmodi
 
@@ -61,7 +63,7 @@ Für echte Server-Provisionierung. Frozenclaw ruft ein externes Skript mit diese
 
 Das Skript muss Container, Reverse Proxy und Health Check selbst umsetzen. Bei Fehlern wird der Auftrag auf `failed` gesetzt.
 
-Auf einem Linux-Host sollte die Web-App selbst weiterhin als unprivilegierter Nutzer laufen. Für Docker- und Caddy-Zugriffe wird deshalb `PROVISIONING_USE_SUDO=true` plus eine passende `sudoers`-Whitelist empfohlen; ein Template liegt unter [`ops/frozenclaw-provisioning.sudoers`](/C:/Users/Mariu/clawd/apps/frozenclaw/ops/frozenclaw-provisioning.sudoers).
+Auf einem Linux-Host sollte die Web-App selbst weiterhin als unprivilegierter Nutzer laufen. Für Docker- und Caddy-Zugriffe wird deshalb `PROVISIONING_USE_SUDO=true` plus eine passende `sudoers`-Whitelist empfohlen; ein Template liegt unter [ops/frozenclaw-provisioning.sudoers](/C:/Users/Mariu/clawd/apps/frozenclaw/ops/frozenclaw-provisioning.sudoers).
 
 ## Statusfluss
 
@@ -79,9 +81,28 @@ Frozenclaw kann nach erfolgreicher Bereitstellung und bei fehlgeschlagener Provi
 
 OpenClaw verlangt für die Browser-Control-UI standardmäßig zusätzlich Device-Auth/Pairing. Für die aktuelle Beta kann pro Instanz `OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH=true` gesetzt werden, damit der Zugriff ausschließlich über Gateway-Token läuft. Das ist bewusst ein Sicherheits-Downgrade und sollte nur verwendet werden, solange keine saubere Geräte-Pairing- oder Session-Lösung davorsteht.
 
+## Managed Beta
+
+Der Managed-Pfad ist technisch vorbereitet, bleibt aber gesperrt, bis `OPENAI_MANAGED_API_KEY` serverseitig gesetzt ist und das echte Usage-Tracking am Providerpfad hängt.
+
+Aktueller Zielzustand:
+
+- Modell: `openai/gpt-5.2`
+- Inklusivkontingent: `3.000.000` Standard-Tokens pro Monat
+- Nachbuchung geplant:
+  - `1.000.000` Standard-Tokens für `9 EUR`
+  - `2.500.000` Standard-Tokens für `19 EUR`
+
+SQLite speichert dafür bereits:
+
+- Managed-Provider und Managed-Modell pro Bestellung
+- inklusives Tokenkontingent und internes Budget
+- Usage-Events mit Standard-Tokens und Kostenfeldern
+- spätere Top-up-Käufe
+
 ## Nächste echte Produktionsschritte
 
-- Server-Skript für Provisionierung anbinden
-- echte Impressumsdaten eintragen
+- zentralen Betreiber-Key per `OPENAI_MANAGED_API_KEY` setzen
+- Usage-Tracking an den echten OpenAI-Pfad hängen
+- Top-up-Kaufpfad ergänzen
 - Stripe-Testmodus komplett durchspielen
-- E-Mail-Versand für Bereitstellung und Warnungen ergänzen

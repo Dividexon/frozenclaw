@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, logOrderEvent } from "@/lib/db";
 import { getBaseUrlFromRequest } from "@/lib/env";
+import { buildManagedOrderSeed } from "@/lib/managed";
 import { startRuntimeRecovery } from "@/lib/provisioning";
 import { getStripe } from "@/lib/stripe";
 import { isPlanId, plans } from "@/lib/plans";
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
 
   const planId = body.planId && isPlanId(body.planId) ? body.planId : "hosted_byok";
   const plan = plans[planId];
+  const managedSeed = plan.usageMode === "managed" ? buildManagedOrderSeed() : null;
 
   if (!plan.active) {
     return NextResponse.json(
@@ -64,18 +66,46 @@ export async function POST(request: Request) {
 
     const db = getDb();
     db.prepare(`
-      INSERT INTO orders (stripe_session_id, plan, usage_mode, payment_status, checkout_url)
-      VALUES (@sessionId, @plan, @usageMode, 'checkout_created', @checkoutUrl)
+      INSERT INTO orders (
+        stripe_session_id,
+        plan,
+        usage_mode,
+        payment_status,
+        checkout_url,
+        managed_provider,
+        managed_model,
+        included_standard_tokens,
+        included_budget_cents
+      )
+      VALUES (
+        @sessionId,
+        @plan,
+        @usageMode,
+        'checkout_created',
+        @checkoutUrl,
+        @managedProvider,
+        @managedModel,
+        @includedStandardTokens,
+        @includedBudgetCents
+      )
       ON CONFLICT(stripe_session_id) DO UPDATE SET
         plan = excluded.plan,
         usage_mode = excluded.usage_mode,
         checkout_url = excluded.checkout_url,
+        managed_provider = excluded.managed_provider,
+        managed_model = excluded.managed_model,
+        included_standard_tokens = excluded.included_standard_tokens,
+        included_budget_cents = excluded.included_budget_cents,
         updated_at = datetime('now')
     `).run({
       sessionId: session.id,
       plan: plan.id,
       usageMode: plan.usageMode,
       checkoutUrl: session.url ?? null,
+      managedProvider: managedSeed?.managedProvider ?? null,
+      managedModel: managedSeed?.managedModel ?? null,
+      includedStandardTokens: managedSeed?.includedStandardTokens ?? 0,
+      includedBudgetCents: managedSeed?.includedBudgetCents ?? 0,
     });
 
     const order = db

@@ -29,6 +29,10 @@ function migrate(db: DbInstance) {
       instance_state TEXT NOT NULL DEFAULT 'pending',
       gateway_token TEXT,
       checkout_url TEXT,
+      managed_provider TEXT,
+      managed_model TEXT,
+      included_standard_tokens INTEGER NOT NULL DEFAULT 0,
+      included_budget_cents INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -51,6 +55,21 @@ function migrate(db: DbInstance) {
       input_tokens INTEGER NOT NULL DEFAULT 0,
       output_tokens INTEGER NOT NULL DEFAULT 0,
       credits_charged INTEGER NOT NULL DEFAULT 0,
+      standard_tokens_charged INTEGER NOT NULL DEFAULT 0,
+      cost_input_micros INTEGER NOT NULL DEFAULT 0,
+      cost_output_micros INTEGER NOT NULL DEFAULT 0,
+      cost_total_micros INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS topup_purchases (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      package_id TEXT NOT NULL,
+      standard_tokens INTEGER NOT NULL,
+      amount_cents INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'paid',
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE
     );
@@ -68,9 +87,51 @@ function migrate(db: DbInstance) {
     CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status);
     CREATE INDEX IF NOT EXISTS idx_orders_instance_state ON orders(instance_state);
     CREATE INDEX IF NOT EXISTS idx_usage_events_order_id ON usage_events(order_id);
+    CREATE INDEX IF NOT EXISTS idx_topup_purchases_order_id ON topup_purchases(order_id);
     CREATE INDEX IF NOT EXISTS idx_login_tokens_order_id ON login_tokens(order_id);
     CREATE INDEX IF NOT EXISTS idx_login_tokens_email ON login_tokens(email);
   `);
+
+  const orderColumns = db.prepare("PRAGMA table_info(orders)").all() as Array<{ name: string }>;
+  const usageColumns = db
+    .prepare("PRAGMA table_info(usage_events)")
+    .all() as Array<{ name: string }>;
+  const orderColumnSet = new Set(orderColumns.map((column) => column.name));
+  const usageColumnSet = new Set(usageColumns.map((column) => column.name));
+
+  if (!orderColumnSet.has("managed_provider")) {
+    db.exec("ALTER TABLE orders ADD COLUMN managed_provider TEXT");
+  }
+
+  if (!orderColumnSet.has("managed_model")) {
+    db.exec("ALTER TABLE orders ADD COLUMN managed_model TEXT");
+  }
+
+  if (!orderColumnSet.has("included_standard_tokens")) {
+    db.exec("ALTER TABLE orders ADD COLUMN included_standard_tokens INTEGER NOT NULL DEFAULT 0");
+  }
+
+  if (!orderColumnSet.has("included_budget_cents")) {
+    db.exec("ALTER TABLE orders ADD COLUMN included_budget_cents INTEGER NOT NULL DEFAULT 0");
+  }
+
+  if (!usageColumnSet.has("standard_tokens_charged")) {
+    db.exec(
+      "ALTER TABLE usage_events ADD COLUMN standard_tokens_charged INTEGER NOT NULL DEFAULT 0"
+    );
+  }
+
+  if (!usageColumnSet.has("cost_input_micros")) {
+    db.exec("ALTER TABLE usage_events ADD COLUMN cost_input_micros INTEGER NOT NULL DEFAULT 0");
+  }
+
+  if (!usageColumnSet.has("cost_output_micros")) {
+    db.exec("ALTER TABLE usage_events ADD COLUMN cost_output_micros INTEGER NOT NULL DEFAULT 0");
+  }
+
+  if (!usageColumnSet.has("cost_total_micros")) {
+    db.exec("ALTER TABLE usage_events ADD COLUMN cost_total_micros INTEGER NOT NULL DEFAULT 0");
+  }
 }
 
 export function getDb() {

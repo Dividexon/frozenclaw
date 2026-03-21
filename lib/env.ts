@@ -27,6 +27,7 @@ export type AppConfig = {
   smtpPass: string | null;
   mailFrom: string | null;
   supportEmail: string | null;
+  managedOpenAiApiKey: string | null;
 };
 
 let cachedConfig: AppConfig | null = null;
@@ -130,6 +131,7 @@ export function getAppConfig() {
       smtpPass: process.env.SMTP_PASS ?? null,
       mailFrom: process.env.MAIL_FROM ?? null,
       supportEmail: process.env.SUPPORT_EMAIL ?? null,
+      managedOpenAiApiKey: process.env.OPENAI_MANAGED_API_KEY ?? null,
     };
   }
 

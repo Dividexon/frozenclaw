@@ -2,6 +2,7 @@ import "server-only";
 
 import crypto from "node:crypto";
 import { getDb, logOrderEvent } from "@/lib/db";
+import { getManagedUsageSummary } from "@/lib/managed";
 import { buildAgentUrl, buildSetupUrl } from "@/lib/provisioning";
 
 type LoginTarget = {
@@ -111,5 +112,6 @@ export function resolveLoginToken(rawToken: string) {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     expiresAt: row.expires_at,
+    managed: row.usage_mode === "managed" ? getManagedUsageSummary(row.id) : null,
   };
 }
