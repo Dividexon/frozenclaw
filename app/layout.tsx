@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "Frozenclaw | Gehostetes OpenClaw aus Deutschland",
   description:
     "Eigene gehostete OpenClaw-Instanz aus Deutschland. Du bringst deinen Modell-Key mit, wir übernehmen Hosting, Bereitstellung und Betrieb.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+    shortcut: "/icon.png",
+  },
   openGraph: {
     title: "Frozenclaw",
     description:
@@ -24,6 +29,14 @@ export const metadata: Metadata = {
     url: "https://frozenclaw.com",
     siteName: "Frozenclaw",
     type: "website",
+    images: [
+      {
+        url: "/frozenclaw-logo.png",
+        width: 768,
+        height: 768,
+        alt: "Frozenclaw Logo",
+      },
+    ],
   },
 };
 

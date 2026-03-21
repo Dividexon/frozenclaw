@@ -129,7 +129,7 @@ const faqs = [
 function FrozenclawIcon() {
   return (
     <Image
-      src="/frozenclaw-logo.png.png"
+      src="/frozenclaw-logo.png"
       alt=""
       width={48}
       height={48}
