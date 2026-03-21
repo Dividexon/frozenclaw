@@ -5,7 +5,7 @@ const launchSignals = [
   "Eigene OpenClaw-Instanz pro Kunde",
   "Hosting in Deutschland",
   "Start mit eigenem Modell-Key",
-  "Managed später als begrenzter Pilot",
+  "Startanleitung und E-Mail-Support inklusive",
 ];
 
 const steps = [
@@ -13,19 +13,19 @@ const steps = [
     id: "01",
     title: "Plan auswählen",
     copy:
-      "Du wählst das passende Hosting-Modell und startest mit einer klaren, verständlichen Bestellstrecke.",
+      "Du bestellst deine gehostete Instanz über eine einfache Checkout-Strecke ohne unnötige Konfiguration vor dem Kauf.",
   },
   {
     id: "02",
     title: "Instanz wird bereitgestellt",
     copy:
-      "Frozenclaw legt deine private OpenClaw-Instanz auf deutscher Infrastruktur an und richtet den Zugriff für dich ein.",
+      "Frozenclaw richtet deine private OpenClaw-Instanz auf deutscher Infrastruktur ein und stellt den Zugang für dich bereit.",
   },
   {
     id: "03",
     title: "Konfigurieren und nutzen",
     copy:
-      "Zum Start verbindest du deinen eigenen Modell-Key. Später kann zusätzlich ein Managed-Modell mit von uns gestelltem Key dazukommen.",
+      "Du hinterlegst deinen eigenen Modell-Key, arbeitest die Startanleitung durch und kannst deinen Agenten direkt nutzen.",
   },
 ];
 
@@ -34,19 +34,19 @@ const features = [
     kicker: "Eigene Instanz",
     title: "Du bekommst eine private OpenClaw-Instanz.",
     copy:
-      "Kein Shared Frontend, keine unklare Multi-Tenant-Logik. Jede Bestellung bekommt ihren eigenen Laufzeitkontext.",
+      "Jede Bestellung bekommt ihren eigenen Laufzeitkontext mit eigenem Zugang und eigener Betriebsumgebung.",
   },
   {
-    kicker: "Einfacher Betrieb",
-    title: "Du musst den Server nicht selbst betreiben.",
+    kicker: "Weniger Infrastruktur",
+    title: "Du musst den Server nicht selbst aufsetzen.",
     copy:
-      "Frozenclaw nimmt dir Hosting, Provisionierung und Erreichbarkeit ab, damit du dich auf den Agenten statt auf Infrastruktur konzentrieren kannst.",
+      "Frozenclaw übernimmt Hosting, Bereitstellung und Erreichbarkeit, damit du dich auf den Einsatz des Agenten konzentrieren kannst.",
   },
   {
-    kicker: "Sauberer Ausbau",
-    title: "Der Start ist bewusst schmal und verständlich.",
+    kicker: "Klarer Einstieg",
+    title: "Der Startplan ist bewusst einfach gehalten.",
     copy:
-      "Öffentlich startet zuerst das Hosting mit eigenem Modell-Key. Managed wird erst geöffnet, wenn Verbrauch und Limits sauber messbar sind.",
+      "Zum Start ist das Hosting mit eigenem Modell-Key das Standardangebot. So bleibt Nutzen, Preis und Betrieb für beide Seiten klar.",
   },
 ];
 
@@ -54,9 +54,9 @@ const byokIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "Eigener API-Key des Kunden",
   "Hosting in Deutschland",
-  "Direkter Support während der Beta",
-  "Schnelle Provisionierung",
-  "Standardangebot zum Start",
+  "Startanleitung für die ersten Schritte",
+  "E-Mail-Support während der Beta",
+  "Öffentliches Standardangebot zum Start",
 ];
 
 const managedIncludes = [
@@ -69,29 +69,29 @@ const managedIncludes = [
 ];
 
 const specRows = [
+  ["Zielgruppe", "Founder, Power-User, kleine Teams"],
   ["Region", "Deutschland"],
-  ["Zugang", "app.frozenclaw.com/agent/..."],
-  ["Modus", "OpenClaw Hosting Beta"],
-  ["Provisionierung", "Automatisch, mit manuellem Fallback"],
-  ["Öffentlich", "Hosting mit eigenem Modell-Key"],
-  ["Pilot", "Managed mit 5 Slots"],
+  ["Zugang", "Eigene URL pro Instanz"],
+  ["Modell-Key", "Zum Start vom Kunden gestellt"],
+  ["Support", "E-Mail + Startanleitung"],
+  ["Managed", "Später als Pilot mit 5 Slots"],
 ];
 
 const faqs = [
   {
     question: "Muss ich meinen eigenen API-Key mitbringen?",
     answer:
-      "Zum öffentlichen Start ja. Das Hauptangebot ist Hosting mit eigenem Modell-Key. So bleiben Nutzung und Modellkosten zunächst klar getrennt.",
+      "Ja. Das öffentliche Startangebot ist Hosting mit eigenem Modell-Key. Dadurch bleiben Nutzung, Modellkosten und Verantwortung am Anfang klar getrennt.",
   },
   {
     question: "Was bedeutet Managed konkret?",
     answer:
-      "Wir stellen den Modell-Key, aber nur in einem kleinen Pilot mit festen Plätzen und klaren Nutzungsgrenzen. Dieser Modus wird erst geöffnet, wenn wir den Verbrauch pro Kunde technisch sauber messen können.",
+      "Später kann es einen begrenzten Plan mit von uns gestelltem Modell-Key geben. Dieser wird aber erst geöffnet, wenn wir Verbrauch und Limits pro Kunde technisch sauber messen können.",
   },
   {
     question: "Brauche ich eigene Server oder Docker-Kenntnisse?",
     answer:
-      "Nein. Du musst keinen eigenen Server betreiben und keine Infrastruktur rund um die Uhr am Laufen halten.",
+      "Nein. Du musst keinen eigenen Server betreiben und keine Infrastruktur selbst rund um die Uhr am Laufen halten.",
   },
   {
     question: "Ist das schon ein komplett ausgereiftes SaaS?",
@@ -263,12 +263,12 @@ export default function Home() {
               </p>
               <h1 className="font-display text-6xl uppercase leading-[0.88] text-[var(--fc-text)] sm:text-7xl lg:text-[7.5rem]">
                 Dein eigener
-                <span className="block text-[var(--fc-accent)]">OpenClaw-Agent.</span>
+                <span className="block text-[var(--fc-accent)]">KI-Agent.</span>
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
                 Frozenclaw hostet deine private OpenClaw-Instanz auf deutscher Infrastruktur.
-                Du bekommst einen festen Zugang, eine schnelle Bereitstellung und musst den
-                Server nicht selbst betreiben.
+                Du bringst deinen eigenen Modell-Key mit, wir kümmern uns um Bereitstellung,
+                Erreichbarkeit und den technischen Betrieb der Instanz.
               </p>
             </div>
 
@@ -295,7 +295,7 @@ export default function Home() {
             <div className="vault-panel panel-cut">
               <div className="vault-topline">
                 <span>INSTANZSTATUS</span>
-                <span>BETA / BEREIT</span>
+                <span>GEHOSTET / AKTIV</span>
               </div>
 
               <div className="vault-core-wrap">
@@ -323,15 +323,15 @@ export default function Home() {
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="stat-block">
                   <span className="stat-label">Provisionierung</span>
-                  <strong className="stat-value">~5 min</strong>
+                  <strong className="stat-value">Schnell</strong>
                 </div>
                 <div className="stat-block">
                   <span className="stat-label">Standort</span>
                   <strong className="stat-value">Nur EU</strong>
                 </div>
                 <div className="stat-block">
-                  <span className="stat-label">Modus</span>
-                  <strong className="stat-value">Privat</strong>
+                  <span className="stat-label">Startmodell</span>
+                  <strong className="stat-value">Eigener Key</strong>
                 </div>
               </div>
             </div>
@@ -342,9 +342,10 @@ export default function Home() {
           <div className="data-strip">
             <span>OpenClaw Hosting</span>
             <span>Private Instanz</span>
-            <span>Bereitstellung in Minuten</span>
             <span>Hosting in Deutschland</span>
-            <span>Managed nur als Pilot</span>
+            <span>Eigener Modell-Key</span>
+            <span>Startanleitung inklusive</span>
+            <span>E-Mail-Support</span>
           </div>
         </section>
 
@@ -353,8 +354,8 @@ export default function Home() {
             <p className="section-kicker">Ablauf</p>
             <h2 className="section-title">So startet Frozenclaw.</h2>
             <p className="section-copy">
-              Die Seite soll in wenigen Sätzen erklären, was du bekommst, was es kostet und
-              wie du loslegst. Genau so ist der Ablauf aufgebaut.
+              Frozenclaw richtet sich an Founder, Power-User und kleine Teams, die ihren
+              eigenen Agenten nutzen möchten, ohne den Server selbst zu betreiben.
             </p>
           </div>
 
@@ -386,7 +387,7 @@ export default function Home() {
               <div className="mb-8 flex items-center justify-between gap-4 border-b border-[var(--fc-border)] pb-4">
                 <div>
                   <p className="text-sm uppercase tracking-[0.24em] text-[var(--fc-accent-soft)]">
-                    Produktversprechen
+                    Leistungsumfang
                   </p>
                   <h3 className="mt-2 font-display text-4xl uppercase text-[var(--fc-text)]">
                     Gehostetes OpenClaw
@@ -423,14 +424,14 @@ export default function Home() {
               </div>
 
               <div className="panel-cut fc-panel">
-                <p className="section-kicker">Startlogik</p>
+                <p className="section-kicker">Für wen das gedacht ist</p>
                 <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
-                  Erst das verständliche Angebot. Danach der teurere Ausbau.
+                  Für Nutzer, die einen Agenten wollen, aber keinen Server betreiben möchten.
                 </h3>
                 <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  Deshalb ist Hosting mit eigenem Modell-Key das öffentliche Standardangebot.
-                  Managed bleibt ein kleiner Pilot, bis Verbrauch und Limits technisch sauber
-                  gemessen werden können.
+                  Der Start richtet sich nicht an alle. Er richtet sich an Leute, die wissen,
+                  warum sie OpenClaw nutzen möchten, und den technischen Betrieb nicht selbst
+                  übernehmen wollen.
                 </p>
               </div>
             </div>
@@ -440,7 +441,7 @@ export default function Home() {
         <section id="preise" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
             <p className="section-kicker">Preise</p>
-            <h2 className="section-title">Ein Hauptangebot zum Start. Ein Managed-Pilot danach.</h2>
+            <h2 className="section-title">Das Startangebot ist bewusst klar aufgebaut.</h2>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
@@ -451,7 +452,7 @@ export default function Home() {
                     Jetzt buchbar
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Hosting mit eigenem Key
+                    Standardplan
                   </h3>
                 </div>
                 <div className="text-right">
@@ -490,7 +491,7 @@ export default function Home() {
                     Später im Pilot
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Hosting mit gestelltem Key
+                    Managed
                   </h3>
                 </div>
                 <div className="text-right">
@@ -535,11 +536,11 @@ export default function Home() {
             <div className="panel-cut fc-panel">
               <p className="section-kicker">Launch-Hinweis</p>
               <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
-                Der Start ist bewusst einfach gehalten.
+                Der Start konzentriert sich auf ein Angebot, das sofort verständlich ist.
               </h3>
               <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                Du sollst auf der Startseite sofort verstehen, welches Angebot heute verfügbar
-                ist. Deshalb steht das Hosting mit eigenem Modell-Key klar im Vordergrund.
+                Private Instanz, Hosting in Deutschland, eigener Modell-Key, Startanleitung und
+                Support per E-Mail. Mehr muss die erste Version nicht versprechen.
               </p>
             </div>
 
@@ -549,7 +550,7 @@ export default function Home() {
                 <li>01. Checkout erfasst die Bestellung.</li>
                 <li>02. Provisionierung legt deine Instanz an.</li>
                 <li>03. Du hinterlegst deinen eigenen Modell-Key.</li>
-                <li>04. Danach kannst du deine Instanz direkt nutzen.</li>
+                <li>04. Danach kannst du deine Instanz mit der Startanleitung direkt nutzen.</li>
               </ol>
             </div>
           </div>
@@ -584,8 +585,8 @@ export default function Home() {
               <p className="font-display text-3xl text-[var(--fc-text)]">Frozenclaw</p>
             </div>
             <p className="mt-2 max-w-xl text-xs leading-6 text-[var(--fc-text-muted)]">
-              Gehostetes OpenClaw aus Deutschland: private Instanz, schneller Start und ein
-              klarer Fokus auf das öffentliche Hauptangebot mit eigenem Modell-Key.
+              Gehostetes OpenClaw aus Deutschland für Founder, Power-User und kleine Teams, die
+              ihren eigenen Agenten nutzen möchten, ohne den Server selbst zu betreiben.
             </p>
           </div>
           <div className="flex flex-wrap gap-4 md:justify-end">

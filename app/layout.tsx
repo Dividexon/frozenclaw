@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://frozenclaw.com"),
   title: "Frozenclaw | Gehostetes OpenClaw aus Deutschland",
   description:
-    "Gehostetes OpenClaw aus Deutschland: eigene Instanz, schneller Start und Hosting mit eigenem Modell-Key als öffentliches Hauptangebot.",
+    "Eigene gehostete OpenClaw-Instanz aus Deutschland. Du bringst deinen Modell-Key mit, wir übernehmen Hosting, Bereitstellung und Betrieb.",
   openGraph: {
     title: "Frozenclaw",
     description:
-      "Gehostetes OpenClaw mit deutscher Infrastruktur, eigener Instanz und klarem Startangebot für Kunden mit eigenem Modell-Key.",
+      "Eigene gehostete OpenClaw-Instanz mit deutscher Infrastruktur. Modell-Key vom Kunden, Hosting und Betrieb durch Frozenclaw.",
     url: "https://frozenclaw.com",
     siteName: "Frozenclaw",
     type: "website",
