@@ -34,17 +34,20 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
   const [state, setState] = useState(initialState);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!apiKey.trim()) {
       setError("Bitte einen API-Key eintragen.");
+      setSuccess(null);
       return;
     }
 
     setIsSaving(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const response = await fetch(`/api/instances/${slug}/provider-key`, {
@@ -69,12 +72,16 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
         current
           ? {
               ...current,
+              instanceState: "ready",
               providerStatus: payload.providerStatus,
               agentUrl: payload.agentUrl,
             }
           : current
       );
       setApiKey("");
+      setSuccess(
+        "API-Key gespeichert. Deine Instanz wurde neu gestartet. Du kannst OpenClaw jetzt öffnen."
+      );
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -135,6 +142,11 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
           />
         </label>
 
+        {success ? (
+          <p className="rounded-none border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            {success}
+          </p>
+        ) : null}
         {error ? <p className="text-sm text-[var(--fc-accent)]">{error}</p> : null}
 
         <button type="submit" className="fc-button fc-button-primary" disabled={isSaving}>
