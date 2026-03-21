@@ -56,12 +56,14 @@ CONTAINER_NAME="frozenclaw-${SLUG}"
 CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
 CONFIG_DIR="${CUSTOMER_DIR}/config"
 WORKSPACE_DIR="${CUSTOMER_DIR}/workspace"
+AGENT_DIR="${CONFIG_DIR}/agents/main/agent"
 INSTANCE_ENV="${CUSTOMER_DIR}/instance.env"
 PROVIDER_ENV="${CONFIG_DIR}/.env"
 OPENCLAW_CONFIG_JSON="${CONFIG_DIR}/openclaw.json"
+AUTH_PROFILES_JSON="${AGENT_DIR}/auth-profiles.json"
 CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 
-mkdir -p "$CONFIG_DIR" "$WORKSPACE_DIR" /etc/caddy/customers.d
+mkdir -p "$CONFIG_DIR" "$WORKSPACE_DIR" "$AGENT_DIR" /etc/caddy/customers.d
 
 if ! docker image inspect "$OPENCLAW_IMAGE" >/dev/null 2>&1; then
   /opt/frozenclaw/app/scripts/server/install-openclaw-base.sh
@@ -97,6 +99,15 @@ cat > "$OPENCLAW_CONFIG_JSON" <<EOF
 }
 EOF
 
+if [[ ! -f "$AUTH_PROFILES_JSON" ]]; then
+  cat > "$AUTH_PROFILES_JSON" <<EOF
+{
+  "version": 1,
+  "profiles": {}
+}
+EOF
+fi
+
 cat > "$CADDY_SNIPPET" <<EOF
 handle /agent/$SLUG {
 	reverse_proxy 127.0.0.1:$PORT
@@ -108,8 +119,8 @@ handle_path /agent/$SLUG/* {
 EOF
 
 chown -R "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$CUSTOMER_DIR"
-chmod 750 "$CUSTOMER_DIR" "$CONFIG_DIR" "$WORKSPACE_DIR"
-chmod 640 "$INSTANCE_ENV" "$PROVIDER_ENV" "$OPENCLAW_CONFIG_JSON"
+chmod 750 "$CUSTOMER_DIR" "$CONFIG_DIR" "$WORKSPACE_DIR" "${CONFIG_DIR}/agents" "${CONFIG_DIR}/agents/main" "$AGENT_DIR"
+chmod 640 "$INSTANCE_ENV" "$PROVIDER_ENV" "$OPENCLAW_CONFIG_JSON" "$AUTH_PROFILES_JSON"
 
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
 

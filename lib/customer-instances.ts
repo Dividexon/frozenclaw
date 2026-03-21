@@ -18,6 +18,23 @@ const providerEnvMap: Record<ProviderId, string> = {
   gemini: "GEMINI_API_KEY",
 };
 
+const authStoreVersion = 1;
+
+type AuthProfileStore = {
+  version: number;
+  profiles: Record<
+    string,
+    {
+      type: "api_key";
+      provider: string;
+      key?: string;
+    }
+  >;
+  order?: Record<string, string[]>;
+  lastGood?: Record<string, string>;
+  usageStats?: Record<string, unknown>;
+};
+
 function parseEnv(content: string) {
   const values = new Map<string, string>();
 
@@ -53,6 +70,19 @@ async function readEnvFile(filePath: string) {
   }
 }
 
+async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
+  try {
+    const content = await fs.readFile(filePath, "utf8");
+    return JSON.parse(content) as T;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return fallback;
+    }
+
+    throw error;
+  }
+}
+
 export function getCustomerDir(slug: string) {
   return path.join(getAppConfig().customerRootDir, slug);
 }
@@ -73,34 +103,105 @@ export function getCustomerProviderEnvPath(slug: string) {
   return path.join(getCustomerConfigDir(slug), ".env");
 }
 
+export function getCustomerAgentDir(slug: string) {
+  return path.join(getCustomerConfigDir(slug), "agents", "main", "agent");
+}
+
+export function getCustomerAuthProfilesPath(slug: string) {
+  return path.join(getCustomerAgentDir(slug), "auth-profiles.json");
+}
+
 export async function ensureCustomerDirectories(slug: string) {
   await fs.mkdir(getCustomerDir(slug), { recursive: true });
   await fs.mkdir(getCustomerConfigDir(slug), { recursive: true });
   await fs.mkdir(getCustomerWorkspaceDir(slug), { recursive: true });
+  await fs.mkdir(getCustomerAgentDir(slug), { recursive: true });
+}
+
+function getDefaultProfileId(provider: ProviderId) {
+  return `${provider}:default`;
+}
+
+async function readAuthProfileStore(slug: string): Promise<AuthProfileStore> {
+  return readJsonFile<AuthProfileStore>(getCustomerAuthProfilesPath(slug), {
+    version: authStoreVersion,
+    profiles: {},
+  });
+}
+
+async function writeAuthProfileStore(slug: string, store: AuthProfileStore) {
+  const content = `${JSON.stringify(store, null, 2)}\n`;
+  await fs.writeFile(getCustomerAuthProfilesPath(slug), content, "utf8");
+}
+
+function hasProviderProfile(store: AuthProfileStore, provider: ProviderId) {
+  return Object.values(store.profiles).some(
+    (profile) => profile.provider === provider && profile.type === "api_key" && Boolean(profile.key),
+  );
+}
+
+async function migrateLegacyProviderEnvToAuthStore(slug: string) {
+  const envValues = await readEnvFile(getCustomerProviderEnvPath(slug));
+  const store = await readAuthProfileStore(slug);
+  let changed = false;
+
+  for (const provider of Object.keys(providerEnvMap) as ProviderId[]) {
+    const legacyKey = envValues.get(providerEnvMap[provider])?.trim();
+    const profileId = getDefaultProfileId(provider);
+
+    if (!legacyKey || store.profiles[profileId]?.key) {
+      continue;
+    }
+
+    store.profiles[profileId] = {
+      type: "api_key",
+      provider,
+      key: legacyKey,
+    };
+    changed = true;
+  }
+
+  if (changed) {
+    await writeAuthProfileStore(slug, store);
+  }
 }
 
 export async function readProviderStatus(slug: string): Promise<ProviderStatus> {
+  await ensureCustomerDirectories(slug);
+  await migrateLegacyProviderEnvToAuthStore(slug);
+
   const values = await readEnvFile(getCustomerProviderEnvPath(slug));
+  const authStore = await readAuthProfileStore(slug);
 
   return {
-    anthropic: Boolean(values.get(providerEnvMap.anthropic)),
-    openai: Boolean(values.get(providerEnvMap.openai)),
-    gemini: Boolean(values.get(providerEnvMap.gemini)),
+    anthropic:
+      hasProviderProfile(authStore, "anthropic") || Boolean(values.get(providerEnvMap.anthropic)),
+    openai: hasProviderProfile(authStore, "openai") || Boolean(values.get(providerEnvMap.openai)),
+    gemini: hasProviderProfile(authStore, "gemini") || Boolean(values.get(providerEnvMap.gemini)),
   };
 }
 
 export async function writeProviderKey(slug: string, provider: ProviderId, apiKey: string) {
   await ensureCustomerDirectories(slug);
 
-  const filePath = getCustomerProviderEnvPath(slug);
-  const current = await readEnvFile(filePath);
-  current.set(providerEnvMap[provider], apiKey.trim());
+  const trimmedApiKey = apiKey.trim();
+  const authStore = await readAuthProfileStore(slug);
+  authStore.profiles[getDefaultProfileId(provider)] = {
+    type: "api_key",
+    provider,
+    key: trimmedApiKey,
+  };
+  await writeAuthProfileStore(slug, authStore);
 
-  const content = `${Array.from(current.entries())
+  const providerEnvPath = getCustomerProviderEnvPath(slug);
+  const currentEnv = await readEnvFile(providerEnvPath);
+  currentEnv.set(providerEnvMap[provider], trimmedApiKey);
+
+  const envContent = `${Array.from(currentEnv.entries())
     .map(([key, value]) => `${key}=${value}`)
     .join("\n")}\n`;
 
-  await fs.writeFile(filePath, content, "utf8");
+  await fs.writeFile(providerEnvPath, envContent, "utf8");
 }
 
 export async function readInstanceMetadata(slug: string) {
