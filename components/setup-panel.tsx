@@ -28,6 +28,32 @@ type SaveResponse = {
   agentUrl: string | null;
 };
 
+const providerMeta = {
+  anthropic: {
+    label: "Anthropic",
+    placeholder: "sk-ant-...",
+    hint: "Anthropic-Keys beginnen in der Regel mit sk-ant-.",
+    models: [
+      "claude-opus-4-6",
+      "claude-sonnet-4-6",
+      "claude-sonnet-4-5",
+      "claude-haiku-3-5",
+    ],
+  },
+  openai: {
+    label: "OpenAI",
+    placeholder: "sk-...",
+    hint: "OpenAI-Keys beginnen in der Regel mit sk- oder sk-proj-.",
+    models: ["gpt-5.2", "gpt-5.1", "gpt-4.1", "gpt-4o"],
+  },
+  gemini: {
+    label: "Gemini",
+    placeholder: "AIza...",
+    hint: "Gemini schaltet die freigegebenen Gemini-Modelle in OpenClaw frei.",
+    models: ["gemini-3-pro", "gemini-3-flash", "gemini-2.5-pro", "gemini-2.5-flash"],
+  },
+} as const;
+
 export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
   const [provider, setProvider] = useState<"anthropic" | "openai" | "gemini">("anthropic");
   const [apiKey, setApiKey] = useState("");
@@ -36,6 +62,10 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const activeProviders = (Object.keys(providerMeta) as Array<keyof typeof providerMeta>).filter(
+    (providerKey) => Boolean(state?.providerStatus[providerKey]),
+  );
+  const selectedProviderMeta = providerMeta[provider];
 
   async function copyGatewayToken() {
     try {
@@ -106,7 +136,7 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
 
   return (
     <div className="mt-8 space-y-8">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="signal-row">
           <span className="signal-index">+</span>
           <span>{state ? `Instanzstatus: ${state.instanceState}` : "Status wird geladen"}</span>
@@ -114,11 +144,71 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
         <div className="signal-row">
           <span className="signal-index">+</span>
           <span>
-            {state?.providerStatus.anthropic
-              ? "Anthropic-Key vorhanden"
-              : "Noch kein Anthropic-Key hinterlegt"}
+            {activeProviders.length > 0
+              ? `${activeProviders.length} Provider aktiv`
+              : "Noch kein Provider aktiv"}
           </span>
         </div>
+        <div className="signal-row">
+          <span className="signal-index">+</span>
+          <span>
+            {activeProviders.length > 1
+              ? "Multi-Provider-Modus aktiv"
+              : "Ein Provider aktiv"}
+          </span>
+        </div>
+        <div className="signal-row">
+          <span className="signal-index">+</span>
+          <span>
+            {activeProviders.length > 0
+              ? `${activeProviders
+                  .map((providerKey) => providerMeta[providerKey].label)
+                  .join(", ")}`
+              : "Modelle werden nach dem ersten Key freigeschaltet"}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {(Object.keys(providerMeta) as Array<keyof typeof providerMeta>).map((providerKey) => {
+          const meta = providerMeta[providerKey];
+          const isActive = Boolean(state?.providerStatus[providerKey]);
+
+          return (
+            <article
+              key={providerKey}
+              className={`border px-5 py-5 ${
+                isActive
+                  ? "border-emerald-500/40 bg-emerald-500/10"
+                  : "border-[var(--fc-border)] bg-black/20"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+                  {meta.label}
+                </p>
+                <span
+                  className={`text-xs uppercase tracking-[0.18em] ${
+                    isActive ? "text-emerald-200" : "text-[var(--fc-text-muted)]"
+                  }`}
+                >
+                  {isActive ? "Aktiv" : "Nicht hinterlegt"}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">{meta.hint}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {meta.models.map((model) => (
+                  <span
+                    key={model}
+                    className="border border-[var(--fc-border)] bg-black/30 px-3 py-1 text-xs text-[var(--fc-text-muted)]"
+                  >
+                    {model}
+                  </span>
+                ))}
+              </div>
+            </article>
+          );
+        })}
       </div>
 
       <form className="grid gap-4" onSubmit={handleSubmit}>
@@ -148,12 +238,11 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
             className="rounded-none border border-[var(--fc-border)] bg-black/30 px-4 py-3 text-[var(--fc-text)]"
             value={apiKey}
             onChange={(event) => setApiKey(event.target.value)}
-            placeholder="sk-ant-..."
+            placeholder={selectedProviderMeta.placeholder}
             autoComplete="off"
           />
           <span className="text-xs text-[var(--fc-text-muted)]">
-            Für Anthropic bitte den echten Schlüssel einfügen, der mit <code>sk-ant-</code>{" "}
-            beginnt. Keine URL und keinen Fehlertext.
+            {selectedProviderMeta.hint} Keine URL und keinen Fehlertext einfügen.
           </span>
         </label>
 
@@ -168,6 +257,45 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
           {isSaving ? "Wird gespeichert..." : "API-Key speichern und Instanz neu starten"}
         </button>
       </form>
+
+      <div className="rounded-none border border-[var(--fc-border)] bg-black/20 p-5">
+        <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+          Aktive Provider und Modelle
+        </p>
+        <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
+          Hinterlegte Provider bleiben parallel aktiv. In OpenClaw kannst du danach zwischen den
+          freigeschalteten Modellen wechseln, ohne den Schlüssel jedes Mal neu einzutragen.
+        </p>
+        {activeProviders.length > 0 ? (
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {activeProviders.map((providerKey) => (
+              <div
+                key={providerKey}
+                className="border border-[var(--fc-border)] bg-black/30 px-4 py-4"
+              >
+                <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text)]">
+                  {providerMeta[providerKey].label}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {providerMeta[providerKey].models.map((model) => (
+                    <span
+                      key={model}
+                      className="border border-[var(--fc-border)] bg-black/30 px-3 py-1 text-xs text-[var(--fc-text-muted)]"
+                    >
+                      {model}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-[var(--fc-text-muted)]">
+            Noch kein Provider aktiv. Hinterlege zuerst einen API-Key, damit OpenClaw passende
+            Modelle freischalten kann.
+          </p>
+        )}
+      </div>
 
       <div className="rounded-none border border-[var(--fc-border)] bg-black/20 p-5">
         <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
