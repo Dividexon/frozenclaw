@@ -10,9 +10,15 @@ mkdir -p "$(dirname "$OPENCLAW_REPO_DIR")"
 if [[ ! -d "$OPENCLAW_REPO_DIR/.git" ]]; then
   git clone --depth 1 --branch "$OPENCLAW_GIT_REF" https://github.com/openclaw/openclaw.git "$OPENCLAW_REPO_DIR"
 else
-  git -C "$OPENCLAW_REPO_DIR" fetch --depth 1 origin "$OPENCLAW_GIT_REF"
-  git -C "$OPENCLAW_REPO_DIR" checkout "$OPENCLAW_GIT_REF"
-  git -C "$OPENCLAW_REPO_DIR" reset --hard "origin/$OPENCLAW_GIT_REF"
+  git -C "$OPENCLAW_REPO_DIR" fetch --depth 1 origin "$OPENCLAW_GIT_REF" || true
+  git -C "$OPENCLAW_REPO_DIR" fetch --tags --depth 1 origin
+
+  if git -C "$OPENCLAW_REPO_DIR" rev-parse -q --verify "refs/tags/$OPENCLAW_GIT_REF" >/dev/null; then
+    git -C "$OPENCLAW_REPO_DIR" checkout -f "refs/tags/$OPENCLAW_GIT_REF"
+  else
+    git -C "$OPENCLAW_REPO_DIR" checkout "$OPENCLAW_GIT_REF"
+    git -C "$OPENCLAW_REPO_DIR" reset --hard "origin/$OPENCLAW_GIT_REF"
+  fi
 fi
 
 DOCKER_BUILDKIT=1 docker build -t "$OPENCLAW_IMAGE" "$OPENCLAW_REPO_DIR"
