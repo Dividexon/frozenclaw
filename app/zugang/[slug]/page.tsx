@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SetupPanel } from "@/components/setup-panel";
 
 type AccessPageProps = {
@@ -53,6 +54,15 @@ export default async function ZugangPage({ params, searchParams }: AccessPagePro
           Für den BYOK-Start hinterlegst du hier deinen eigenen API-Key. Danach wird deine
           OpenClaw-Instanz neu gestartet und ist direkt nutzbar.
         </p>
+
+        <div className="mt-8 flex flex-wrap gap-4">
+          <Link href="/" className="fc-button fc-button-secondary">
+            Zur Startseite
+          </Link>
+          <Link href="/anmelden" className="fc-button fc-button-secondary">
+            Neuer Login-Link
+          </Link>
+        </div>
 
         {!token ? (
           <p className="mt-8 text-base leading-8 text-[var(--fc-accent)]">
