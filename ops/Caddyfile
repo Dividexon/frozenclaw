@@ -1,9 +1,8 @@
 {
-	auto_https off
 	email {$ACME_EMAIL:admin@frozenclaw.com}
 }
 
-http://{$SITE_ADDRESS:46.225.143.215} {
+(frozenclaw_app) {
 	encode zstd gzip
 
 	header {
@@ -17,4 +16,16 @@ http://{$SITE_ADDRESS:46.225.143.215} {
 	handle {
 		reverse_proxy 127.0.0.1:3000
 	}
+}
+
+http://{$IP_SITE_ADDRESS:46.225.143.215} {
+	import frozenclaw_app
+}
+
+{$CANONICAL_HOST:frozenclaw.com} {
+	import frozenclaw_app
+}
+
+www.{$CANONICAL_HOST:frozenclaw.com} {
+	redir https://{$CANONICAL_HOST:frozenclaw.com}{uri} permanent
 }
