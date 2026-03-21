@@ -2,7 +2,7 @@
 	email {$ACME_EMAIL:admin@frozenclaw.com}
 }
 
-{$SITE_ADDRESS:46.225.143.215} {
+http://{$SITE_ADDRESS:46.225.143.215} {
 	encode zstd gzip
 
 	header {

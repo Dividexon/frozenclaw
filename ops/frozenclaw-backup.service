@@ -1,0 +1,8 @@
+[Unit]
+Description=Frozenclaw lokales Backup
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/opt/frozenclaw/app/scripts/server/backup-local.sh
