@@ -1,15 +1,15 @@
 export const legalProfile = {
-  operatorName: "",
-  addressLine1: "",
-  postalCode: "",
-  city: "",
+  operatorName: "Marius Schumacher",
+  addressLine1: "Zum Bahnhof 38",
+  postalCode: "28876",
+  city: "Oyten",
   country: "Deutschland",
-  email: "",
+  email: "Frozenclaw9@gmail.com",
   phone: "",
   vatId: "",
-  responsiblePerson: "",
+  responsiblePerson: "Marius Schumacher",
   betaTermsEffectiveDate: "21.03.2026",
-  privacyContact: "",
+  privacyContact: "Frozenclaw9@gmail.com",
 } as const;
 
 export function missingLegalFields() {
