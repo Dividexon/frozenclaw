@@ -151,6 +151,10 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
             placeholder="sk-ant-..."
             autoComplete="off"
           />
+          <span className="text-xs text-[var(--fc-text-muted)]">
+            Für Anthropic bitte den echten Schlüssel einfügen, der mit <code>sk-ant-</code>{" "}
+            beginnt. Keine URL und keinen Fehlertext.
+          </span>
         </label>
 
         {success ? (

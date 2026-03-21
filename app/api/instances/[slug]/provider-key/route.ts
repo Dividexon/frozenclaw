@@ -25,6 +25,44 @@ function isProviderId(value: string | undefined): value is ProviderId {
   return value === "anthropic" || value === "openai" || value === "gemini";
 }
 
+function validateProviderKey(provider: ProviderId, apiKey: string) {
+  const trimmed = apiKey.trim();
+
+  if (!trimmed) {
+    return "Bitte einen API-Key eintragen.";
+  }
+
+  if (/\s/.test(trimmed)) {
+    return "Der API-Key darf keine Leerzeichen oder Zeilenumbrüche enthalten.";
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return "Bitte die echte API-Key-Zeichenfolge eintragen, nicht eine URL.";
+  }
+
+  if (
+    trimmed.includes("Agent failed before reply") ||
+    trimmed.includes("No API key found for provider") ||
+    trimmed.includes("Logs: openclaw logs --follow")
+  ) {
+    return "Es wurde ein Fehlertext statt eines echten API-Keys eingefügt.";
+  }
+
+  if (provider === "anthropic" && !trimmed.startsWith("sk-ant-")) {
+    return "Anthropic-Keys beginnen in der Regel mit `sk-ant-`.";
+  }
+
+  if (provider === "openai" && !trimmed.startsWith("sk-")) {
+    return "OpenAI-Keys beginnen in der Regel mit `sk-`.";
+  }
+
+  if (provider === "gemini" && trimmed.length < 20) {
+    return "Der Gemini-Key sieht unvollständig aus.";
+  }
+
+  return null;
+}
+
 export async function POST(request: Request, context: RouteContext) {
   startRuntimeRecovery();
 
@@ -35,6 +73,12 @@ export async function POST(request: Request, context: RouteContext) {
 
   if (!token || !apiKey || !isProviderId(body.provider)) {
     return NextResponse.json({ error: "Provider, Token oder API-Key fehlt." }, { status: 400 });
+  }
+
+  const validationError = validateProviderKey(body.provider, apiKey);
+
+  if (validationError) {
+    return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
   const order = getDb()
