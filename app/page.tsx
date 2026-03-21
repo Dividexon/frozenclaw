@@ -5,7 +5,7 @@ const launchSignals = [
   "Eigene OpenClaw-Instanz pro Kunde",
   "Hosting in Deutschland",
   "Start mit eigenem Modell-Key",
-  "Startanleitung und E-Mail-Support inklusive",
+  "Bereitstellung in der Regel am selben Tag",
 ];
 
 const steps = [
@@ -56,6 +56,7 @@ const byokIncludes = [
   "Hosting in Deutschland",
   "Startanleitung für die ersten Schritte",
   "E-Mail-Support während der Beta",
+  "Bereitstellung in der Regel am selben Tag",
   "Öffentliches Standardangebot zum Start",
 ];
 
@@ -68,12 +69,36 @@ const managedIncludes = [
   "Freischaltung erst nach aktivem Verbrauchstracking",
 ];
 
+const useCases = [
+  {
+    title: "Recherche",
+    copy:
+      "Für Nutzer, die Themen, Märkte oder Unternehmen mit einem eigenen Agenten strukturierter aufarbeiten möchten.",
+  },
+  {
+    title: "Content und Ideen",
+    copy:
+      "Für Entwürfe, Zusammenfassungen und wiederkehrende kreative Arbeitsabläufe auf Basis deiner eigenen Instanz.",
+  },
+  {
+    title: "Interne Workflows",
+    copy:
+      "Für kleine Teams, die Wissen, Prozesse oder wiederkehrende Aufgaben mit einem Agenten unterstützen möchten.",
+  },
+  {
+    title: "Geplante Routinen",
+    copy:
+      "Für Aufgaben, die regelmäßig laufen sollen und nicht jedes Mal manuell angestoßen werden müssen.",
+  },
+];
+
 const specRows = [
   ["Zielgruppe", "Founder, Power-User, kleine Teams"],
   ["Region", "Deutschland"],
   ["Zugang", "Eigene URL pro Instanz"],
   ["Modell-Key", "Zum Start vom Kunden gestellt"],
   ["Support", "E-Mail + Startanleitung"],
+  ["Bereitstellung", "In der Regel am selben Tag"],
   ["Managed", "Später als Pilot mit 5 Slots"],
 ];
 
@@ -268,7 +293,8 @@ export default function Home() {
               <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
                 Frozenclaw hostet deine private OpenClaw-Instanz auf deutscher Infrastruktur.
                 Du bringst deinen eigenen Modell-Key mit, wir kümmern uns um Bereitstellung,
-                Erreichbarkeit und den technischen Betrieb der Instanz.
+                Erreichbarkeit und den technischen Betrieb der Instanz. Dazu bekommst du eine
+                Startanleitung und Support per E-Mail.
               </p>
             </div>
 
@@ -323,7 +349,7 @@ export default function Home() {
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="stat-block">
                   <span className="stat-label">Provisionierung</span>
-                  <strong className="stat-value">Schnell</strong>
+                  <strong className="stat-value">Gleicher Tag</strong>
                 </div>
                 <div className="stat-block">
                   <span className="stat-label">Standort</span>
@@ -344,8 +370,8 @@ export default function Home() {
             <span>Private Instanz</span>
             <span>Hosting in Deutschland</span>
             <span>Eigener Modell-Key</span>
-            <span>Startanleitung inklusive</span>
             <span>E-Mail-Support</span>
+            <span>Startanleitung inklusive</span>
           </div>
         </section>
 
@@ -435,6 +461,28 @@ export default function Home() {
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="mx-auto w-[94%] max-w-7xl py-14">
+          <div className="section-head">
+            <p className="section-kicker">Einsatzbereiche</p>
+            <h2 className="section-title">Wofür Frozenclaw am Anfang gedacht ist.</h2>
+            <p className="section-copy">
+              Nicht für jeden denkbaren KI-Anwendungsfall, sondern für klare, wiederkehrende
+              Aufgaben, bei denen eine eigene gehostete Instanz sinnvoll ist.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-5 lg:grid-cols-2">
+            {useCases.map((item) => (
+              <article key={item.title} className="panel-cut fc-panel">
+                <p className="section-kicker">{item.title}</p>
+                <p className="mt-4 text-base leading-8 text-[var(--fc-text-muted)]">
+                  {item.copy}
+                </p>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -540,7 +588,8 @@ export default function Home() {
               </h3>
               <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
                 Private Instanz, Hosting in Deutschland, eigener Modell-Key, Startanleitung und
-                Support per E-Mail. Mehr muss die erste Version nicht versprechen.
+                Support per E-Mail. Bereitstellung in der Regel am selben Tag. Mehr muss die
+                erste Version nicht versprechen.
               </p>
             </div>
 
@@ -549,8 +598,9 @@ export default function Home() {
               <ol className="mt-4 space-y-4 text-base text-[var(--fc-text-muted)]">
                 <li>01. Checkout erfasst die Bestellung.</li>
                 <li>02. Provisionierung legt deine Instanz an.</li>
-                <li>03. Du hinterlegst deinen eigenen Modell-Key.</li>
-                <li>04. Danach kannst du deine Instanz mit der Startanleitung direkt nutzen.</li>
+                <li>03. Du erhältst Zugang und Startanleitung.</li>
+                <li>04. Du hinterlegst deinen eigenen Modell-Key.</li>
+                <li>05. Danach kannst du deine Instanz direkt nutzen.</li>
               </ol>
             </div>
           </div>
@@ -590,9 +640,9 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-wrap gap-4 md:justify-end">
-              <Link href="/impressum" className="transition hover:text-[var(--fc-text)]">
-                Impressum
-              </Link>
+            <Link href="/impressum" className="transition hover:text-[var(--fc-text)]">
+              Impressum
+            </Link>
             <Link href="/datenschutz" className="transition hover:text-[var(--fc-text)]">
               Datenschutz
             </Link>
