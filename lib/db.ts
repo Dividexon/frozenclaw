@@ -55,9 +55,21 @@ function migrate(db: DbInstance) {
       FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS login_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      email TEXT NOT NULL,
+      token_hash TEXT NOT NULL UNIQUE,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE
+    );
+
     CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status);
     CREATE INDEX IF NOT EXISTS idx_orders_instance_state ON orders(instance_state);
     CREATE INDEX IF NOT EXISTS idx_usage_events_order_id ON usage_events(order_id);
+    CREATE INDEX IF NOT EXISTS idx_login_tokens_order_id ON login_tokens(order_id);
+    CREATE INDEX IF NOT EXISTS idx_login_tokens_email ON login_tokens(email);
   `);
 }
 

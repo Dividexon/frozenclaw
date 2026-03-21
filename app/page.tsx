@@ -269,10 +269,18 @@ export default function Home() {
             <a href="#faq" className="transition hover:text-[var(--fc-text)]">
               Fragen
             </a>
+            <Link href="/anmelden" className="transition hover:text-[var(--fc-text)]">
+              Anmelden
+            </Link>
           </nav>
-          <a href="#preise" className="fc-button fc-button-secondary hidden md:inline-flex">
-            Zugang sichern
-          </a>
+          <div className="hidden items-center gap-3 md:flex">
+            <Link href="/anmelden" className="fc-button fc-button-secondary">
+              Anmelden
+            </Link>
+            <a href="#preise" className="fc-button fc-button-primary">
+              Zugang sichern
+            </a>
+          </div>
         </header>
 
         <section className="mx-auto grid min-h-[calc(100vh-88px)] w-[94%] max-w-7xl items-center gap-12 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
@@ -302,6 +310,9 @@ export default function Home() {
               <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
                 Jetzt starten
               </CheckoutButton>
+              <Link href="/anmelden" className="fc-button fc-button-secondary">
+                Anmelden
+              </Link>
               <a href="#ueberblick" className="fc-button fc-button-secondary">
                 System ansehen
               </a>

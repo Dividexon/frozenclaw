@@ -16,6 +16,11 @@ type FailedMailInput = {
   message: string;
 };
 
+type LoginLinkMailInput = {
+  to: string;
+  loginUrl: string;
+};
+
 declare global {
   var __frozenclawMailer:
     | ReturnType<typeof nodemailer.createTransport>
@@ -137,5 +142,31 @@ export async function sendTestMail(to: string) {
     subject: "Frozenclaw Mail-Test",
     text: "Der SMTP-Versand für Frozenclaw funktioniert.",
     html: "<p>Der SMTP-Versand fÃ¼r Frozenclaw funktioniert.</p>",
+  });
+}
+
+export async function sendLoginLinkMail(input: LoginLinkMailInput) {
+  const config = getAppConfig();
+
+  await getMailer().sendMail({
+    from: config.mailFrom!,
+    to: input.to,
+    replyTo: config.supportEmail ?? config.mailFrom!,
+    subject: "Dein Frozenclaw-Zugangslink",
+    text: [
+      "Hier ist dein Zugangslink zu Frozenclaw.",
+      "",
+      input.loginUrl,
+      "",
+      "Der Link ist für 30 Minuten gültig.",
+    ].join("\n"),
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111">
+        <h1 style="font-size:24px;margin-bottom:16px">Dein Frozenclaw-Zugangslink</h1>
+        <p>Hier ist dein Zugangslink zu Frozenclaw.</p>
+        <p><a href="${escapeHtml(input.loginUrl)}">Jetzt anmelden</a></p>
+        <p>Der Link ist fÃ¼r 30 Minuten gÃ¼ltig.</p>
+      </div>
+    `,
   });
 }

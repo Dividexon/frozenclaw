@@ -2,8 +2,12 @@
 set -euo pipefail
 
 if [[ -f /etc/frozenclaw/frozenclaw.env ]]; then
-  # shellcheck disable=SC1091
-  source /etc/frozenclaw/frozenclaw.env
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ -z "$line" || "${line:0:1}" == "#" || "$line" != *=* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    export "$key=$value"
+  done < /etc/frozenclaw/frozenclaw.env
 fi
 
 OPENCLAW_REPO_DIR="${OPENCLAW_REPO_DIR:-/opt/frozenclaw/vendor/openclaw}"
