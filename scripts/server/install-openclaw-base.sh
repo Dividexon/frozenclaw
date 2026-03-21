@@ -15,4 +15,4 @@ else
   git -C "$OPENCLAW_REPO_DIR" reset --hard "origin/$OPENCLAW_GIT_REF"
 fi
 
-docker build -t "$OPENCLAW_IMAGE" "$OPENCLAW_REPO_DIR"
+DOCKER_BUILDKIT=1 docker build -t "$OPENCLAW_IMAGE" "$OPENCLAW_REPO_DIR"
