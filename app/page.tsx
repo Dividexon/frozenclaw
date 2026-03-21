@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CheckoutButton } from "@/components/checkout-button";
 
 const launchSignals = [
@@ -587,15 +588,15 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-wrap gap-4 md:justify-end">
-            <a href="#" className="transition hover:text-[var(--fc-text)]">
-              Impressum
-            </a>
-            <a href="#" className="transition hover:text-[var(--fc-text)]">
+              <Link href="/impressum" className="transition hover:text-[var(--fc-text)]">
+                Impressum
+              </Link>
+            <Link href="/datenschutz" className="transition hover:text-[var(--fc-text)]">
               Datenschutz
-            </a>
-            <a href="#" className="transition hover:text-[var(--fc-text)]">
+            </Link>
+            <Link href="/beta-bedingungen" className="transition hover:text-[var(--fc-text)]">
               Beta-Bedingungen
-            </a>
+            </Link>
           </div>
         </footer>
       </div>
