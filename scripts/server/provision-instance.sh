@@ -94,7 +94,7 @@ docker run -d \
   -v "$CONFIG_DIR:/home/node/.openclaw" \
   -v "$WORKSPACE_DIR:/home/node/.openclaw/workspace" \
   "$OPENCLAW_IMAGE" \
-  node dist/index.js gateway --bind lan --port 18789
+  node dist/index.js gateway --bind lan --port 18789 --allow-unconfigured
 
 caddy validate --config /etc/caddy/Caddyfile
 systemctl reload caddy
