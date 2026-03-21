@@ -25,7 +25,3 @@ http://{$IP_SITE_ADDRESS:46.225.143.215} {
 {$CANONICAL_HOST:frozenclaw.com} {
 	import frozenclaw_app
 }
-
-www.{$CANONICAL_HOST:frozenclaw.com} {
-	redir https://{$CANONICAL_HOST:frozenclaw.com}{uri} permanent
-}
