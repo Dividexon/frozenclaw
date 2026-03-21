@@ -92,50 +92,61 @@ function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
   const glowId = `${idPrefix}-glow`;
   const iceId = `${idPrefix}-ice`;
   const edgeId = `${idPrefix}-edge`;
+  const darkId = `${idPrefix}-dark`;
 
   return (
     <svg
-      viewBox="0 0 96 96"
-      className="h-11 w-11 shrink-0"
+      viewBox="0 0 120 120"
+      className="h-12 w-12 shrink-0"
       aria-hidden="true"
       role="presentation"
     >
       <defs>
         <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#69d8ff" stopOpacity="0.95" />
-          <stop offset="55%" stopColor="#1d86ff" stopOpacity="0.28" />
-          <stop offset="100%" stopColor="#0a1020" stopOpacity="0" />
+          <stop offset="0%" stopColor="#b9f8ff" stopOpacity="0.95" />
+          <stop offset="45%" stopColor="#37b3ff" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#061325" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id={iceId} x1="18%" y1="10%" x2="82%" y2="86%">
-          <stop offset="0%" stopColor="#f6fdff" />
-          <stop offset="35%" stopColor="#7fdcff" />
-          <stop offset="70%" stopColor="#4b8cff" />
-          <stop offset="100%" stopColor="#163f8f" />
+        <linearGradient id={iceId} x1="12%" y1="8%" x2="88%" y2="92%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="24%" stopColor="#d7fbff" />
+          <stop offset="52%" stopColor="#79deff" />
+          <stop offset="78%" stopColor="#468eff" />
+          <stop offset="100%" stopColor="#1a2c78" />
         </linearGradient>
         <linearGradient id={edgeId} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#8ce6ff" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#8ce6ff" stopOpacity="0.45" />
+        </linearGradient>
+        <linearGradient id={darkId} x1="20%" y1="0%" x2="80%" y2="100%">
+          <stop offset="0%" stopColor="#11244a" />
+          <stop offset="100%" stopColor="#071124" />
         </linearGradient>
         <filter id={`${idPrefix}-blur`} x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="4.5" />
+          <feGaussianBlur stdDeviation="6.5" />
         </filter>
       </defs>
 
       <circle
-        cx="48"
-        cy="48"
-        r="33"
+        cx="60"
+        cy="60"
+        r="40"
         fill={`url(#${glowId})`}
         filter={`url(#${idPrefix}-blur)`}
         opacity="0.9"
       />
 
       <path
-        d="M66 13c-9 1-18 5-25 12-9 9-13 20-12 31 1 10 6 18 14 24-6-1-12-3-17-7-10-8-15-18-15-30 0-15 8-27 21-35 9-6 21-8 34-6z"
+        d="M76 16c12 2 24 9 31 21 6 11 7 21 2 31-5 9-13 15-25 18 5-6 9-12 11-20 2-8 1-16-4-25-4-7-11-13-20-19 2-3 3-5 5-6z"
+        fill={`url(#${darkId})`}
+        opacity="0.5"
+      />
+      <path
+        d="M36 18c13-4 29-4 41 2 10 5 16 12 19 22 2 8 1 15-4 21-3 4-7 7-12 9-7 3-15 4-23 4 4-7 6-13 5-20-1-7-5-13-11-19-7-6-15-10-24-13 2-2 5-4 9-6z"
         fill={`url(#${iceId})`}
       />
       <path
-        d="M66 13c-9 1-18 5-25 12-9 9-13 20-12 31 1 10 6 18 14 24-6-1-12-3-17-7-10-8-15-18-15-30 0-15 8-27 21-35 9-6 21-8 34-6z"
+        d="M36 18c13-4 29-4 41 2 10 5 16 12 19 22 2 8 1 15-4 21-3 4-7 7-12 9-7 3-15 4-23 4 4-7 6-13 5-20-1-7-5-13-11-19-7-6-15-10-24-13 2-2 5-4 9-6z"
         fill="none"
         stroke={`url(#${edgeId})`}
         strokeWidth="2"
@@ -143,11 +154,11 @@ function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
       />
 
       <path
-        d="M70 18c9 7 14 16 15 27 1 13-4 24-14 33-8 8-18 12-31 13 9-5 17-11 22-19 6-8 9-17 9-27 0-9-3-18-8-27 2 0 5 0 7 0z"
+        d="M73 27c-8 2-15 6-21 12-6 6-8 13-6 20 2 5 5 8 11 11 5 2 13 4 23 4 11 0 19-2 25-7-4 11-12 20-23 26-11 6-23 7-35 3-11-3-19-10-24-20-4-10-4-20 0-31 4-11 11-19 22-25 9-5 19-6 28-4z"
         fill={`url(#${iceId})`}
       />
       <path
-        d="M70 18c9 7 14 16 15 27 1 13-4 24-14 33-8 8-18 12-31 13 9-5 17-11 22-19 6-8 9-17 9-27 0-9-3-18-8-27 2 0 5 0 7 0z"
+        d="M73 27c-8 2-15 6-21 12-6 6-8 13-6 20 2 5 5 8 11 11 5 2 13 4 23 4 11 0 19-2 25-7-4 11-12 20-23 26-11 6-23 7-35 3-11-3-19-10-24-20-4-10-4-20 0-31 4-11 11-19 22-25 9-5 19-6 28-4z"
         fill="none"
         stroke={`url(#${edgeId})`}
         strokeWidth="2"
@@ -155,25 +166,41 @@ function FrozenclawIcon({ idPrefix }: { idPrefix: string }) {
       />
 
       <path
-        d="M30 60c5 7 13 12 22 13-8 4-18 5-27 1 1-5 2-10 5-14z"
+        d="M23 77l11-8 2 13 10 8-13 2-5 12-5-11-14-1 10-8z"
+        fill={`url(#${iceId})`}
+        opacity="0.85"
+      />
+      <path
+        d="M88 18l7-9 3 11 11 5-11 2-4 10-4-10-10-2z"
         fill={`url(#${iceId})`}
         opacity="0.9"
       />
       <path
-        d="M57 20c4 3 7 8 8 13-7-2-15-2-22 0 3-6 8-10 14-13z"
+        d="M60 14l4-8 3 8 8 3-8 2-3 8-4-7-8-2z"
         fill={`url(#${iceId})`}
-        opacity="0.85"
+        opacity="0.9"
       />
 
       <path
-        d="M75 22l4-8 3 9 9 4-9 2-3 8-3-8-8-2z"
-        fill="#dffbff"
-        opacity="0.95"
+        d="M31 33c8 3 14 7 19 12"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.8"
       />
       <path
-        d="M18 60l4-7 2 8 8 3-8 2-2 8-4-7-8-3z"
-        fill="#c9f8ff"
+        d="M47 22c8 0 15 2 23 6"
+        stroke="#d8fdff"
+        strokeWidth="2"
+        strokeLinecap="round"
         opacity="0.75"
+      />
+      <path
+        d="M50 84c10 2 20 1 31-5"
+        stroke="#d8fdff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.8"
       />
     </svg>
   );
