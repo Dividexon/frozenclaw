@@ -3,15 +3,13 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
+import { getAppConfig } from "@/lib/env";
 
 type DbInstance = Database.Database;
 
 declare global {
   var __frozenclawDb: DbInstance | undefined;
 }
-
-const dataDir = path.join(process.cwd(), "data");
-const dbFile = path.join(dataDir, "frozenclaw.db");
 
 function migrate(db: DbInstance) {
   db.pragma("journal_mode = WAL");
@@ -65,6 +63,9 @@ function migrate(db: DbInstance) {
 
 export function getDb() {
   if (!global.__frozenclawDb) {
+    const dataDir = process.env.DATA_DIR ?? path.join(process.cwd(), "data");
+    const dbFile = path.join(dataDir, "frozenclaw.db");
+    getAppConfig();
     fs.mkdirSync(dataDir, { recursive: true });
     global.__frozenclawDb = new Database(dbFile);
     migrate(global.__frozenclawDb);
