@@ -97,7 +97,7 @@ EOF
 
 cat > "$CADDY_SNIPPET" <<EOF
 handle /agent/$SLUG {
-	redir /agent/$SLUG/ 308
+	reverse_proxy 127.0.0.1:$PORT
 }
 
 handle_path /agent/$SLUG/* {
