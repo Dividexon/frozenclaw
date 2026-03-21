@@ -35,6 +35,17 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function copyGatewayToken() {
+    try {
+      await navigator.clipboard.writeText(token);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -154,8 +165,40 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
         </button>
       </form>
 
+      <div className="rounded-none border border-[var(--fc-border)] bg-black/20 p-5">
+        <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+          OpenClaw-Verbindung
+        </p>
+        <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
+          OpenClaw verlangt beim ersten Browser-Zugriff den Gateway-Token manuell. Die
+          WebSocket-URL lässt du unverändert. Das Passwort-Feld bleibt leer.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3 border border-[var(--fc-border)] bg-black/30 px-4 py-3">
+          <code className="break-all text-sm text-[var(--fc-text)]">{token}</code>
+          <button
+            type="button"
+            className="fc-button fc-button-secondary"
+            onClick={copyGatewayToken}
+          >
+            {copied ? "Kopiert" : "Gateway-Token kopieren"}
+          </button>
+        </div>
+        <ol className="mt-4 space-y-2 text-sm leading-7 text-[var(--fc-text-muted)]">
+          <li>1. OpenClaw öffnen.</li>
+          <li>2. WebSocket-URL unverändert lassen.</li>
+          <li>3. Gateway-Token einfügen.</li>
+          <li>4. Passwort leer lassen.</li>
+          <li>5. Auf Verbinden klicken.</li>
+        </ol>
+      </div>
+
       {state?.agentUrl ? (
-        <a href={state.agentUrl} className="fc-button fc-button-secondary">
+        <a
+          href={state.agentUrl}
+          className="fc-button fc-button-secondary"
+          target="_blank"
+          rel="noreferrer"
+        >
           OpenClaw öffnen
         </a>
       ) : null}
