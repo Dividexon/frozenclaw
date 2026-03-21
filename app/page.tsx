@@ -1,470 +1,425 @@
-"use client";
+const launchSignals = [
+  "EU hosted in Germany",
+  "One private OpenClaw instance per customer",
+  "Provisioned in minutes, not days",
+  "Built for Beta launch, hardened before scale",
+];
 
-import { useEffect, useRef, useState } from "react";
-
-type CodeTab = "python" | "curl";
-
-type SchemaOption = "Auto" | "Pricing" | "Products" | "Custom";
-
-const fakeMarkdown = `# Example.com\n\n## Product Overview\n\n| Name | Price | Availability |\n|---|---:|---|\n| Polar Sensor X1 | $129 | In stock |\n| Frost Lens Pro | $89 | Limited |\n\n## Key Links\n- Docs: https://example.com/docs\n- API: https://example.com/api\n\n_Last scraped: 2026-03-05T11:34:00Z_`;
-const heroHeadline = "Grab any web data.\nFreeze it. Ship it.";
-
-const useCases = [
+const steps = [
   {
-    title: "Real Estate",
-    description:
-      "Monitor property portals, extract listings, track price changes",
+    id: "01",
+    title: "Reserve your slot",
+    copy:
+      "Join the Founding Member beta and secure a private hosted instance before the public rollout gets noisy.",
   },
   {
-    title: "Compliance",
-    description:
-      "Track regulatory updates from ADR, IMDG, government sources",
+    id: "02",
+    title: "We provision the gate",
+    copy:
+      "Frozenclaw deploys your own hosted OpenClaw environment on EU infrastructure with a dedicated access path.",
   },
   {
-    title: "E-Commerce",
-    description:
-      "Price monitoring, product data, competitor tracking",
-  },
-  {
-    title: "Research",
-    description:
-      "Extract structured data from any blog, paper, or documentation",
+    id: "03",
+    title: "Bring your model key",
+    copy:
+      "You connect your provider key, tune the agent, and keep it running without local setup or home-lab babysitting.",
   },
 ];
 
-const pricing = [
+const features = [
   {
-    tier: "Free",
-    pages: "100 pages/month",
-    price: "$0",
-    cta: "Start building",
-    features: ["100 pages/month", "API access", "Community support"],
-    featured: false,
+    kicker: "Private Runtime",
+    title: "Your own agent, not a shared toy box.",
+    copy:
+      "Each customer gets a separate hosted instance with its own route, token, and operational state.",
   },
   {
-    tier: "Developer",
-    pages: "5,000 pages/month",
-    price: "$29/month",
-    cta: "Most Popular",
-    features: [
-      "5k pages/month",
-      "Priority scraping",
-      "Custom schemas",
-      "Email support",
-    ],
-    featured: true,
+    kicker: "Industrial Simplicity",
+    title: "No local setup. No Docker spelunking.",
+    copy:
+      "The value proposition is brutal in the best way: pay, get provisioned, configure your agent, keep working.",
   },
   {
-    tier: "Business",
-    pages: "50,000 pages/month",
-    price: "$149/month",
-    cta: "Scale",
-    features: ["50k pages", "Parallel batch", "Custom extractors", "SLA"],
-    featured: false,
+    kicker: "Operator Visibility",
+    title: "Built for controlled rollout, not fake scale theater.",
+    copy:
+      "The launch path is optimized for real customers, manual fallback, and sane operational recovery instead of hype architecture.",
+  },
+];
+
+const included = [
+  "1 hosted OpenClaw instance",
+  "EU hosting footprint",
+  "Gateway token delivery",
+  "Founding Member pricing lock",
+  "Direct support during beta",
+  "Launch-focused onboarding",
+];
+
+const specRows = [
+  ["Region", "Germany"],
+  ["Access", "app.frozenclaw.com/agent/..."],
+  ["Mode", "Beta hosted deployment"],
+  ["Provisioning", "Automatic with manual fallback"],
+  ["Billing", "Founding Member"],
+  ["Support", "Direct operator support"],
+];
+
+const faqs = [
+  {
+    question: "Is this a shared agent platform?",
+    answer:
+      "No. The positioning is one hosted OpenClaw instance per customer, not a multi-tenant chat surface pretending to be private.",
+  },
+  {
+    question: "Do I need to self-host anything?",
+    answer:
+      "No local server is required. The point is to remove home-lab friction and keep the agent available without your machine staying online.",
+  },
+  {
+    question: "Is this already a fully mature SaaS?",
+    answer:
+      "No. The launch is framed as a beta: functional, paid, and useful, but still being hardened operationally before larger customer volume.",
+  },
+  {
+    question: "Can I get in before the broader launch?",
+    answer:
+      "Yes. The current page is tuned for founding members who want the hosted setup early and can tolerate a sharper-edged product phase.",
   },
 ];
 
 export default function Home() {
-  const [codeTab, setCodeTab] = useState<CodeTab>("python");
-  const [schema, setSchema] = useState<SchemaOption>("Auto");
-  const [typedHeadline, setTypedHeadline] = useState("");
-  const [showCursor, setShowCursor] = useState(true);
-  const [scrapeState, setScrapeState] = useState<"idle" | "loading" | "done">("idle");
-  const [streamedOutput, setStreamedOutput] = useState("");
-  const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const intervalRefs = useRef<ReturnType<typeof setInterval>[]>([]);
-
-  const registerTimeout = (callback: () => void, ms: number) => {
-    const timeoutId = setTimeout(callback, ms);
-    timeoutRefs.current.push(timeoutId);
-    return timeoutId;
-  };
-
-  const registerInterval = (callback: () => void, ms: number) => {
-    const intervalId = setInterval(callback, ms);
-    intervalRefs.current.push(intervalId);
-    return intervalId;
-  };
-
-  useEffect(() => {
-    setTypedHeadline("");
-    setShowCursor(true);
-    let charIndex = 0;
-
-    const typeInterval = registerInterval(() => {
-      charIndex += 1;
-      setTypedHeadline(heroHeadline.slice(0, charIndex));
-
-      if (charIndex >= heroHeadline.length) {
-        clearInterval(typeInterval);
-        registerTimeout(() => setShowCursor(false), 2000);
-      }
-    }, 60);
-  }, []);
-
-  useEffect(() => {
-    const revealElements = document.querySelectorAll<HTMLElement>(".reveal");
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-
-    revealElements.forEach((element) => observer.observe(element));
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      timeoutRefs.current.forEach((timeoutId) => clearTimeout(timeoutId));
-      intervalRefs.current.forEach((intervalId) => clearInterval(intervalId));
-    };
-  }, []);
-
-  const handleScrape = () => {
-    if (scrapeState === "loading") {
-      return;
-    }
-
-    setScrapeState("loading");
-    setStreamedOutput("");
-
-    registerTimeout(() => {
-      setScrapeState("done");
-      let charIndex = 0;
-      const streamInterval = registerInterval(() => {
-        charIndex += 1;
-        setStreamedOutput(fakeMarkdown.slice(0, charIndex));
-
-        if (charIndex >= fakeMarkdown.length) {
-          clearInterval(streamInterval);
-          setScrapeState("idle");
-        }
-      }, 20);
-    }, 1800);
-  };
-
-  const renderedMarkdown = streamedOutput || fakeMarkdown;
-
   return (
-    <div className="relative z-10 min-h-screen bg-[#020c15] text-[#e8f6fb]">
-      <header className="glass sticky top-0 z-50 mx-auto mt-4 flex w-[95%] max-w-6xl items-center justify-between border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] px-5 py-3 backdrop-blur-2xl">
-        <a href="#" className="text-lg font-bold tracking-tight text-white">
-          frozenclaw
-        </a>
-        <nav className="flex items-center gap-3 sm:gap-4">
-          <a href="#docs" className="text-sm text-[#e8f6fb] hover:text-[#0fb5d3]">
-            Docs
+    <main className="min-h-screen overflow-x-hidden bg-[var(--fc-bg)] text-[var(--fc-text)]">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="grid-overlay absolute inset-0" />
+        <div className="hazard-glow absolute inset-0" />
+        <div className="noise-overlay absolute inset-0" />
+      </div>
+
+      <div className="relative z-10">
+        <header className="mx-auto flex w-[94%] max-w-7xl items-center justify-between border-b border-[var(--fc-border-strong)] py-5">
+          <a href="#" className="flex items-center gap-3 text-[var(--fc-text)]">
+            <span className="brand-mark" aria-hidden="true" />
+            <span className="font-display text-2xl uppercase tracking-[0.18em]">
+              Frozenclaw
+            </span>
           </a>
-          <a href="#pricing" className="text-sm text-[#e8f6fb] hover:text-[#0fb5d3]">
-            Pricing
+          <nav className="hidden items-center gap-8 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)] md:flex">
+            <a href="#how" className="transition hover:text-[var(--fc-text)]">
+              Process
+            </a>
+            <a href="#pricing" className="transition hover:text-[var(--fc-text)]">
+              Pricing
+            </a>
+            <a href="#faq" className="transition hover:text-[var(--fc-text)]">
+              FAQ
+            </a>
+          </nav>
+          <a href="#pricing" className="fc-button fc-button-secondary hidden md:inline-flex">
+            Secure Access
           </a>
-          <button className="rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.35)] px-4 py-2 text-sm text-[#0fb5d3] transition hover:bg-[rgba(10,50,80,0.5)]">
-            Start free
-          </button>
-        </nav>
-      </header>
+        </header>
 
-      <main className="mx-auto flex w-[95%] max-w-6xl flex-col gap-24 pb-20 pt-16">
-        {/* Hero mit Ice Cave Effekt */}
-        <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-          {/* Ice Cave Background Layers */}
-          <div className="absolute inset-0 z-0">
-            {/* Haupt-Gradient: Eishoehlen-Atmosphaere */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#020c15] via-[#041824] to-[#020c15]" />
-
-            {/* Glowing Center: Licht aus der Hoehle */}
-            <div className="animate-pulse-glow absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(15,181,211,0.12)_0%,transparent_65%)]" />
-
-            {/* Eis-Stalaktiten Effect: vertikale Linien oben */}
-            <div className="absolute left-0 right-0 top-0 h-48 overflow-hidden opacity-20">
-              {[...Array(20)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`absolute top-0 bg-gradient-to-b from-[#aee7f7] to-transparent ${
-                    i % 5 === 0 ? "animate-drip-fast" : i % 3 === 0 ? "animate-drip-slow" : ""
-                  }`}
-                  style={{
-                    left: `${5 + i * 5}%`,
-                    height: `${40 + ((i * 17) % 80)}px`,
-                    opacity: 0.3 + ((i * 7) % 7) / 10,
-                    width: `${1 + (i % 3)}px`,
-                    animationDelay: `${i * 0.2}s`,
-                  }}
-                />
-              ))}
+        <section className="mx-auto grid min-h-[calc(100vh-88px)] w-[94%] max-w-7xl items-center gap-12 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
+          <div className="space-y-8">
+            <div className="fc-chip">
+              <span className="fc-chip-dot" />
+              Beta hosted OpenClaw infrastructure
             </div>
 
-            {/* Eis-Stalaktiten unten */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden opacity-15">
-              {[...Array(15)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute bottom-0 bg-gradient-to-t from-[#0fb5d3] to-transparent"
-                  style={{
-                    left: `${3 + i * 7}%`,
-                    height: `${30 + ((i * 11) % 60)}px`,
-                    width: `${1 + (i % 4)}px`,
-                    opacity: 0.4 + ((i * 5) % 6) / 10,
-                  }}
-                />
-              ))}
+            <div className="space-y-5">
+              <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
+                Metal. Gate. Control.
+              </p>
+              <h1 className="font-display text-6xl uppercase leading-[0.88] text-[var(--fc-text)] sm:text-7xl lg:text-[7.5rem]">
+                Your AI agent
+                <span className="block text-[var(--fc-accent)]">behind the vault.</span>
+              </h1>
+              <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
+                Frozenclaw turns OpenClaw into a hosted product: private instance, EU
+                infrastructure, fast provisioning, and a visual language that feels like
+                sealed machinery instead of soft SaaS wallpaper.
+              </p>
             </div>
 
-            {/* Subtile Eis-Partikel (Kreise) */}
-            <div className="absolute inset-0">
-              {[...Array(12)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`absolute rounded-full bg-[#0fb5d3] ${
-                    i % 3 === 0
-                      ? "animate-float-slow"
-                      : i % 3 === 1
-                        ? "animate-float-medium"
-                        : "animate-float-fast"
-                  }`}
-                  style={{
-                    left: `${(i * 13) % 100}%`,
-                    top: `${(i * 19) % 100}%`,
-                    width: `${2 + (i % 4)}px`,
-                    height: `${2 + (i % 4)}px`,
-                    opacity: 0.1 + (i % 3) / 10,
-                    animationDelay: `${i * 0.4}s`,
-                  }}
-                />
+            <div className="flex flex-wrap gap-4">
+              <a href="#pricing" className="fc-button fc-button-primary">
+                Join Founding Member
+              </a>
+              <a href="#overview" className="fc-button fc-button-secondary">
+                Inspect The System
+              </a>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {launchSignals.map((signal) => (
+                <div key={signal} className="signal-row">
+                  <span className="signal-index">+</span>
+                  <span>{signal}</span>
+                </div>
               ))}
             </div>
           </div>
 
-          {/* Hero Content (bestehend, nur z-10 hinzugefuegt) */}
-          <div className="relative z-10 w-full max-w-5xl px-6 text-center">
-            <div className="space-y-8 text-left">
-              <div className="max-w-3xl space-y-4">
-                <h1 className="glow-text text-4xl font-extrabold leading-tight text-white sm:text-6xl">
-                  {typedHeadline.split("\n").map((line, index, lines) => (
-                    <span key={`${line}-${index}`}>
-                      {line}
-                      {index < lines.length - 1 ? <br /> : null}
+          <div className="relative">
+            <div className="vault-panel panel-cut">
+              <div className="vault-topline">
+                <span>SITE STATUS</span>
+                <span>LOCKED / LIVE</span>
+              </div>
+
+              <div className="vault-core-wrap">
+                <div className="vault-ring" />
+                <div className="vault-door">
+                  <div className="vault-spoke vault-spoke-a" />
+                  <div className="vault-spoke vault-spoke-b" />
+                  <div className="vault-spoke vault-spoke-c" />
+                  <div className="vault-center">
+                    <span className="font-display text-xs uppercase tracking-[0.35em] text-[var(--fc-accent-soft)]">
+                      agent core
                     </span>
+                  </div>
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <span
+                      key={index}
+                      className="vault-bolt"
+                      style={{ transform: `rotate(${index * 45}deg) translateY(-9.75rem)` }}
+                    />
                   ))}
-                  {showCursor ? <span className="animate-typewriter ml-1 inline-block">|</span> : null}
-                </h1>
-                <p className="max-w-2xl text-base text-[rgba(174,231,247,0.7)] sm:text-lg">
-                  FrozenClaw scrapes any website and returns clean, structured markdown
-                  ready for your AI pipeline. No JS rendering issues. No boilerplate.
+                </div>
+                <div className="vault-beam" />
+              </div>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                <div className="stat-block">
+                  <span className="stat-label">Provisioning</span>
+                  <strong className="stat-value">~5 min</strong>
+                </div>
+                <div className="stat-block">
+                  <span className="stat-label">Footprint</span>
+                  <strong className="stat-value">EU only</strong>
+                </div>
+                <div className="stat-block">
+                  <span className="stat-label">Mode</span>
+                  <strong className="stat-value">Private</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="overview" className="mx-auto w-[94%] max-w-7xl pb-10">
+          <div className="data-strip">
+            <span>Hosted OpenClaw</span>
+            <span>Black / Red industrial UI</span>
+            <span>Germany-based deployment</span>
+            <span>Founding Member beta</span>
+            <span>Manual fallback available</span>
+          </div>
+        </section>
+
+        <section id="how" className="mx-auto w-[94%] max-w-7xl py-14">
+          <div className="section-head">
+            <p className="section-kicker">Deployment Sequence</p>
+            <h2 className="section-title">The launch path is simple on purpose.</h2>
+            <p className="section-copy">
+              The product should feel like opening a secure gate, not assembling a hobby
+              stack in the dark.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-5 lg:grid-cols-3">
+            {steps.map((step) => (
+              <article key={step.id} className="panel-cut fc-panel h-full">
+                <p className="font-display text-5xl leading-none text-[var(--fc-accent)]">
+                  {step.id}
+                </p>
+                <h3 className="mt-5 text-2xl font-semibold text-[var(--fc-text)]">
+                  {step.title}
+                </h3>
+                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
+                  {step.copy}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto w-[94%] max-w-7xl py-14">
+          <div className="section-head">
+            <p className="section-kicker">Design Direction</p>
+            <h2 className="section-title">Industrial pressure outside. Clear control inside.</h2>
+          </div>
+
+          <div className="mt-8 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="panel-cut fc-panel">
+              <div className="mb-8 flex items-center justify-between gap-4 border-b border-[var(--fc-border)] pb-4">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-[var(--fc-accent-soft)]">
+                    Visual system
+                  </p>
+                  <h3 className="mt-2 font-display text-4xl uppercase text-[var(--fc-text)]">
+                    Gate aesthetics
+                  </h3>
+                </div>
+                <span className="fc-chip">Black / steel / red</span>
+              </div>
+
+              <div className="grid gap-5">
+                {features.map((feature) => (
+                  <div key={feature.title} className="feature-row">
+                    <p className="feature-kicker">{feature.kicker}</p>
+                    <h4 className="feature-title">{feature.title}</h4>
+                    <p className="feature-copy">{feature.copy}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-5">
+              <div className="panel-cut fc-panel">
+                <p className="section-kicker">Signal stack</p>
+                <div className="mt-4 space-y-4">
+                  {specRows.map(([label, value]) => (
+                    <div
+                      key={label}
+                      className="flex items-center justify-between gap-4 border-b border-[var(--fc-border)] pb-3 text-sm uppercase tracking-[0.14em]"
+                    >
+                      <span className="text-[var(--fc-text-muted)]">{label}</span>
+                      <span className="text-right text-[var(--fc-text)]">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="panel-cut fc-panel">
+                <p className="section-kicker">Built for launch</p>
+                <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
+                  Enough ceremony to feel premium. Not enough to feel fake.
+                </h3>
+                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
+                  This is the right balance for Frozenclaw: visually aggressive, technically
+                  restrained, and oriented around a private hosted agent instead of generic AI
+                  marketing haze.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="mx-auto w-[94%] max-w-7xl py-14">
+          <div className="section-head">
+            <p className="section-kicker">Founding Member</p>
+            <h2 className="section-title">One clear offer beats three weak tiers.</h2>
+          </div>
+
+          <div className="mt-8 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+            <article className="panel-cut fc-panel pricing-panel">
+              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
+                    Beta access
+                  </p>
+                  <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
+                    Founding Member
+                  </h3>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
+                    EUR 19
+                  </p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+                    per month
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {included.map((item) => (
+                  <div key={item} className="signal-row">
+                    <span className="signal-index">+</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-4">
+                <a href="#pricing" className="fc-button fc-button-primary">
+                  Reserve Founding Slot
+                </a>
+                <a href="#faq" className="fc-button fc-button-secondary">
+                  Read Beta Conditions
+                </a>
+              </div>
+            </article>
+
+            <aside className="grid gap-5">
+              <div className="panel-cut fc-panel">
+                <p className="section-kicker">Launch note</p>
+                <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
+                  Start narrow. Start hard. Expand later.
+                </h3>
+                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
+                  The page is intentionally focused on one paid path, one promise, and one
+                  technical story. That keeps the product believable.
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <button className="rounded-xl bg-[#0fb5d3] px-5 py-3 text-sm font-bold text-[#020c15] transition hover:bg-[#1dbfd6]">
-                  Start free -&gt;
-                </button>
-                <button className="rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.35)] px-5 py-3 text-sm text-[#0fb5d3] transition hover:bg-[rgba(10,50,80,0.5)]">
-                  View docs
-                </button>
+              <div className="panel-cut fc-panel">
+                <p className="section-kicker">What happens next</p>
+                <ol className="mt-4 space-y-4 text-base text-[var(--fc-text-muted)]">
+                  <li>01. Checkout captures the order.</li>
+                  <li>02. Provisioning allocates your instance.</li>
+                  <li>03. Access details are delivered for setup.</li>
+                  <li>04. The agent moves from beta utility to production hardening.</li>
+                </ol>
               </div>
-
-              <div className="glass space-y-4 border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl sm:p-6">
-                <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-                  <input
-                    type="url"
-                    placeholder="https://example.com"
-                    className="rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(2,12,21,0.75)] px-4 py-3 text-sm text-[#e8f6fb] outline-none placeholder:text-[rgba(174,231,247,0.4)] focus:border-[rgba(15,181,211,0.5)]"
-                  />
-                  <select
-                    value={schema}
-                    onChange={(event) => setSchema(event.target.value as SchemaOption)}
-                    className="rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(2,12,21,0.75)] px-4 py-3 text-sm text-[#e8f6fb] outline-none"
-                  >
-                    <option>Auto</option>
-                    <option>Pricing</option>
-                    <option>Products</option>
-                    <option>Custom</option>
-                  </select>
-                  <button
-                    onClick={handleScrape}
-                    disabled={scrapeState === "loading"}
-                    className="rounded-xl bg-[#0fb5d3] px-5 py-3 text-sm font-bold text-[#020c15] transition hover:bg-[#1dbfd6] disabled:cursor-not-allowed disabled:opacity-80"
-                  >
-                    Scrape -&gt;
-                  </button>
-                </div>
-                {scrapeState === "loading" ? (
-                  <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(2,12,21,0.75)] p-4 text-[#aee7f7]">
-                    <span className="inline-block text-3xl animate-spin">❄️</span>
-                    <span className="text-sm sm:text-base">Freezing data...</span>
-                  </div>
-                ) : (
-                  <pre className="overflow-x-auto rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(2,12,21,0.75)] p-4 text-xs text-[#aee7f7] sm:text-sm">
-                    <code>{renderedMarkdown}</code>
-                  </pre>
-                )}
-              </div>
-            </div>
+            </aside>
           </div>
         </section>
 
-        <section className="reveal space-y-6">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">How it works</h2>
-          <div className="grid gap-4 md:grid-cols-3">
-            <article
-              className="glass shimmer-card reveal border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
-              style={{ animationDelay: "0.1s" }}
-            >
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#0fb5d3]">Step 1</p>
-              <h3 className="mb-2 text-lg font-semibold text-white">Paste any URL</h3>
-              <p className="text-sm text-[rgba(174,231,247,0.7)]">
-                Drop in any link. FrozenClaw handles JS rendering, auth-free scraping,
-                bot detection.
-              </p>
-            </article>
-            <article
-              className="glass shimmer-card reveal border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#0fb5d3]">Step 2</p>
-              <h3 className="mb-2 text-lg font-semibold text-white">We extract and freeze</h3>
-              <p className="text-sm text-[rgba(174,231,247,0.7)]">
-                Playwright renders the page. GPT-4o extracts clean, structured markdown.
-              </p>
-            </article>
-            <article
-              className="glass shimmer-card reveal border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
-              style={{ animationDelay: "0.3s" }}
-            >
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#0fb5d3]">Step 3</p>
-              <h3 className="mb-2 text-lg font-semibold text-white">Ship structured data</h3>
-              <p className="text-sm text-[rgba(174,231,247,0.7)]">
-                Get back clean markdown, tables, links via API or Python SDK.
-              </p>
-            </article>
+        <section id="faq" className="mx-auto w-[94%] max-w-7xl py-14">
+          <div className="section-head">
+            <p className="section-kicker">Questions</p>
+            <h2 className="section-title">No fluff. Just the sharp edges.</h2>
           </div>
-        </section>
 
-        <section className="reveal space-y-6">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">Use cases</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {useCases.map((item, index) => (
-              <article
-                key={item.title}
-                className="glass shimmer-card reveal border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl"
-                style={{ animationDelay: `${0.1 + index * 0.1}s` }}
-              >
-                <h3 className="mb-2 text-lg font-semibold text-white">{item.title}</h3>
-                <p className="text-sm text-[rgba(174,231,247,0.7)]">{item.description}</p>
+          <div className="mt-8 grid gap-5 lg:grid-cols-2">
+            {faqs.map((item) => (
+              <article key={item.question} className="panel-cut fc-panel">
+                <h3 className="text-2xl font-semibold text-[var(--fc-text)]">
+                  {item.question}
+                </h3>
+                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
+                  {item.answer}
+                </p>
               </article>
             ))}
           </div>
         </section>
 
-        <section id="pricing" className="reveal space-y-6">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">Pricing</h2>
-          <div className="grid gap-4 lg:grid-cols-3">
-            {pricing.map((plan, index) => (
-              <article
-                key={plan.tier}
-                className={`glass shimmer-card reveal flex flex-col border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-6 backdrop-blur-2xl ${
-                  plan.featured ? "ring-1 ring-[rgba(15,181,211,0.6)]" : ""
-                }`}
-                style={{ animationDelay: `${0.1 + index * 0.1}s` }}
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-white">{plan.tier}</h3>
-                  {plan.featured ? (
-                    <span className="rounded-full bg-[#0fb5d3] px-3 py-1 text-xs font-semibold text-[#020c15]">
-                      Most Popular
-                    </span>
-                  ) : null}
-                </div>
-                <p className="text-sm text-[#0fb5d3]">{plan.pages}</p>
-                <p className="mt-2 text-3xl font-bold text-white">{plan.price}</p>
-                <p className="mb-4 mt-1 text-sm text-[rgba(174,231,247,0.7)]">{plan.cta}</p>
-                <ul className="mb-6 mt-2 space-y-2 text-sm text-[rgba(174,231,247,0.8)]">
-                  {plan.features.map((feature) => (
-                    <li key={feature}>{feature}</li>
-                  ))}
-                </ul>
-                <button
-                  className={`mt-auto rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                    plan.featured
-                      ? "bg-[#0fb5d3] text-[#020c15] hover:bg-[#1dbfd6]"
-                      : "border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.35)] text-[#0fb5d3] hover:bg-[rgba(10,50,80,0.5)]"
-                  }`}
-                >
-                  Choose {plan.tier}
-                </button>
-              </article>
-            ))}
+        <footer className="mx-auto grid w-[94%] max-w-7xl gap-6 border-t border-[var(--fc-border-strong)] py-8 text-sm uppercase tracking-[0.14em] text-[var(--fc-text-muted)] md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="font-display text-3xl text-[var(--fc-text)]">Frozenclaw</p>
+            <p className="mt-2 max-w-xl text-xs leading-6 text-[var(--fc-text-muted)]">
+              Hosted OpenClaw infrastructure with a black-and-red vault language, built for
+              a focused beta instead of soft generic SaaS.
+            </p>
           </div>
-        </section>
-
-        <section id="docs" className="reveal space-y-6">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">API in seconds</h2>
-          <div className="glass border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] p-5 backdrop-blur-2xl sm:p-6">
-            <div className="mb-4 flex gap-2">
-              <button
-                onClick={() => setCodeTab("python")}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                  codeTab === "python"
-                    ? "bg-[#0fb5d3] text-[#020c15] hover:bg-[#1dbfd6]"
-                    : "border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.35)] text-[#0fb5d3] hover:bg-[rgba(10,50,80,0.5)]"
-                }`}
-              >
-                Python
-              </button>
-              <button
-                onClick={() => setCodeTab("curl")}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-                  codeTab === "curl"
-                    ? "bg-[#0fb5d3] text-[#020c15] hover:bg-[#1dbfd6]"
-                    : "border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.35)] text-[#0fb5d3] hover:bg-[rgba(10,50,80,0.5)]"
-                }`}
-              >
-                cURL
-              </button>
-            </div>
-            <pre className="overflow-x-auto rounded-xl border border-[rgba(15,181,211,0.18)] bg-[rgba(2,12,21,0.75)] p-4 text-xs text-[#aee7f7] sm:text-sm">
-              <code>
-                {codeTab === "python"
-                  ? `from frozenclaw import scrape\n\nresult = scrape("https://example.com")\nprint(result.markdown)  # Clean markdown ->`
-                  : `curl -X POST https://api.frozenclaw.com/scrape \\\n  -H "Authorization: Bearer fc_your_key" \\\n  -d '{"url": "https://example.com"}'`}
-              </code>
-            </pre>
+          <div className="flex flex-wrap gap-4 md:justify-end">
+            <a href="#" className="transition hover:text-[var(--fc-text)]">
+              Impressum
+            </a>
+            <a href="#" className="transition hover:text-[var(--fc-text)]">
+              Privacy
+            </a>
+            <a href="#" className="transition hover:text-[var(--fc-text)]">
+              Beta Terms
+            </a>
           </div>
-        </section>
-      </main>
-
-      <footer className="glass relative z-10 mx-auto mb-6 mt-8 flex w-[95%] max-w-6xl flex-col gap-4 border border-[rgba(15,181,211,0.18)] bg-[rgba(10,50,80,0.3)] px-5 py-6 backdrop-blur-2xl sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-lg font-bold text-white">frozenclaw</p>
-          <p className="text-sm text-[rgba(174,231,247,0.7)]">Freeze the web. Build faster.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-[rgba(174,231,247,0.8)]">
-          <a href="#docs" className="hover:text-[#0fb5d3]">
-            Docs
-          </a>
-          <a href="#docs" className="hover:text-[#0fb5d3]">
-            API
-          </a>
-          <a href="#pricing" className="hover:text-[#0fb5d3]">
-            Pricing
-          </a>
-          <a href="#" className="hover:text-[#0fb5d3]">
-            Terms
-          </a>
-          <a href="#" className="hover:text-[#0fb5d3]">
-            Privacy
-          </a>
-        </div>
-        <p className="text-xs text-[rgba(174,231,247,0.6)]">Built in Germany - DSGVO compliant</p>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </main>
   );
 }

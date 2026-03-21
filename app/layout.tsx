@@ -1,20 +1,28 @@
-﻿import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata } from "next";
+import { Oswald, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const display = Oswald({
+  subsets: ["latin"],
+  variable: "--font-display",
+});
+
+const body = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-body",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://frozenclaw.com"),
-  title: "FrozenClaw | Freeze the web. Build faster.",
+  title: "Frozenclaw | Your AI agent behind the vault",
   description:
-    "FrozenClaw scrapes any website and returns clean, structured markdown for AI pipelines.",
+    "Hosted OpenClaw in a black-and-red industrial shell: private instance, EU hosting, founding member beta.",
   openGraph: {
-    title: "FrozenClaw",
+    title: "Frozenclaw",
     description:
-      "Grab any web data. Freeze it. Ship it. Structured markdown via API.",
+      "Your AI agent behind the vault. Hosted OpenClaw with EU infrastructure and a focused beta launch.",
     url: "https://frozenclaw.com",
-    siteName: "FrozenClaw",
+    siteName: "Frozenclaw",
     type: "website",
   },
 };
@@ -26,9 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased bg-frost-bg text-[#e8f4ff]`}>
-        {children}
-      </body>
+      <body className={`${display.variable} ${body.variable} antialiased`}>{children}</body>
     </html>
   );
 }
