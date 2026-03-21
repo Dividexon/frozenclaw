@@ -1,3 +1,5 @@
+import { CheckoutButton } from "@/components/checkout-button";
+
 const launchSignals = [
   "EU-Hosting in Deutschland",
   "Eigene OpenClaw-Instanz pro Kunde",
@@ -51,16 +53,16 @@ const byokIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "Eigener API-Key des Kunden",
   "EU-Hosting-Footprint in Deutschland",
-  "Direkter Support waehrend der Beta",
+  "Direkter Support während der Beta",
   "Schnelle Provisionierung",
-  "Beste Startoption fuer den Launch",
+  "Beste Startoption für den Launch",
 ];
 
 const managedIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "Modell-Key wird von uns gestellt",
-  "Pilot mit 5 verfuegbaren Plaetzen",
-  "Zunaechst konservatives Usage-Limit",
+  "Pilot mit 5 verfügbaren Plätzen",
+  "Zunächst konservatives Usage-Limit",
   "Separates Cron-Limit vorgesehen",
   "Freischaltung erst mit aktivem Tracking",
 ];
@@ -70,7 +72,7 @@ const specRows = [
   ["Zugang", "app.frozenclaw.com/agent/..."],
   ["Modus", "OpenClaw Hosting Beta"],
   ["Provisionierung", "Automatisch mit manuellem Fallback"],
-  ["Oeffentlich", "BYOK"],
+  ["Öffentlich", "BYOK"],
   ["Pilot", "Managed Beta mit 5 Slots"],
 ];
 
@@ -78,12 +80,12 @@ const faqs = [
   {
     question: "Muss ich meinen eigenen API-Key mitbringen?",
     answer:
-      "Beim oeffentlichen Start ja. Hosted BYOK ist das Standardangebot. Managed wird als begrenzter Pilot angeboten, sobald wir den Verbrauch sauber pro Kunde messen koennen.",
+      "Beim öffentlichen Start ja. Hosted BYOK ist das Standardangebot. Managed wird als begrenzter Pilot angeboten, sobald wir den Verbrauch sauber pro Kunde messen können.",
   },
   {
     question: "Was bedeutet Managed Beta konkret?",
     answer:
-      "Wir stellen den Modell-Key, aber nur in einem kleinen Pilot mit festen Plaetzen und klaren Nutzungsgrenzen. Ohne verifiziertes Credit-Tracking wird dieser Modus nicht breit freigeschaltet.",
+      "Wir stellen den Modell-Key, aber nur in einem kleinen Pilot mit festen Plätzen und klaren Nutzungsgrenzen. Ohne verifiziertes Credit-Tracking wird dieser Modus nicht breit freigeschaltet.",
   },
   {
     question: "Brauche ich eigene Server oder Docker-Kenntnisse?",
@@ -93,7 +95,7 @@ const faqs = [
   {
     question: "Ist das schon ein komplett ausgereiftes SaaS?",
     answer:
-      "Nein. Es ist eine bezahlte Beta: nuetzlich, hostbar und klar fokussiert, aber noch bewusst vor dem grossen Ausbau.",
+      "Nein. Es ist eine bezahlte Beta: nützlich, hostbar und klar fokussiert, aber noch bewusst vor dem großen Ausbau.",
   },
 ];
 
@@ -270,9 +272,9 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <a href="#preise" className="fc-button fc-button-primary">
+              <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
                 BYOK starten
-              </a>
+              </CheckoutButton>
               <a href="#ueberblick" className="fc-button fc-button-secondary">
                 System ansehen
               </a>
@@ -350,7 +352,7 @@ export default function Home() {
             <p className="section-kicker">Ablauf</p>
             <h2 className="section-title">Der Startpfad ist absichtlich direkt.</h2>
             <p className="section-copy">
-              Frozenclaw soll sich anfuehlen wie ein sicheres Tor, nicht wie ein loses
+              Frozenclaw soll sich anfühlen wie ein sicheres Tor, nicht wie ein loses
               Bastelprojekt mit zu vielen beweglichen Teilen.
             </p>
           </div>
@@ -425,7 +427,7 @@ export default function Home() {
                   Erst sauber starten. Dann teuren Betrieb freischalten.
                 </h3>
                 <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  Deshalb ist BYOK das oeffentliche Kernangebot. Managed bleibt ein kleiner
+                  Deshalb ist BYOK das öffentliche Kernangebot. Managed bleibt ein kleiner
                   Pilot, bis Verbrauch und Limits pro Kunde wirklich messbar sind.
                 </p>
               </div>
@@ -436,7 +438,7 @@ export default function Home() {
         <section id="preise" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
             <p className="section-kicker">Preise</p>
-            <h2 className="section-title">Zwei Linien. Eine oeffentlich, eine kontrolliert.</h2>
+            <h2 className="section-title">Zwei Linien. Eine öffentlich, eine kontrolliert.</h2>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
@@ -444,7 +446,7 @@ export default function Home() {
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Oeffentlich buchbar
+                    Öffentlich buchbar
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
                     Hosted BYOK
@@ -470,11 +472,11 @@ export default function Home() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
-                <a href="#preise" className="fc-button fc-button-primary">
+                <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
                   BYOK reservieren
-                </a>
+                </CheckoutButton>
                 <a href="#faq" className="fc-button fc-button-secondary">
-                  Fragen klaeren
+                  Fragen klären
                 </a>
               </div>
             </article>
@@ -511,7 +513,7 @@ export default function Home() {
               <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
                 Managed wird erst aktiv verkauft, wenn Usage-Tracking, Credit-Logik und
                 Warnschwellen technisch verifiziert sind. Vorher bleibt es ein sichtbarer
-                Pilot mit fester Kapazitaetsgrenze.
+                Pilot mit fester Kapazitätsgrenze.
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
