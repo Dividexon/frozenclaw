@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { buildActivationUrl, startRuntimeRecovery } from "@/lib/provisioning";
+import { buildActivationUrl, buildAgentUrl, startRuntimeRecovery } from "@/lib/provisioning";
 
 export const runtime = "nodejs";
 
@@ -26,6 +26,7 @@ export async function GET(_request: Request, context: RouteContext) {
         payment_status,
         instance_state,
         instance_slug,
+        gateway_token,
         created_at,
         updated_at
       FROM orders
@@ -40,6 +41,7 @@ export async function GET(_request: Request, context: RouteContext) {
         payment_status: string;
         instance_state: string;
         instance_slug: string | null;
+        gateway_token: string | null;
         created_at: string;
         updated_at: string;
       }
@@ -57,7 +59,8 @@ export async function GET(_request: Request, context: RouteContext) {
     paymentStatus: order.payment_status,
     instanceState: order.instance_state,
     instanceSlug: order.instance_slug,
-    activationUrl: buildActivationUrl(order.instance_slug),
+    activationUrl: buildActivationUrl(order.instance_slug, order.gateway_token),
+    agentUrl: buildAgentUrl(order.instance_slug, order.gateway_token),
     createdAt: order.created_at,
     updatedAt: order.updated_at,
   });

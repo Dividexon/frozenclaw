@@ -24,6 +24,7 @@ async function loadStatus(sessionId: string) {
       usageMode: string;
       plan: string;
       activationUrl?: string | null;
+      agentUrl?: string | null;
     };
   } catch {
     return null;
@@ -40,8 +41,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
         <p className="section-kicker">Checkout</p>
         <h1 className="section-title mt-3 text-5xl">Bestellung eingegangen.</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
-          Stripe hat deinen Checkout abgeschlossen. Die Bestellung liegt jetzt in Frozenclaw vor
-          und wird für die Bereitstellung der Instanz verarbeitet.
+          Die Bestellung ist gespeichert. Sobald deine Instanz bereitsteht, führt dich der
+          Zugangslink direkt in den Setup-Schritt für deinen eigenen API-Key.
         </p>
 
         {sessionId ? <OrderStatusPanel sessionId={sessionId} initialStatus={status} /> : null}

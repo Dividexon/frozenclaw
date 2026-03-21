@@ -7,6 +7,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { getDb, logOrderEvent } from "@/lib/db";
 import { getAppConfig } from "@/lib/env";
+import { ensureCustomerDirectories } from "@/lib/customer-instances";
 
 const execFileAsync = promisify(execFile);
 const processingOrders = new Set<number>();
@@ -41,18 +42,36 @@ function generateGatewayToken() {
   return crypto.randomBytes(18).toString("base64url");
 }
 
-function getActivationUrl(slug: string | null) {
+export function buildAgentUrl(slug: string | null, token: string | null) {
   if (!slug) {
     return null;
   }
 
   const config = getAppConfig();
+  const pathValue = `${config.agentBasePath}/${slug}/`;
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
 
   if (!config.appBaseUrl) {
-    return `${config.agentBasePath}/${slug}`;
+    return `${pathValue}${query}`;
   }
 
-  return `${config.appBaseUrl}${config.agentBasePath}/${slug}`;
+  return `${config.appBaseUrl}${pathValue}${query}`;
+}
+
+export function buildSetupUrl(slug: string | null, token: string | null) {
+  if (!slug) {
+    return null;
+  }
+
+  const config = getAppConfig();
+  const pathValue = `${config.setupBasePath}/${slug}`;
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
+
+  if (!config.appBaseUrl) {
+    return `${pathValue}${query}`;
+  }
+
+  return `${config.appBaseUrl}${pathValue}${query}`;
 }
 
 function getOrderById(orderId: number) {
@@ -167,11 +186,10 @@ function ensureIdentity(orderId: number) {
 
 async function runMockProvisioning(order: ProvisionableOrder) {
   const identity = ensureIdentity(order.id);
-  const customerDir = path.join(process.cwd(), "data", "customers", identity.slug);
 
-  await fs.mkdir(customerDir, { recursive: true });
+  await ensureCustomerDirectories(identity.slug);
   await fs.writeFile(
-    path.join(customerDir, "instance.json"),
+    path.join(getAppConfig().customerRootDir, identity.slug, "instance.json"),
     JSON.stringify(
       {
         orderId: order.id,
@@ -179,7 +197,8 @@ async function runMockProvisioning(order: ProvisionableOrder) {
         plan: order.plan,
         usageMode: order.usage_mode,
         port: identity.port,
-        activationUrl: getActivationUrl(identity.slug),
+        setupUrl: buildSetupUrl(identity.slug, identity.token),
+        agentUrl: buildAgentUrl(identity.slug, identity.token),
         createdAt: new Date().toISOString(),
       },
       null,
@@ -217,6 +236,16 @@ async function runProvisioningDriver(order: ProvisionableOrder) {
   }
 
   await runMockProvisioning(order);
+}
+
+export async function restartProvisionedInstance(slug: string) {
+  const config = getAppConfig();
+
+  if (!config.restartScript) {
+    throw new Error("RESTART_INSTANCE_SCRIPT fehlt.");
+  }
+
+  await execFileAsync(config.restartScript, ["--slug", slug]);
 }
 
 function claimOrder(orderId: number) {
@@ -304,7 +333,8 @@ export async function provisionOrder(orderId: number) {
 
     markReady(orderId);
     logOrderEvent(orderId, "provisioning_ready", {
-      activationUrl: getActivationUrl(readyOrder?.instance_slug ?? null),
+      setupUrl: buildSetupUrl(readyOrder?.instance_slug ?? null, readyOrder?.gateway_token ?? null),
+      agentUrl: buildAgentUrl(readyOrder?.instance_slug ?? null, readyOrder?.gateway_token ?? null),
       slug: readyOrder?.instance_slug ?? null,
       port: readyOrder?.instance_port ?? null,
     });
@@ -352,6 +382,6 @@ export function startRuntimeRecovery() {
   }
 }
 
-export function buildActivationUrl(slug: string | null) {
-  return getActivationUrl(slug);
+export function buildActivationUrl(slug: string | null, token: string | null) {
+  return buildSetupUrl(slug, token);
 }

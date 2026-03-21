@@ -8,6 +8,7 @@ type OrderStatus = {
   usageMode: string;
   plan: string;
   activationUrl?: string | null;
+  agentUrl?: string | null;
 };
 
 type OrderStatusPanelProps = {
@@ -74,7 +75,7 @@ export function OrderStatusPanel({ sessionId, initialStatus }: OrderStatusPanelP
 
       {status?.activationUrl ? (
         <a href={status.activationUrl} className="fc-button fc-button-secondary sm:col-span-2">
-          Instanz öffnen
+          Zugang öffnen
         </a>
       ) : null}
     </div>

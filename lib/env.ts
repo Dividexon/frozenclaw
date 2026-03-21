@@ -1,15 +1,24 @@
 import "server-only";
 
+import path from "node:path";
+
 export type ProvisioningMode = "mock" | "script";
 
 export type AppConfig = {
   appBaseUrl: string | null;
   provisioningMode: ProvisioningMode;
   provisioningScript: string | null;
+  restartScript: string | null;
+  deprovisionScript: string | null;
   provisioningPortStart: number;
   provisioningPortEnd: number;
   staleProvisioningMinutes: number;
   agentBasePath: string;
+  setupBasePath: string;
+  customerRootDir: string;
+  openClawImage: string;
+  openClawRepoDir: string;
+  serverTimezone: string;
 };
 
 let cachedConfig: AppConfig | null = null;
@@ -57,6 +66,8 @@ export function getAppConfig() {
       appBaseUrl: process.env.APP_BASE_URL ?? process.env.NEXT_PUBLIC_URL ?? null,
       provisioningMode: parseProvisioningMode(process.env.PROVISIONING_MODE),
       provisioningScript: process.env.PROVISIONING_SCRIPT ?? null,
+      restartScript: process.env.RESTART_INSTANCE_SCRIPT ?? null,
+      deprovisionScript: process.env.DEPROVISION_SCRIPT ?? null,
       provisioningPortStart,
       provisioningPortEnd,
       staleProvisioningMinutes: parsePositiveInt(
@@ -65,6 +76,12 @@ export function getAppConfig() {
         "PROVISIONING_STALE_MINUTES"
       ),
       agentBasePath: process.env.AGENT_BASE_PATH ?? "/agent",
+      setupBasePath: process.env.SETUP_BASE_PATH ?? "/zugang",
+      customerRootDir:
+        process.env.CUSTOMER_ROOT_DIR ?? path.join(process.cwd(), "data", "customers"),
+      openClawImage: process.env.OPENCLAW_IMAGE ?? "frozenclaw/openclaw:latest",
+      openClawRepoDir: process.env.OPENCLAW_REPO_DIR ?? "/opt/frozenclaw/vendor/openclaw",
+      serverTimezone: process.env.SERVER_TIMEZONE ?? "Europe/Berlin",
     };
   }
 

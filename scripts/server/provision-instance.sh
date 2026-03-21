@@ -36,14 +36,79 @@ if [[ -z "$ORDER_ID" || -z "$SLUG" || -z "$PORT" || -z "$TOKEN" ]]; then
   exit 1
 fi
 
-CUSTOMER_DIR="/opt/frozenclaw/customers/$SLUG"
-mkdir -p "$CUSTOMER_DIR"
+OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-frozenclaw/openclaw:latest}"
+CUSTOMER_ROOT_DIR="${CUSTOMER_ROOT_DIR:-/opt/frozenclaw/customers}"
+SERVER_TIMEZONE="${SERVER_TIMEZONE:-Europe/Berlin}"
+CONTAINER_NAME="frozenclaw-${SLUG}"
+CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
+CONFIG_DIR="${CUSTOMER_DIR}/config"
+WORKSPACE_DIR="${CUSTOMER_DIR}/workspace"
+INSTANCE_ENV="${CUSTOMER_DIR}/instance.env"
+PROVIDER_ENV="${CONFIG_DIR}/.env"
+CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 
-cat > "$CUSTOMER_DIR/instance.env" <<EOF
+mkdir -p "$CONFIG_DIR" "$WORKSPACE_DIR" /etc/caddy/customers.d
+
+if ! docker image inspect "$OPENCLAW_IMAGE" >/dev/null 2>&1; then
+  /opt/frozenclaw/app/scripts/server/install-openclaw-base.sh
+fi
+
+if [[ ! -f "$PROVIDER_ENV" ]]; then
+  cat > "$PROVIDER_ENV" <<EOF
+OPENCLAW_GATEWAY_TOKEN=$TOKEN
+EOF
+else
+  grep -q '^OPENCLAW_GATEWAY_TOKEN=' "$PROVIDER_ENV" \
+    && sed -i "s/^OPENCLAW_GATEWAY_TOKEN=.*/OPENCLAW_GATEWAY_TOKEN=$TOKEN/" "$PROVIDER_ENV" \
+    || printf '\nOPENCLAW_GATEWAY_TOKEN=%s\n' "$TOKEN" >> "$PROVIDER_ENV"
+fi
+
+cat > "$INSTANCE_ENV" <<EOF
 ORDER_ID=$ORDER_ID
 INSTANCE_SLUG=$SLUG
 INSTANCE_PORT=$PORT
 GATEWAY_TOKEN=$TOKEN
+CONTAINER_NAME=$CONTAINER_NAME
+OPENCLAW_IMAGE=$OPENCLAW_IMAGE
 EOF
 
-echo "Provisionierungsplatzhalter für $SLUG erstellt."
+cat > "$CADDY_SNIPPET" <<EOF
+handle /agent/$SLUG {
+	redir /agent/$SLUG/ 308
+}
+
+handle_path /agent/$SLUG/* {
+	reverse_proxy 127.0.0.1:$PORT
+}
+EOF
+
+docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+
+docker run -d \
+  --name "$CONTAINER_NAME" \
+  --restart unless-stopped \
+  -p "127.0.0.1:${PORT}:18789" \
+  -e HOME=/home/node \
+  -e TERM=xterm-256color \
+  -e TZ="$SERVER_TIMEZONE" \
+  -v "$CONFIG_DIR:/home/node/.openclaw" \
+  -v "$WORKSPACE_DIR:/home/node/.openclaw/workspace" \
+  "$OPENCLAW_IMAGE" \
+  node dist/index.js gateway --bind lan --port 18789
+
+caddy validate --config /etc/caddy/Caddyfile
+systemctl reload caddy
+
+for _ in $(seq 1 30); do
+  CODE="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/healthz" || true)"
+  if [[ "$CODE" != "000" ]]; then
+    echo "OpenClaw-Instanz $SLUG ist erreichbar."
+    exit 0
+  fi
+
+  sleep 2
+done
+
+echo "OpenClaw-Instanz $SLUG wurde nicht rechtzeitig erreichbar." >&2
+docker logs "$CONTAINER_NAME" --tail 200 >&2 || true
+exit 1
