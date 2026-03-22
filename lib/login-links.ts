@@ -57,7 +57,10 @@ export function findLatestOrderByEmail(email: string) {
         updated_at
       FROM orders
       WHERE lower(email) = lower(?)
-        AND payment_status = 'paid'
+        AND (
+          payment_status = 'paid'
+          OR plan = 'trial'
+        )
       ORDER BY updated_at DESC, id DESC
       LIMIT 1
     `)

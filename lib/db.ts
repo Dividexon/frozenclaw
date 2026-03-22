@@ -176,6 +176,13 @@ function migrate(db: DbInstance) {
   }
 
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_usage_events_usage_key ON usage_events(usage_key)");
+  db.exec(`
+    UPDATE orders
+    SET payment_status = 'paid',
+        updated_at = datetime('now')
+    WHERE plan = 'trial'
+      AND payment_status = 'checkout_created'
+  `);
 }
 
 export function getDb() {
