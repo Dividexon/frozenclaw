@@ -213,6 +213,12 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                       <a
                         href={dashboard.nextAction.href}
                         className="fc-button fc-button-primary"
+                        target={dashboard.nextAction.href === access.agentUrl ? "_blank" : undefined}
+                        rel={
+                          dashboard.nextAction.href === access.agentUrl
+                            ? "noreferrer noopener"
+                            : undefined
+                        }
                       >
                         {dashboard.nextAction.label}
                       </a>
