@@ -77,6 +77,7 @@ CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
 CONFIG_DIR="${CUSTOMER_DIR}/config"
 WORKSPACE_DIR="${CUSTOMER_DIR}/workspace"
 AGENT_DIR="${CONFIG_DIR}/agents/main/agent"
+SESSIONS_DIR="${CONFIG_DIR}/agents/main/sessions"
 INSTANCE_ENV="${CUSTOMER_DIR}/instance.env"
 PROVIDER_ENV="${CONFIG_DIR}/.env"
 OPENCLAW_CONFIG_JSON="${CONFIG_DIR}/openclaw.json"
@@ -93,6 +94,13 @@ if ! docker image inspect "$OPENCLAW_IMAGE" >/dev/null 2>&1; then
 fi
 
 /opt/frozenclaw/app/scripts/server/write-workspace-files.sh "$WORKSPACE_DIR"
+
+if [[ "$USAGE_MODE" == "managed" && -f "$SESSIONS_DIR/sessions.json" ]]; then
+  if grep -Eq '"modelProvider": "(anthropic|google)"|"model": "claude-|"model": "gemini-' "$SESSIONS_DIR/sessions.json"; then
+    mv "$SESSIONS_DIR" "${SESSIONS_DIR}.reset.$(date +%Y%m%d%H%M%S)"
+    mkdir -p "$SESSIONS_DIR"
+  fi
+fi
 
 if [[ ! -f "$PROVIDER_ENV" ]]; then
   cat > "$PROVIDER_ENV" <<EOF
@@ -241,6 +249,8 @@ chown -R "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$CUSTOMER_DIR"
 chmod 750 "$CUSTOMER_DIR" "$CONFIG_DIR" "$WORKSPACE_DIR" "${CONFIG_DIR}/agents" "${CONFIG_DIR}/agents/main" "$AGENT_DIR"
 chmod 640 "$INSTANCE_ENV" "$PROVIDER_ENV" "$OPENCLAW_CONFIG_JSON" "$AUTH_PROFILES_JSON"
 if [[ -f "$MANAGED_PLUGIN_FILE" ]]; then
+  chown root:root "$WORKSPACE_DIR" "$MANAGED_PLUGIN_FILE"
+  chmod 755 "$WORKSPACE_DIR"
   chmod 640 "$MANAGED_PLUGIN_FILE"
 fi
 
