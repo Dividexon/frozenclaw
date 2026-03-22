@@ -92,10 +92,10 @@ function PlanCard({
   const isCurrent = currentPlanId === card.id;
 
   return (
-    <div className="border border-[var(--fc-border)] bg-black/20 p-5">
+    <div className="flex h-full flex-col border border-[var(--fc-border)] bg-black/20 p-5">
       <p className="section-kicker">{card.kicker}</p>
       <h3 className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">{card.price}</h3>
-      <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">{card.description}</p>
+      <p className="mt-4 flex-1 text-sm leading-7 text-[var(--fc-text-muted)]">{card.description}</p>
       <div className="mt-5">
         {isCurrent ? (
           <span className="fc-button fc-button-secondary opacity-60">Aktiver Plan</span>
