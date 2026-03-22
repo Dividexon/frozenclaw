@@ -648,8 +648,11 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     <div className="border border-[var(--fc-border)] bg-black/25 p-4">
                       <h3 className="text-xl font-semibold text-[var(--fc-text)]">Nachbuchung</h3>
                       <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
-                        Geplante Pakete: 1 Mio. oder 2,5 Mio. zusätzliche Standard-Tokens als
-                        Einmalkauf. Verbrauch erst nach dem Monatskontingent.
+                        {access.usageMode === "managed" && !isLegacyTrial
+                          ? "Du kannst 1 Mio. oder 2,5 Mio. zusätzliche Standard-Tokens als Einmalkauf nachbuchen. Die Nachbuchung wird erst verbraucht, wenn dein Monatskontingent aufgebraucht ist."
+                          : isLegacyTrial
+                            ? "Nachbuchungen sind im Free Tier noch nicht verfügbar. Wechsle dafür in einen Managed-Plan."
+                            : "Nachbuchungen sind nur für Managed-Pläne relevant. Im Standardplan nutzt du deinen eigenen API-Key."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-4">
                         {access.usageMode === "managed" && !isLegacyTrial && topUpPackages.length > 0 ? (
@@ -670,8 +673,10 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                         ) : (
                           <span className="fc-button fc-button-secondary opacity-60">
                             {isLegacyTrial
-                              ? "Nach Kauf im Managed-Plan verfügbar"
-                              : "Nur für Managed-Pläne relevant"}
+                              ? "Im Free Tier noch nicht verfügbar"
+                              : access.usageMode === "managed"
+                                ? "Für diesen Plan sind aktuell keine Pakete hinterlegt"
+                                : "Im Standardplan nicht nötig"}
                           </span>
                         )}
                       </div>
