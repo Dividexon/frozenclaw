@@ -165,6 +165,24 @@ function roundToInt(value: number) {
   return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
 }
 
+function resolveChargedStandardTokens(event: ManagedUsageEvent) {
+  const perTurnTotal = roundToInt(event.inputTokens + event.outputTokens);
+  const reportedTotal = roundToInt(event.totalTokens ?? 0);
+
+  if (!reportedTotal) {
+    return perTurnTotal;
+  }
+
+  // OpenClaw can report `usage.total` as a cumulative session figure while
+  // `input` and `output` describe the current turn. For billing/counting we only
+  // want the current turn, otherwise short prompts can consume an entire quota.
+  if (Math.abs(reportedTotal - perTurnTotal) > 64) {
+    return perTurnTotal;
+  }
+
+  return reportedTotal;
+}
+
 function getOpenAiTokenRatesMicros(model: string) {
   if (model === "openai/gpt-5.2" || model === "gpt-5.2") {
     return {
@@ -186,7 +204,7 @@ export function calculateManagedUsage(event: ManagedUsageEvent) {
   const costTotalMicros = costInputMicros + costOutputMicros;
 
   return {
-    standardTokensCharged: roundToInt(event.totalTokens ?? event.inputTokens + event.outputTokens),
+    standardTokensCharged: resolveChargedStandardTokens(event),
     costInputMicros,
     costOutputMicros,
     costTotalMicros,

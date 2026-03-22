@@ -193,6 +193,11 @@ function migrate(db: DbInstance) {
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_topup_purchases_event_id ON topup_purchases(stripe_event_id)");
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_topup_purchases_session_id ON topup_purchases(stripe_session_id)");
   db.exec(`
+    UPDATE usage_events
+    SET standard_tokens_charged = input_tokens + output_tokens
+    WHERE ABS(COALESCE(standard_tokens_charged, 0) - (COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0))) > 64
+  `);
+  db.exec(`
     UPDATE orders
     SET payment_status = 'paid',
         updated_at = datetime('now')
