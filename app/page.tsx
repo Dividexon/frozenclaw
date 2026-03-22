@@ -1,54 +1,64 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { CheckoutButton } from "@/components/checkout-button";
 
 const launchSignals = [
   "Eigene OpenClaw-Instanz pro Kunde",
   "Hosting in Deutschland",
-  "BYOK oder Managed direkt buchbar",
+  "Free Tier, BYOK und Managed",
   "Bereitstellung in der Regel am selben Tag",
 ];
 
 const steps = [
   {
     id: "01",
-    title: "Plan auswählen",
+    title: "Kostenlos testen oder direkt buchen",
     copy:
-      "Du bestellst deine gehostete Instanz über eine einfache Checkout-Strecke ohne unnötige Konfiguration vor dem Kauf.",
+      "Du kannst erst mit einem kleinen Testzugang starten oder sofort einen bezahlten Plan buchen.",
   },
   {
     id: "02",
     title: "Instanz wird bereitgestellt",
     copy:
-      "Frozenclaw richtet deine private OpenClaw-Instanz auf deutscher Infrastruktur ein und stellt den Zugang für dich bereit.",
+      "Frozenclaw richtet deine Instanz auf deutscher Infrastruktur ein und stellt den Zugang für dich bereit.",
   },
   {
     id: "03",
-    title: "Konfigurieren und nutzen",
+    title: "OpenClaw öffnen und nutzen",
     copy:
-      "Du hinterlegst deinen eigenen Modell-Key, arbeitest die Startanleitung durch und kannst deinen Agenten direkt nutzen.",
+      "Du meldest dich an, öffnest deine Instanz und kannst direkt mit dem Agenten arbeiten.",
   },
 ];
 
 const features = [
   {
     kicker: "Eigene Instanz",
-    title: "Du bekommst eine private OpenClaw-Instanz.",
+    title: "Jeder Zugang läuft in einer eigenen Umgebung.",
     copy:
-      "Jede Bestellung bekommt ihren eigenen Laufzeitkontext mit eigenem Zugang und eigener Betriebsumgebung.",
+      "Jede Bestellung und jeder Testzugang bekommt einen eigenen Laufzeitkontext mit eigener URL und eigener OpenClaw-Instanz.",
   },
   {
     kicker: "Weniger Infrastruktur",
-    title: "Du musst den Server nicht selbst aufsetzen.",
+    title: "Du musst Server und Betrieb nicht selbst übernehmen.",
     copy:
-      "Frozenclaw übernimmt Hosting, Bereitstellung und Erreichbarkeit, damit du dich auf den Einsatz des Agenten konzentrieren kannst.",
+      "Frozenclaw übernimmt Hosting, Bereitstellung und Erreichbarkeit, damit du dich auf den Agenten konzentrieren kannst.",
   },
   {
     kicker: "Klarer Einstieg",
-    title: "Der Startplan ist bewusst einfach gehalten.",
+    title: "Das Angebot ist bewusst in wenige Stufen geschnitten.",
     copy:
-      "Zum Start ist das Hosting mit eigenem Modell-Key das Standardangebot. So bleibt Nutzen, Preis und Betrieb für beide Seiten klar.",
+      "Free Tier für den kurzen Test, BYOK für eigenes Modell-Budget und Managed für Nutzer, die Modellzugang direkt mitbuchen wollen.",
   },
+];
+
+const freeTierIncludes = [
+  "1 gehostete Testinstanz",
+  "GPT-4o mini als Testmodell",
+  "100.000 Tokens für einen kurzen echten Test",
+  "E-Mail + Passwort statt Mail-Warten",
+  "Upgrade auf bezahlte Pläne jederzeit möglich",
+  "Für Produkttest statt Dauerbetrieb gedacht",
 ];
 
 const byokIncludes = [
@@ -58,36 +68,32 @@ const byokIncludes = [
   "Startanleitung für die ersten Schritte",
   "E-Mail-Support während der Beta",
   "Bereitstellung in der Regel am selben Tag",
-  "Öffentliches Standardangebot zum Start",
 ];
 
 const managedStarterIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "GPT-5.2 als festes Modell",
-  "500.000 Standard-Tokens pro Monat",
-  "Modellzugang wird von Frozenclaw gestellt",
+  "500.000 Tokens pro Monat",
   "Verbrauch wird automatisch mitgerechnet",
   "Geeignet für den Einstieg",
   "Nachbuchung später zubuchbar",
 ];
 
-const managedImmediateIncludes = [
+const managedPlusIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "GPT-5.2 als festes Modell",
-  "3 Mio. Standard-Tokens pro Monat",
-  "Modellzugang wird von Frozenclaw gestellt",
+  "3 Mio. Tokens pro Monat",
   "Verbrauch wird automatisch mitgerechnet",
-  "Für regelmäßige Nutzung mit klarem Monatsrahmen",
+  "Für regelmäßige Nutzung",
   "Nachbuchung später zubuchbar",
 ];
 
 const managedAdvancedIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "GPT-5.2 als festes Modell",
-  "5 Mio. Standard-Tokens pro Monat",
-  "Modellzugang wird von Frozenclaw gestellt",
+  "5 Mio. Tokens pro Monat",
   "Verbrauch wird automatisch mitgerechnet",
-  "Mehr Spielraum für regelmäßige Nutzung",
+  "Mehr Spielraum für laufende Nutzung",
   "Nachbuchung später zubuchbar",
 ];
 
@@ -118,42 +124,41 @@ const specRows = [
   ["Zielgruppe", "Founder, Power-User, kleine Teams"],
   ["Region", "Deutschland"],
   ["Zugang", "Eigene URL pro Instanz"],
-  ["Modell-Key", "Zum Start vom Kunden gestellt"],
-  ["Support", "E-Mail + Startanleitung"],
-  ["Bereitstellung", "In der Regel am selben Tag"],
+  ["Testzugang", "GPT-4o mini mit 100.000 Tokens"],
   ["Managed", "GPT-5.2 mit Starter, Plus und Advanced"],
+  ["Support", "E-Mail + Startanleitung"],
 ];
 
 const faqs = [
   {
+    question: "Gibt es einen kostenlosen Testzugang?",
+    answer:
+      "Ja. Der Free Tier läuft auf GPT-4o mini mit 100.000 Tokens und ist für einen kurzen echten Produkttest gedacht.",
+  },
+  {
     question: "Muss ich meinen eigenen API-Key mitbringen?",
     answer:
-      "Ja. Das öffentliche Startangebot ist Hosting mit eigenem Modell-Key. Dadurch bleiben Nutzung, Modellkosten und Verantwortung am Anfang klar getrennt.",
+      "Beim Standardplan ja. Dort bringst du deinen eigenen Modell-Key mit. Im Managed-Bereich stellt Frozenclaw den Modellzugang direkt bereit.",
   },
   {
     question: "Was bedeutet Managed konkret?",
     answer:
-      "Managed ist der Plan für Nutzer, die keinen eigenen API-Key verwalten möchten. Frozenclaw stellt dafür GPT-5.2 bereit, rechnet den Verbrauch automatisch mit und startet zunächst mit einem klar begrenzten Tokenkontingent pro Monat.",
+      "Managed ist für Nutzer gedacht, die keinen eigenen API-Key verwalten möchten. Frozenclaw stellt dort GPT-5.2 bereit und rechnet den Verbrauch intern mit.",
   },
   {
     question: "Welche Managed-Stufen gibt es?",
     answer:
-      "Zum Start planen wir drei Managed-Stufen mit demselben Modell. Starter liegt bei 9,90 EUR mit 500.000 Standard-Tokens pro Monat. Plus liegt bei 39 EUR mit 3 Mio. Standard-Tokens pro Monat. Advanced liegt bei 59 EUR mit 5 Mio. Standard-Tokens pro Monat.",
-  },
-  {
-    question: "Wie funktioniert die Nutzung im Managed-Plan?",
-    answer:
-      "Managed nutzt immer GPT-5.2 als festes Modell. Der Unterschied liegt nur im Monatskontingent. Dadurch bleiben Angebot, Kosten und spätere Nachbuchung sauber steuerbar.",
+      "Managed Starter liegt bei 9,90 EUR mit 500.000 Tokens pro Monat. Managed Plus liegt bei 39 EUR mit 3 Mio. Tokens pro Monat. Managed Advanced liegt bei 59 EUR mit 5 Mio. Tokens pro Monat.",
   },
   {
     question: "Brauche ich eigene Server oder Docker-Kenntnisse?",
     answer:
-      "Nein. Du musst keinen eigenen Server betreiben und keine Infrastruktur selbst rund um die Uhr am Laufen halten.",
+      "Nein. Du musst keinen eigenen Server betreiben und keine Infrastruktur selbst dauerhaft am Laufen halten.",
   },
   {
     question: "Ist das schon ein komplett ausgereiftes SaaS?",
     answer:
-      "Nein. Es ist eine bezahlte Beta mit klarem Nutzen und bewusst begrenztem Scope. Genau deshalb starten wir mit einem verständlichen Kernangebot.",
+      "Nein. Es ist eine bezahlte Beta mit bewusst klarem Scope. Der Kern soll funktionieren, bevor der Rest ausgebaut wird.",
   },
 ];
 
@@ -167,6 +172,58 @@ function FrozenclawIcon() {
       className="h-12 w-12 shrink-0 object-contain"
       priority
     />
+  );
+}
+
+function PricingCard({
+  kicker,
+  title,
+  price,
+  includes,
+  cta,
+  secondary,
+  note,
+}: {
+  kicker: string;
+  title: string;
+  price: string;
+  includes: string[];
+  cta: ReactNode;
+  secondary?: ReactNode;
+  note?: string;
+}) {
+  return (
+    <article className="panel-cut fc-panel pricing-panel">
+      <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
+        <div>
+          <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">{kicker}</p>
+          <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">{title}</h3>
+        </div>
+        <div className="text-right">
+          <p className="font-display text-6xl leading-none text-[var(--fc-text)]">{price}</p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        {includes.map((item) => (
+          <div key={item} className="signal-row">
+            <span className="signal-index">+</span>
+            <span>{item}</span>
+          </div>
+        ))}
+      </div>
+
+      {note ? (
+        <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+          {note}
+        </div>
+      ) : null}
+
+      <div className="mt-8 flex flex-wrap gap-4">
+        {cta}
+        {secondary}
+      </div>
+    </article>
   );
 }
 
@@ -185,9 +242,7 @@ export default function Home() {
             <span className="brand-lockup">
               <FrozenclawIcon />
             </span>
-            <span className="font-display text-2xl uppercase tracking-[0.18em]">
-              Frozenclaw
-            </span>
+            <span className="font-display text-2xl uppercase tracking-[0.18em]">Frozenclaw</span>
           </a>
           <nav className="hidden items-center gap-8 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)] md:flex">
             <a href="#ablauf" className="transition hover:text-[var(--fc-text)]">
@@ -204,9 +259,9 @@ export default function Home() {
             </Link>
           </nav>
           <div className="hidden items-center gap-3 md:flex">
-            <a href="#preise" className="fc-button fc-button-primary">
-              Pläne wählen
-            </a>
+            <Link href="/registrieren" className="fc-button fc-button-primary">
+              Kostenlos testen
+            </Link>
             <Link href="/anmelden" className="fc-button fc-button-secondary">
               Anmelden
             </Link>
@@ -229,21 +284,22 @@ export default function Home() {
                 <span className="block text-[var(--fc-accent)]">KI-Agent.</span>
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
-                Frozenclaw hostet deine private OpenClaw-Instanz auf deutscher Infrastruktur.
-                Du bringst deinen eigenen Modell-Key mit, wir kümmern uns um Bereitstellung,
-                Erreichbarkeit und den technischen Betrieb der Instanz. Dazu bekommst du eine
-                Startanleitung und Support per E-Mail.
+                Frozenclaw hostet deine private OpenClaw-Instanz auf deutscher Infrastruktur. Du
+                kannst erst mit einem kleinen Free Tier testen und danach in BYOK oder Managed
+                wechseln.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <a href="#preise" className="fc-button fc-button-primary">
-                Jetzt starten
+              <Link href="/registrieren" className="fc-button fc-button-primary">
+                Kostenlos testen
+              </Link>
+              <a href="#preise" className="fc-button fc-button-secondary">
+                Pläne ansehen
               </a>
               <Link href="/anmelden" className="fc-button fc-button-secondary">
                 Anmelden
               </Link>
-              <a href="#preise" className="fc-button fc-button-secondary">Pläne ansehen</a>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -287,16 +343,16 @@ export default function Home() {
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="stat-block">
-                  <span className="stat-label">Provisionierung</span>
-                  <strong className="stat-value">Gleicher Tag</strong>
+                  <span className="stat-label">Free Tier</span>
+                  <strong className="stat-value">GPT-4o mini</strong>
+                </div>
+                <div className="stat-block">
+                  <span className="stat-label">Managed</span>
+                  <strong className="stat-value">GPT-5.2</strong>
                 </div>
                 <div className="stat-block">
                   <span className="stat-label">Standort</span>
                   <strong className="stat-value">Nur EU</strong>
-                </div>
-                <div className="stat-block">
-                  <span className="stat-label">Startmodell</span>
-                  <strong className="stat-value">Eigener Key</strong>
                 </div>
               </div>
             </div>
@@ -308,8 +364,8 @@ export default function Home() {
             <span>OpenClaw Hosting</span>
             <span>Private Instanz</span>
             <span>Hosting in Deutschland</span>
-            <span>Eigener Modell-Key</span>
-            <span>E-Mail-Support</span>
+            <span>Free Tier zum Testen</span>
+            <span>Managed mit GPT-5.2</span>
             <span>Startanleitung inklusive</span>
           </div>
         </section>
@@ -319,23 +375,16 @@ export default function Home() {
             <p className="section-kicker">Ablauf</p>
             <h2 className="section-title">So startet Frozenclaw.</h2>
             <p className="section-copy">
-              Frozenclaw richtet sich an Founder, Power-User und kleine Teams, die ihren
-              eigenen Agenten nutzen möchten, ohne den Server selbst zu betreiben.
+              Erst testen, dann buchen. Oder direkt in einen bezahlten Plan einsteigen.
             </p>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
             {steps.map((step) => (
               <article key={step.id} className="panel-cut fc-panel h-full">
-                <p className="font-display text-5xl leading-none text-[var(--fc-accent)]">
-                  {step.id}
-                </p>
-                <h3 className="mt-5 text-2xl font-semibold text-[var(--fc-text)]">
-                  {step.title}
-                </h3>
-                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  {step.copy}
-                </p>
+                <p className="font-display text-5xl leading-none text-[var(--fc-accent)]">{step.id}</p>
+                <h3 className="mt-5 text-2xl font-semibold text-[var(--fc-text)]">{step.title}</h3>
+                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">{step.copy}</p>
               </article>
             ))}
           </div>
@@ -394,9 +443,8 @@ export default function Home() {
                   Für Nutzer, die einen Agenten wollen, aber keinen Server betreiben möchten.
                 </h3>
                 <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  Der Start richtet sich nicht an alle. Er richtet sich an Leute, die wissen,
-                  warum sie OpenClaw nutzen möchten, und den technischen Betrieb nicht selbst
-                  übernehmen wollen.
+                  Der Start richtet sich an Founder, Power-User und kleine Teams, die OpenClaw
+                  praktisch nutzen wollen, ohne sich um den Betrieb kümmern zu müssen.
                 </p>
               </div>
             </div>
@@ -407,19 +455,13 @@ export default function Home() {
           <div className="section-head">
             <p className="section-kicker">Einsatzbereiche</p>
             <h2 className="section-title">Wofür Frozenclaw am Anfang gedacht ist.</h2>
-            <p className="section-copy">
-              Nicht für jeden denkbaren KI-Anwendungsfall, sondern für klare, wiederkehrende
-              Aufgaben, bei denen eine eigene gehostete Instanz sinnvoll ist.
-            </p>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
             {useCases.map((item) => (
               <article key={item.title} className="panel-cut fc-panel">
                 <p className="section-kicker">{item.title}</p>
-                <p className="mt-4 text-base leading-8 text-[var(--fc-text-muted)]">
-                  {item.copy}
-                </p>
+                <p className="mt-4 text-base leading-8 text-[var(--fc-text-muted)]">{item.copy}</p>
               </article>
             ))}
           </div>
@@ -428,181 +470,100 @@ export default function Home() {
         <section id="preise" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
             <p className="section-kicker">Preise</p>
-            <h2 className="section-title">Das Startangebot ist bewusst klar aufgebaut.</h2>
+            <h2 className="section-title">Klarer Einstieg, klare Stufen.</h2>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
-            <article className="panel-cut fc-panel pricing-panel">
-              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Jetzt buchbar
-                  </p>
-                  <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Standardplan
-                  </h3>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
-                    EUR 19
-                  </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
-                    pro Monat
-                  </p>
-                </div>
-              </div>
+            <PricingCard
+              kicker="Kostenlos testen"
+              title="Free Tier"
+              price="EUR 0"
+              includes={freeTierIncludes}
+              note="Der Free Tier ist für einen kurzen echten Produkttest gedacht und führt danach in einen bezahlten Plan."
+              cta={
+                <Link href="/registrieren" className="fc-button fc-button-primary">
+                  Kostenlos testen
+                </Link>
+              }
+              secondary={
+                <a href="#faq" className="fc-button fc-button-secondary">
+                  Mehr dazu
+                </a>
+              }
+            />
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {byokIncludes.map((item) => (
-                  <div key={item} className="signal-row">
-                    <span className="signal-index">+</span>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8 flex flex-wrap gap-4">
+            <PricingCard
+              kicker="Jetzt buchbar"
+              title="Standardplan"
+              price="EUR 19"
+              includes={byokIncludes}
+              cta={
                 <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
                   Jetzt starten
                 </CheckoutButton>
+              }
+              secondary={
                 <a href="#faq" className="fc-button fc-button-secondary">
                   Fragen klären
                 </a>
-              </div>
-            </article>
+              }
+            />
+          </div>
 
-            <article className="panel-cut fc-panel">
-              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Jetzt buchbar
-                  </p>
-                  <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Managed Starter
-                  </h3>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
-                    EUR 9,90
-                  </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
-                    pro Monat
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {managedStarterIncludes.map((item) => (
-                  <div key={item} className="signal-row">
-                    <span className="signal-index">+</span>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Der Einstiegsplan ist bewusst knapp gehalten. Er ist für Nutzer gedacht, die
-                Managed erst ausprobieren wollen, ohne direkt in ein größeres Monatskontingent
-                zu gehen.
-              </div>
-
-              <div className="mt-8 flex flex-wrap gap-4">
+          <div className="mt-5 grid gap-5 lg:grid-cols-3">
+            <PricingCard
+              kicker="Managed"
+              title="Starter"
+              price="EUR 9,90"
+              includes={managedStarterIncludes}
+              note="Der Einstiegsplan ist bewusst knapp gehalten und eignet sich für den ersten Managed-Einstieg."
+              cta={
                 <CheckoutButton planId="managed_starter" className="fc-button fc-button-primary">
                   Jetzt starten
                 </CheckoutButton>
+              }
+              secondary={
                 <a href="#faq" className="fc-button fc-button-secondary">
                   Mehr dazu
                 </a>
-              </div>
-            </article>
+              }
+            />
 
-            <article className="panel-cut fc-panel">
-              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Jetzt buchbar
-                  </p>
-                  <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Managed Plus
-                  </h3>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
-                    EUR 39
-                  </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
-                    pro Monat
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {managedImmediateIncludes.map((item) => (
-                  <div key={item} className="signal-row">
-                    <span className="signal-index">+</span>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Plus ist der mittlere Managed-Plan für Nutzer, die GPT-5.2 regelmäßig
-                einsetzen wollen, aber noch kein großes Monatskontingent brauchen.
-              </div>
-
-              <div className="mt-8 flex flex-wrap gap-4">
+            <PricingCard
+              kicker="Managed"
+              title="Plus"
+              price="EUR 39"
+              includes={managedPlusIncludes}
+              note="Der mittlere Managed-Plan für regelmäßige Nutzung mit deutlich mehr Spielraum."
+              cta={
                 <CheckoutButton planId="managed_immediate" className="fc-button fc-button-primary">
                   Jetzt starten
                 </CheckoutButton>
+              }
+              secondary={
                 <a href="#faq" className="fc-button fc-button-secondary">
                   Mehr dazu
                 </a>
-              </div>
-            </article>
+              }
+            />
 
-            <article className="panel-cut fc-panel">
-              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Jetzt buchbar
-                  </p>
-                  <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Managed Advanced
-                  </h3>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
-                    EUR 59
-                  </p>
-                  <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
-                    pro Monat
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {managedAdvancedIncludes.map((item) => (
-                  <div key={item} className="signal-row">
-                    <span className="signal-index">+</span>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Advanced ist die stärkere Managed-Stufe für Nutzer, die GPT-5.2 regelmäßig
-                einsetzen und deutlich mehr Spielraum pro Monat brauchen.
-              </div>
-
-              <div className="mt-8 flex flex-wrap gap-4">
+            <PricingCard
+              kicker="Managed"
+              title="Advanced"
+              price="EUR 59"
+              includes={managedAdvancedIncludes}
+              note="Für Nutzer, die GPT-5.2 regelmäßig einsetzen und mehr Reserve pro Monat wollen."
+              cta={
                 <CheckoutButton planId="managed_advanced" className="fc-button fc-button-primary">
                   Jetzt starten
                 </CheckoutButton>
+              }
+              secondary={
                 <a href="#faq" className="fc-button fc-button-secondary">
                   Mehr dazu
                 </a>
-              </div>
-            </article>
+              }
+            />
           </div>
         </section>
 
@@ -611,23 +572,21 @@ export default function Home() {
             <div className="panel-cut fc-panel">
               <p className="section-kicker">Launch-Hinweis</p>
               <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
-                Der Start konzentriert sich auf ein Angebot, das sofort verständlich ist.
+                Erst testen, dann produktiv einsteigen.
               </h3>
               <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                Private Instanz, Hosting in Deutschland, eigener Modell-Key, Startanleitung und
-                Support per E-Mail. Bereitstellung in der Regel am selben Tag. Mehr muss die
-                erste Version nicht versprechen.
+                Der Free Tier soll das Produkt erlebbar machen. Für echten Dauerbetrieb wechselst du
+                danach in BYOK oder Managed.
               </p>
             </div>
 
             <div className="panel-cut fc-panel">
               <p className="section-kicker">Nach der Bestellung</p>
               <ol className="mt-4 space-y-4 text-base text-[var(--fc-text-muted)]">
-                <li>01. Checkout erfasst die Bestellung.</li>
+                <li>01. Konto anlegen oder Plan buchen.</li>
                 <li>02. Provisionierung legt deine Instanz an.</li>
-                <li>03. Du erhältst Zugang und Startanleitung.</li>
-                <li>04. Du hinterlegst deinen eigenen Modell-Key.</li>
-                <li>05. Danach kannst du deine Instanz direkt nutzen.</li>
+                <li>03. Du erhältst Zugang zu deinem Dashboard.</li>
+                <li>04. Du öffnest OpenClaw und arbeitest direkt los.</li>
               </ol>
             </div>
           </div>
@@ -636,18 +595,14 @@ export default function Home() {
         <section id="faq" className="mx-auto w-[94%] max-w-7xl py-14">
           <div className="section-head">
             <p className="section-kicker">FAQ</p>
-            <h2 className="section-title">Keine Weichzeichnung. Nur die wichtigen Kanten.</h2>
+            <h2 className="section-title">Die wichtigsten Fragen direkt beantwortet.</h2>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-2">
             {faqs.map((item) => (
               <article key={item.question} className="panel-cut fc-panel">
-                <h3 className="text-2xl font-semibold text-[var(--fc-text)]">
-                  {item.question}
-                </h3>
-                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  {item.answer}
-                </p>
+                <h3 className="text-2xl font-semibold text-[var(--fc-text)]">{item.question}</h3>
+                <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">{item.answer}</p>
               </article>
             ))}
           </div>
