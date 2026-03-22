@@ -71,10 +71,12 @@ function migrate(db: DbInstance) {
     CREATE TABLE IF NOT EXISTS topup_purchases (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       order_id INTEGER NOT NULL,
+      stripe_event_id TEXT UNIQUE,
+      stripe_session_id TEXT UNIQUE,
       package_id TEXT NOT NULL,
       standard_tokens INTEGER NOT NULL,
       amount_cents INTEGER NOT NULL,
-      status TEXT NOT NULL DEFAULT 'paid',
+      status TEXT NOT NULL DEFAULT 'checkout_created',
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE
     );
@@ -118,8 +120,12 @@ function migrate(db: DbInstance) {
   const usageColumns = db
     .prepare("PRAGMA table_info(usage_events)")
     .all() as Array<{ name: string }>;
+  const topUpColumns = db
+    .prepare("PRAGMA table_info(topup_purchases)")
+    .all() as Array<{ name: string }>;
   const orderColumnSet = new Set(orderColumns.map((column) => column.name));
   const usageColumnSet = new Set(usageColumns.map((column) => column.name));
+  const topUpColumnSet = new Set(topUpColumns.map((column) => column.name));
 
   if (!orderColumnSet.has("managed_provider")) {
     db.exec("ALTER TABLE orders ADD COLUMN managed_provider TEXT");
@@ -175,7 +181,17 @@ function migrate(db: DbInstance) {
     db.exec("ALTER TABLE usage_events ADD COLUMN usage_key TEXT");
   }
 
+  if (!topUpColumnSet.has("stripe_event_id")) {
+    db.exec("ALTER TABLE topup_purchases ADD COLUMN stripe_event_id TEXT");
+  }
+
+  if (!topUpColumnSet.has("stripe_session_id")) {
+    db.exec("ALTER TABLE topup_purchases ADD COLUMN stripe_session_id TEXT");
+  }
+
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_usage_events_usage_key ON usage_events(usage_key)");
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_topup_purchases_event_id ON topup_purchases(stripe_event_id)");
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_topup_purchases_session_id ON topup_purchases(stripe_session_id)");
   db.exec(`
     UPDATE orders
     SET payment_status = 'paid',

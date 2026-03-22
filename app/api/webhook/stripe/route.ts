@@ -28,6 +28,12 @@ function findOrderById(orderId: number) {
     | undefined;
 }
 
+function findProcessedTopUpEvent(eventId: string) {
+  return getDb()
+    .prepare("SELECT id FROM topup_purchases WHERE stripe_event_id = ? LIMIT 1")
+    .get(eventId) as { id: number } | undefined;
+}
+
 function updateSubscriptionState(
   subscriptionId: string,
   next: {
@@ -82,12 +88,79 @@ export async function POST(request: Request) {
       .prepare("SELECT id FROM orders WHERE stripe_event_id = ?")
       .get(event.id) as { id: number } | undefined;
 
-    if (existingOrder) {
+    if (existingOrder || findProcessedTopUpEvent(event.id)) {
       return NextResponse.json({ received: true, duplicate: true });
     }
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
+      const topUpOrderId = Number(session.metadata?.topUpOrderId ?? "");
+      const topUpPackageId = session.metadata?.topUpPackageId?.trim() ?? "";
+
+      if (Number.isInteger(topUpOrderId) && topUpOrderId > 0 && topUpPackageId) {
+        const standardTokens = Number(session.metadata?.standardTokens ?? "0");
+        const amountCents = Number(session.metadata?.amountCents ?? "0");
+
+        db.prepare(
+          `
+            UPDATE topup_purchases
+            SET
+              stripe_event_id = @eventId,
+              status = 'paid'
+            WHERE stripe_session_id = @sessionId
+          `,
+        ).run({
+          eventId: event.id,
+          sessionId: session.id,
+        });
+
+        const existingTopUp = db
+          .prepare("SELECT id FROM topup_purchases WHERE stripe_session_id = ? LIMIT 1")
+          .get(session.id) as { id: number } | undefined;
+
+        if (!existingTopUp) {
+          db.prepare(
+            `
+              INSERT INTO topup_purchases (
+                order_id,
+                stripe_event_id,
+                stripe_session_id,
+                package_id,
+                standard_tokens,
+                amount_cents,
+                status
+              )
+              VALUES (
+                @orderId,
+                @eventId,
+                @sessionId,
+                @packageId,
+                @standardTokens,
+                @amountCents,
+                'paid'
+              )
+            `,
+          ).run({
+            orderId: topUpOrderId,
+            eventId: event.id,
+            sessionId: session.id,
+            packageId: topUpPackageId,
+            standardTokens,
+            amountCents,
+          });
+        }
+
+        logOrderEvent(topUpOrderId, "topup_checkout_completed", {
+          stripeEventId: event.id,
+          stripeSessionId: session.id,
+          packageId: topUpPackageId,
+          standardTokens,
+          amountCents,
+        });
+
+        return NextResponse.json({ received: true });
+      }
+
       const rawPlanId = session.metadata?.planId ?? "hosted_byok";
       const planId = isPlanId(rawPlanId) ? rawPlanId : "hosted_byok";
       const usageMode = (session.metadata?.usageMode as UsageMode | undefined) ?? plans[planId].usageMode;

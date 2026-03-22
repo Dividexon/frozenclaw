@@ -2,12 +2,13 @@ import Link from "next/link";
 import { BillingPortalButton } from "@/components/billing-portal-button";
 import { CopyField } from "@/components/copy-field";
 import { LogoutButton } from "@/components/logout-button";
+import { TopUpButton } from "@/components/topup-button";
 import { UpgradePlanButton } from "@/components/upgrade-plan-button";
 import { resolveSessionAccessFromCookies } from "@/lib/auth";
 import { buildDashboardSnapshot } from "@/lib/dashboard";
 import { legalProfile } from "@/lib/legal";
 import { resolveLoginToken, resolveSetupAccess } from "@/lib/login-links";
-import { formatStandardTokens } from "@/lib/managed";
+import { formatStandardTokens, getManagedTopUps } from "@/lib/managed";
 
 type KontoPageProps = {
   searchParams: Promise<{
@@ -123,6 +124,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
   const managed = access?.managed;
   const billingToken = access?.authType === "login_link" ? token : undefined;
   const isLegacyTrial = access?.plan === "trial";
+  const topUpPackages = access ? getManagedTopUps(access.plan) : [];
   const managedProgressPercent =
     managed && managed.includedStandardTokens > 0
       ? Math.min(
@@ -639,14 +641,27 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                         Geplante Pakete: 1 Mio. oder 2,5 Mio. zusätzliche Standard-Tokens als
                         Einmalkauf. Verbrauch erst nach dem Monatskontingent.
                       </p>
-                      <div className="mt-4">
-                        {access.usageMode === "managed" ? (
-                          <span className="fc-button fc-button-secondary opacity-60">
-                            Einmalkauf folgt
-                          </span>
+                      <div className="mt-4 flex flex-wrap gap-4">
+                        {access.usageMode === "managed" && !isLegacyTrial && topUpPackages.length > 0 ? (
+                          <>
+                            {topUpPackages.map((pkg) => (
+                              <TopUpButton
+                                key={pkg.id}
+                                packageId={pkg.id}
+                                className="fc-button fc-button-secondary"
+                              >
+                                {pkg.label} für {(pkg.amountCents / 100).toLocaleString("de-DE", {
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 2,
+                                })} €
+                              </TopUpButton>
+                            ))}
+                          </>
                         ) : (
                           <span className="fc-button fc-button-secondary opacity-60">
-                            Nur für Managed-Pläne relevant
+                            {isLegacyTrial
+                              ? "Nach Kauf im Managed-Plan verfügbar"
+                              : "Nur für Managed-Pläne relevant"}
                           </span>
                         )}
                       </div>

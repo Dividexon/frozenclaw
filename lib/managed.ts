@@ -64,6 +64,10 @@ export function getManagedTopUps(planId?: string | null) {
   return getManagedPlanDefinition(planId).topUps ?? [];
 }
 
+export function getManagedTopUpPackage(planId: string | null | undefined, packageId: string) {
+  return getManagedTopUps(planId).find((entry) => entry.id === packageId) ?? null;
+}
+
 export function buildManagedOrderSeed(planId: PlanId) {
   const defaults = getManagedDefaults(planId);
 
