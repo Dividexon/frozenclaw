@@ -41,8 +41,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
         <p className="section-kicker">Checkout</p>
         <h1 className="section-title mt-3 text-5xl">Bestellung eingegangen.</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
-          Die Bestellung ist gespeichert. Sobald deine Instanz bereitsteht, führt dich der
-          Zugangslink direkt in den Setup-Schritt für deinen eigenen API-Key.
+          Die Bestellung ist gespeichert. Sobald deine Instanz bereitsteht, findest du den
+          aktuellen Status direkt in deinem Dashboard und kannst von dort aus weiterarbeiten.
         </p>
 
         {sessionId ? <OrderStatusPanel sessionId={sessionId} initialStatus={status} /> : null}
@@ -51,8 +51,8 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
           <Link href="/" className="fc-button fc-button-primary">
             Zur Startseite
           </Link>
-          <Link href="/#preise" className="fc-button fc-button-secondary">
-            Preise ansehen
+          <Link href="/konto" className="fc-button fc-button-secondary">
+            Zum Dashboard
           </Link>
         </div>
       </section>

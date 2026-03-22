@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CheckoutButton } from "@/components/checkout-button";
 import { RegisterForm } from "@/components/register-form";
 
 export default function RegistrierenPage() {
@@ -35,26 +34,27 @@ export default function RegistrierenPage() {
         </div>
 
         <div className="panel-cut fc-panel">
-          <p className="section-kicker">Oder direkt bezahlen</p>
-          <h2 className="section-title mt-3 text-4xl">Bezahlten Plan sofort aktivieren.</h2>
+          <p className="section-kicker">Danach im Dashboard</p>
+          <h2 className="section-title mt-3 text-4xl">Plan wählen und direkt weitermachen.</h2>
           <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
-            Wenn du direkt produktiv einsteigen willst, kannst du ohne Testzugang sofort einen
-            bezahlten Plan buchen.
+            Nach der Registrierung landest du sofort im Dashboard. Dort kannst du deinen
+            Testzugang nutzen oder direkt in einen bezahlten Plan wechseln, ohne einen
+            zusätzlichen Zwischenschritt.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
-              Standardplan buchen
-            </CheckoutButton>
-            <CheckoutButton planId="managed_starter" className="fc-button fc-button-secondary">
-              Managed Starter buchen
-            </CheckoutButton>
-            <CheckoutButton planId="managed_immediate" className="fc-button fc-button-secondary">
-              Managed Plus buchen
-            </CheckoutButton>
-            <CheckoutButton planId="managed_advanced" className="fc-button fc-button-secondary">
-              Managed Advanced buchen
-            </CheckoutButton>
+          <div className="mt-8 grid gap-3">
+            <div className="signal-row">
+              <span className="signal-index">+</span>
+              <span>Login und Registrierung laufen nur noch über E-Mail und Passwort</span>
+            </div>
+            <div className="signal-row">
+              <span className="signal-index">+</span>
+              <span>Im Dashboard kannst du auf Standard oder Managed wechseln</span>
+            </div>
+            <div className="signal-row">
+              <span className="signal-index">+</span>
+              <span>Bestehende Instanz und Konto bleiben dabei erhalten</span>
+            </div>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-4">

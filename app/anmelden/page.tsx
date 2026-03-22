@@ -16,9 +16,8 @@ export default async function AnmeldenPage() {
         <p className="section-kicker">Anmelden</p>
         <h1 className="section-title mt-3 text-5xl">Zugang mit E-Mail und Passwort.</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
-          Melde dich mit der E-Mail-Adresse deiner Frozenclaw-Bestellung und deinem Passwort an.
-          Falls du dein Passwort noch nicht gesetzt hast, nutze zuerst deinen Zugangslink aus der
-          Bereitstellungs-Mail.
+          Melde dich mit deiner E-Mail-Adresse und deinem Passwort an. Wenn du noch kein Konto
+          hast, registriere dich zuerst und starte danach direkt in dein Dashboard.
         </p>
 
         <div className="mt-8 max-w-xl">

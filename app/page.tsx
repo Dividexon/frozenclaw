@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CheckoutButton } from "@/components/checkout-button";
 import { resolveSessionAccessFromCookies } from "@/lib/auth";
 
 const launchSignals = [
@@ -14,9 +13,9 @@ const launchSignals = [
 const steps = [
   {
     id: "01",
-    title: "Kostenlos testen oder direkt buchen",
+    title: "Konto anlegen und starten",
     copy:
-      "Du kannst erst mit einem kleinen Testzugang starten oder sofort einen bezahlten Plan buchen.",
+      "Du registrierst dich mit E-Mail und Passwort, landest direkt im Dashboard und entscheidest dort über Testzugang oder bezahlten Plan.",
   },
   {
     id: "02",
@@ -506,9 +505,9 @@ export default async function Home() {
               price="EUR 19"
               includes={byokIncludes}
               cta={
-                <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
-                  Jetzt starten
-                </CheckoutButton>
+                <Link href="/registrieren" className="fc-button fc-button-primary">
+                  Konto anlegen
+                </Link>
               }
               secondary={
                 <a href="#faq" className="fc-button fc-button-secondary">
@@ -526,9 +525,9 @@ export default async function Home() {
               includes={managedStarterIncludes}
               note="Der Einstiegsplan ist bewusst knapp gehalten und eignet sich für den ersten Managed-Einstieg."
               cta={
-                <CheckoutButton planId="managed_starter" className="fc-button fc-button-primary">
-                  Jetzt starten
-                </CheckoutButton>
+                <Link href="/registrieren" className="fc-button fc-button-primary">
+                  Konto anlegen
+                </Link>
               }
               secondary={
                 <a href="#faq" className="fc-button fc-button-secondary">
@@ -544,9 +543,9 @@ export default async function Home() {
               includes={managedPlusIncludes}
               note="Der mittlere Managed-Plan für regelmäßige Nutzung mit deutlich mehr Spielraum."
               cta={
-                <CheckoutButton planId="managed_immediate" className="fc-button fc-button-primary">
-                  Jetzt starten
-                </CheckoutButton>
+                <Link href="/registrieren" className="fc-button fc-button-primary">
+                  Konto anlegen
+                </Link>
               }
               secondary={
                 <a href="#faq" className="fc-button fc-button-secondary">
@@ -562,9 +561,9 @@ export default async function Home() {
               includes={managedAdvancedIncludes}
               note="Für Nutzer, die GPT-5.2 regelmäßig einsetzen und mehr Reserve pro Monat wollen."
               cta={
-                <CheckoutButton planId="managed_advanced" className="fc-button fc-button-primary">
-                  Jetzt starten
-                </CheckoutButton>
+                <Link href="/registrieren" className="fc-button fc-button-primary">
+                  Konto anlegen
+                </Link>
               }
               secondary={
                 <a href="#faq" className="fc-button fc-button-secondary">
@@ -580,7 +579,7 @@ export default async function Home() {
             <div className="panel-cut fc-panel">
               <p className="section-kicker">Launch-Hinweis</p>
               <h3 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">
-                Erst testen, dann produktiv einsteigen.
+                Erst registrieren, dann im eigenen Konto entscheiden.
               </h3>
               <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
                 Der Free Tier soll das Produkt erlebbar machen. Für echten Dauerbetrieb wechselst du
@@ -591,8 +590,8 @@ export default async function Home() {
             <div className="panel-cut fc-panel">
               <p className="section-kicker">Nach der Bestellung</p>
               <ol className="mt-4 space-y-4 text-base text-[var(--fc-text-muted)]">
-                <li>01. Konto anlegen oder Plan buchen.</li>
-                <li>02. Provisionierung legt deine Instanz an.</li>
+                <li>01. Konto mit E-Mail und Passwort anlegen.</li>
+                <li>02. Im Dashboard testen oder bezahlten Plan wählen.</li>
                 <li>03. Du erhältst Zugang zu deinem Dashboard.</li>
                 <li>04. Du öffnest OpenClaw und arbeitest direkt los.</li>
               </ol>

@@ -98,7 +98,7 @@ export function RegisterForm() {
       {error ? <p className="text-sm text-[var(--fc-accent)]">{error}</p> : null}
 
       <button type="submit" className="fc-button fc-button-primary" disabled={isSubmitting}>
-        {isSubmitting ? "Testzugang wird erstellt..." : "Testzugang erstellen"}
+        {isSubmitting ? "Konto wird erstellt..." : "Konto erstellen"}
       </button>
     </form>
   );
