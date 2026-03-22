@@ -113,10 +113,10 @@ OPENCLAW_IMAGE=$OPENCLAW_IMAGE
 EOF
 
 if [[ "$USAGE_MODE" == "managed" ]]; then
+  sed -i '/^ANTHROPIC_API_KEY=/d;/^OPENAI_API_KEY=/d;/^GEMINI_API_KEY=/d' "$PROVIDER_ENV"
+
   if [[ -n "$OPENAI_MANAGED_API_KEY" ]]; then
-    grep -q '^OPENAI_API_KEY=' "$PROVIDER_ENV" \
-      && sed -i "s/^OPENAI_API_KEY=.*/OPENAI_API_KEY=$OPENAI_MANAGED_API_KEY/" "$PROVIDER_ENV" \
-      || printf 'OPENAI_API_KEY=%s\n' "$OPENAI_MANAGED_API_KEY" >> "$PROVIDER_ENV"
+    printf 'OPENAI_API_KEY=%s\n' "$OPENAI_MANAGED_API_KEY" >> "$PROVIDER_ENV"
 
     cat > "$AUTH_PROFILES_JSON" <<EOF
 {
@@ -134,6 +134,13 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
 }
 EOF
   elif [[ ! -f "$AUTH_PROFILES_JSON" ]]; then
+    cat > "$AUTH_PROFILES_JSON" <<EOF
+{
+  "version": 1,
+  "profiles": {}
+}
+EOF
+  else
     cat > "$AUTH_PROFILES_JSON" <<EOF
 {
   "version": 1,

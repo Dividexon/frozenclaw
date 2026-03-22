@@ -100,6 +100,30 @@ SQLite speichert dafür bereits:
 - Usage-Events mit Standard-Tokens und Kostenfeldern
 - spätere Top-up-Käufe
 
+### Interner Testpfad fuer Managed
+
+Sobald `OPENAI_MANAGED_API_KEY` auf dem Server gesetzt ist, kann ein Managed-Testfall ohne Stripe direkt erzeugt oder eine bestehende Instanz umgestellt werden:
+
+```bash
+cd /opt/frozenclaw/app
+node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com
+```
+
+Optional laesst sich gezielt eine bestehende Instanz umstellen:
+
+```bash
+cd /opt/frozenclaw/app
+node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com --slug fc-451a2857ca
+```
+
+Das Skript:
+
+- setzt die Bestellung auf `managed_beta`
+- hinterlegt `openai/gpt-5.2`
+- setzt `3.000.000` Standard-Tokens
+- erzeugt einen frischen Login-Link
+- laesst die Bereitstellung ueber den bestehenden Recovery-Lauf der App wieder anlaufen
+
 ## Nächste echte Produktionsschritte
 
 - zentralen Betreiber-Key per `OPENAI_MANAGED_API_KEY` setzen

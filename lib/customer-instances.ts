@@ -3,6 +3,7 @@ import "server-only";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getAppConfig } from "@/lib/env";
+import { getDb } from "@/lib/db";
 
 export type ProviderId = "anthropic" | "openai" | "gemini";
 
@@ -217,14 +218,37 @@ async function migrateLegacyProviderEnvToAuthStore(slug: string) {
 async function syncOpenClawModelAllowlist(slug: string) {
   const authStore = await readAuthProfileStore(slug);
   const allowedModels = new Set<string>();
+  const order = getDb()
+    .prepare(`
+      SELECT usage_mode, managed_provider, managed_model
+      FROM orders
+      WHERE instance_slug = ?
+      LIMIT 1
+    `)
+    .get(slug) as
+    | {
+        usage_mode: string;
+        managed_provider: string | null;
+        managed_model: string | null;
+      }
+    | undefined;
 
-  for (const provider of Object.keys(providerEnvMap) as ProviderId[]) {
-    if (!hasProviderProfile(authStore, provider)) {
-      continue;
-    }
+  if (
+    order?.usage_mode === "managed" &&
+    order.managed_provider === "openai" &&
+    order.managed_model &&
+    hasProviderProfile(authStore, "openai")
+  ) {
+    allowedModels.add(order.managed_model);
+  } else {
+    for (const provider of Object.keys(providerEnvMap) as ProviderId[]) {
+      if (!hasProviderProfile(authStore, provider)) {
+        continue;
+      }
 
-    for (const model of providerAllowedModels[provider]) {
-      allowedModels.add(model);
+      for (const model of providerAllowedModels[provider]) {
+        allowedModels.add(model);
+      }
     }
   }
 
