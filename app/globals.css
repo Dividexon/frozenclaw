@@ -141,13 +141,15 @@ a {
 }
 
 .fc-button-secondary {
-  border: 1px solid var(--fc-border-strong);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--fc-border);
+  background: rgba(255, 255, 255, 0.045);
   color: var(--fc-text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .fc-button-secondary:hover {
   border-color: rgba(255, 58, 50, 0.5);
+  background: rgba(255, 77, 77, 0.08);
   color: white;
 }
 
