@@ -5,7 +5,7 @@ import { getBaseUrlFromRequest } from "@/lib/env";
 import { buildManagedOrderSeed } from "@/lib/managed";
 import { startRuntimeRecovery } from "@/lib/provisioning";
 import { getStripe } from "@/lib/stripe";
-import { isPlanId, plans } from "@/lib/plans";
+import { isPlanId, plans, type PlanId } from "@/lib/plans";
 
 type Body = {
   planId?: string;
@@ -13,43 +13,34 @@ type Body = {
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+async function createUpgradeCheckout(request: Request, planId: PlanId | null) {
   startRuntimeRecovery();
 
   const access = await resolveSessionAccessFromCookies();
 
   if (!access) {
-    return NextResponse.json({ error: "Du bist nicht angemeldet." }, { status: 403 });
+    return { error: "Du bist nicht angemeldet.", status: 403 as const };
   }
 
   if (access.plan !== "trial") {
-    return NextResponse.json(
-      { error: "Der Upgrade-Flow ist aktuell nur aus dem Testzugang verfügbar." },
-      { status: 409 },
-    );
+    return {
+      error: "Der Upgrade-Flow ist aktuell nur aus bestehenden Alt-Testkonten verfügbar.",
+      status: 409 as const,
+    };
   }
 
-  const body = (await request.json().catch(() => ({}))) as Body;
-  const planId = body.planId && isPlanId(body.planId) ? body.planId : null;
-
   if (!planId || planId === "trial") {
-    return NextResponse.json({ error: "Bitte einen gültigen Zielplan wählen." }, { status: 400 });
+    return { error: "Bitte einen gültigen Zielplan wählen.", status: 400 as const };
   }
 
   const plan = plans[planId];
 
   if (!plan.active) {
-    return NextResponse.json(
-      { error: "Dieser Plan ist noch nicht buchbar." },
-      { status: 409 },
-    );
+    return { error: "Dieser Plan ist noch nicht buchbar.", status: 409 as const };
   }
 
   if (!access.email) {
-    return NextResponse.json(
-      { error: "Für dieses Konto ist keine E-Mail-Adresse hinterlegt." },
-      { status: 409 },
-    );
+    return { error: "Für dieses Konto ist keine E-Mail-Adresse hinterlegt.", status: 409 as const };
   }
 
   try {
@@ -119,14 +110,44 @@ export async function POST(request: Request) {
       managedProvider: managedSeed?.managedProvider ?? null,
     });
 
-    return NextResponse.json({ url: session.url });
+    return { url: session.url ?? null };
   } catch (error) {
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Upgrade-Checkout konnte nicht erstellt werden.",
-      },
-      { status: 500 },
-    );
+    return {
+      error:
+        error instanceof Error ? error.message : "Upgrade-Checkout konnte nicht erstellt werden.",
+      status: 500 as const,
+    };
   }
+}
+
+export async function POST(request: Request) {
+  const body = (await request.json().catch(() => ({}))) as Body;
+  const planId = body.planId && isPlanId(body.planId) ? body.planId : null;
+  const result = await createUpgradeCheckout(request, planId);
+
+  if ("error" in result) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
+  }
+
+  return NextResponse.json({ url: result.url });
+}
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const rawPlanId = url.searchParams.get("planId");
+  const planId = rawPlanId && isPlanId(rawPlanId) ? rawPlanId : null;
+  const result = await createUpgradeCheckout(request, planId);
+
+  if ("error" in result || !result.url) {
+    const target = new URL("/konto#plan-verbrauch", request.url);
+    target.searchParams.set(
+      "billingError",
+      "error" in result
+        ? (result.error ?? "Upgrade-Checkout konnte nicht erstellt werden.")
+        : "Upgrade-Checkout konnte nicht erstellt werden.",
+    );
+    return NextResponse.redirect(target, { status: 303 });
+  }
+
+  return NextResponse.redirect(result.url, { status: 303 });
 }
