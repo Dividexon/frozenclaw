@@ -120,6 +120,16 @@ export async function POST(request: Request) {
     const message =
       error instanceof Error ? error.message : "Billing-Portal konnte nicht geöffnet werden.";
 
+    if (message.includes("No such checkout.session")) {
+      return NextResponse.json(
+        {
+          error:
+            "Für dieses Konto existiert noch kein echter Stripe-Checkout. Das Billing-Portal wird verfügbar, sobald ein reales Abo über Stripe abgeschlossen wurde.",
+        },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
