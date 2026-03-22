@@ -199,17 +199,20 @@ export default function Home() {
             <a href="#faq" className="transition hover:text-[var(--fc-text)]">
               Fragen
             </a>
+            <Link href="/registrieren" className="transition hover:text-[var(--fc-text)]">
+              Registrieren
+            </Link>
             <Link href="/anmelden" className="transition hover:text-[var(--fc-text)]">
               Anmelden
             </Link>
           </nav>
           <div className="hidden items-center gap-3 md:flex">
+            <Link href="/registrieren" className="fc-button fc-button-primary">
+              Testzugang erstellen
+            </Link>
             <Link href="/anmelden" className="fc-button fc-button-secondary">
               Anmelden
             </Link>
-            <a href="#preise" className="fc-button fc-button-primary">
-              Zugang sichern
-            </a>
           </div>
         </header>
 
@@ -237,15 +240,13 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <CheckoutButton planId="hosted_byok" className="fc-button fc-button-primary">
-                Jetzt starten
-              </CheckoutButton>
+              <Link href="/registrieren" className="fc-button fc-button-primary">
+                Kostenlos testen
+              </Link>
               <Link href="/anmelden" className="fc-button fc-button-secondary">
                 Anmelden
               </Link>
-              <a href="#ueberblick" className="fc-button fc-button-secondary">
-                System ansehen
-              </a>
+              <a href="#preise" className="fc-button fc-button-secondary">Pläne ansehen</a>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">

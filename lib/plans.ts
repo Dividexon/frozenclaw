@@ -1,6 +1,7 @@
 export type UsageMode = "byok" | "managed";
 
 export type PlanId =
+  | "trial"
   | "hosted_byok"
   | "managed_starter"
   | "managed_immediate"
@@ -28,6 +29,18 @@ export type PlanDefinition = {
 };
 
 export const plans: Record<PlanId, PlanDefinition> = {
+  trial: {
+    id: "trial",
+    name: "Testzugang",
+    description: "Begrenzter Testzugang mit GPT-5.2 zum Kennenlernen von Frozenclaw.",
+    usageMode: "managed",
+    amountCents: 0,
+    active: false,
+    managedProvider: "openai",
+    managedModel: "openai/gpt-5.2",
+    includedStandardTokens: 100_000,
+    includedBudgetCents: 50,
+  },
   hosted_byok: {
     id: "hosted_byok",
     name: "Hosted BYOK",

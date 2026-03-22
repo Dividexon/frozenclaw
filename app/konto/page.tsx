@@ -41,6 +41,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
   const dashboard = access ? await buildDashboardSnapshot(access) : null;
   const managed = access?.managed;
   const billingToken = access?.authType === "login_link" ? token : undefined;
+  const isTrial = access?.plan === "trial";
   const managedProgressPercent =
     managed && managed.includedStandardTokens > 0
       ? Math.min(100, Math.round((managed.usedStandardTokens / managed.includedStandardTokens) * 100))
@@ -504,15 +505,24 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                   <p className="section-kicker">Aktionen</p>
                   <div className="mt-4 grid gap-4">
                     <div className="border border-[var(--fc-border)] bg-black/25 p-4">
-                      <h3 className="text-xl font-semibold text-[var(--fc-text)]">Plan wechseln</h3>
+                      <h3 className="text-xl font-semibold text-[var(--fc-text)]">
+                        {isTrial ? "Nächster Schritt" : "Plan wechseln"}
+                      </h3>
                       <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
-                        Upgrade, Downgrade, Kündigung und Rechnungen laufen über das Stripe
-                        Customer Portal.
+                        {isTrial
+                          ? "Dein Testzugang ist aktiv. Der direkte Upgrade-Flow aus dem Dashboard folgt als nächster Ausbau."
+                          : "Upgrade, Downgrade, Kündigung und Rechnungen laufen über das Stripe Customer Portal."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-4">
-                        <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
-                          Stripe-Portal öffnen
-                        </BillingPortalButton>
+                        {isTrial ? (
+                          <Link href="/" className="fc-button fc-button-secondary">
+                            Pläne ansehen
+                          </Link>
+                        ) : (
+                          <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
+                            Stripe-Portal öffnen
+                          </BillingPortalButton>
+                        )}
                       </div>
                     </div>
 
@@ -604,9 +614,11 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                   <Link href="/beta-bedingungen" className="transition hover:text-[var(--fc-text)]">
                     Beta-Bedingungen
                   </Link>
-                  <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
-                    Rechnungen & Abo
-                  </BillingPortalButton>
+                  {!isTrial ? (
+                    <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
+                      Rechnungen & Abo
+                    </BillingPortalButton>
+                  ) : null}
               </div>
             </section>
           </div>

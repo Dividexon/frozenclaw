@@ -18,6 +18,9 @@ export default function AnmeldenPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4">
+          <Link href="/registrieren" className="fc-button fc-button-secondary">
+            Erst registrieren
+          </Link>
           <Link href="/" className="fc-button fc-button-secondary">
             Zur Startseite
           </Link>

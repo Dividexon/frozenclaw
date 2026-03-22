@@ -34,6 +34,10 @@ export function isManagedApiKeyConfigured() {
 }
 
 function getManagedPlanDefinition(planId?: string | null) {
+  if (planId === "trial") {
+    return plans.trial;
+  }
+
   if (planId === "managed_starter") {
     return plans.managed_starter;
   }
