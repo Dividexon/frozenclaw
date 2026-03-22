@@ -215,7 +215,12 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                       </a>
                     ) : null}
                     {access.agentUrl ? (
-                      <a href={access.agentUrl} className="fc-button fc-button-secondary">
+                      <a
+                        href={access.agentUrl}
+                        className="fc-button fc-button-secondary"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
                         Agent öffnen
                       </a>
                     ) : null}
@@ -286,7 +291,12 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 </div>
                 <div className="flex flex-wrap gap-4">
                   {access.agentUrl ? (
-                    <a href={access.agentUrl} className="fc-button fc-button-primary">
+                    <a
+                      href={access.agentUrl}
+                      className="fc-button fc-button-primary"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
                       OpenClaw öffnen
                     </a>
                   ) : null}
