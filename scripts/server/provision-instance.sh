@@ -210,13 +210,6 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
     "load": {
       "paths": ["$MANAGED_PLUGIN_FILE"]
     }
-  },
-  "models": {
-    "providers": {
-      "$MANAGED_PROVIDER": {
-        "api": "openai-responses"
-      }
-    }
   }
 }
 EOF
