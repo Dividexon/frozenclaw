@@ -89,7 +89,7 @@ Aktueller Zielzustand:
 
 - Modell: `openai/gpt-5.2`
 - `Managed Starter`: `500.000` Standard-Tokens fuer `9,90 EUR / Monat`
-- `Managed Immediate`: `3.000.000` Standard-Tokens fuer `39 EUR / Monat`
+- `Managed Plus`: `3.000.000` Standard-Tokens fuer `39 EUR / Monat`
 - `Managed Advanced`: `5.000.000` Standard-Tokens fuer `59 EUR / Monat`
 - Nachbuchung geplant:
   - `1.000.000` Standard-Tokens für `9 EUR`

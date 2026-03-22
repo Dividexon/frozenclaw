@@ -121,7 +121,7 @@ const specRows = [
   ["Modell-Key", "Zum Start vom Kunden gestellt"],
   ["Support", "E-Mail + Startanleitung"],
   ["Bereitstellung", "In der Regel am selben Tag"],
-  ["Managed", "GPT-5.2 mit Starter, Immediate und Advanced"],
+  ["Managed", "GPT-5.2 mit Starter, Plus und Advanced"],
 ];
 
 const faqs = [
@@ -138,7 +138,7 @@ const faqs = [
   {
     question: "Welche Managed-Stufen gibt es?",
     answer:
-      "Zum Start planen wir drei Managed-Stufen mit demselben Modell. Starter liegt bei 9,90 EUR mit 500.000 Standard-Tokens pro Monat. Immediate liegt bei 39 EUR mit 3 Mio. Standard-Tokens pro Monat. Advanced liegt bei 59 EUR mit 5 Mio. Standard-Tokens pro Monat.",
+      "Zum Start planen wir drei Managed-Stufen mit demselben Modell. Starter liegt bei 9,90 EUR mit 500.000 Standard-Tokens pro Monat. Plus liegt bei 39 EUR mit 3 Mio. Standard-Tokens pro Monat. Advanced liegt bei 59 EUR mit 5 Mio. Standard-Tokens pro Monat.",
   },
   {
     question: "Wie funktioniert die Nutzung im Managed-Plan?",
@@ -525,7 +525,7 @@ export default function Home() {
                     Pilot in Vorbereitung
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Managed Immediate
+                    Managed Plus
                   </h3>
                 </div>
                 <div className="text-right">
@@ -548,7 +548,7 @@ export default function Home() {
               </div>
 
               <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Immediate ist der mittlere Managed-Plan für Nutzer, die GPT-5.2 regelmäßig
+                Plus ist der mittlere Managed-Plan für Nutzer, die GPT-5.2 regelmäßig
                 einsetzen wollen, aber noch kein großes Monatskontingent brauchen.
               </div>
 

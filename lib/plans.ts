@@ -65,7 +65,7 @@ export const plans: Record<PlanId, PlanDefinition> = {
   },
   managed_immediate: {
     id: "managed_immediate",
-    name: "Managed Immediate",
+    name: "Managed Plus",
     description:
       "Managed mit GPT-5.2, klarem Monatskontingent und zubuchbaren Tokenpaketen.",
     usageMode: "managed",

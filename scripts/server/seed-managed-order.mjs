@@ -118,7 +118,7 @@ const managedPlans = {
     includedBudgetCents: 250,
   },
   managed_immediate: {
-    name: "Managed Immediate",
+    name: "Managed Plus",
     includedStandardTokens: 3_000_000,
     includedBudgetCents: 1500,
   },
