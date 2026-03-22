@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
 import { BillingPortalButton } from "@/components/billing-portal-button";
 import { CopyField } from "@/components/copy-field";
+import { UpgradePlanButton } from "@/components/upgrade-plan-button";
 import { resolveSessionAccessFromCookies } from "@/lib/auth";
 import { buildDashboardSnapshot } from "@/lib/dashboard";
 import { legalProfile } from "@/lib/legal";
@@ -510,14 +511,22 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                       </h3>
                       <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
                         {isTrial
-                          ? "Dein Testzugang ist aktiv. Der direkte Upgrade-Flow aus dem Dashboard folgt als nächster Ausbau."
+                          ? "Dein Testzugang ist aktiv. Von hier aus kannst du direkt auf einen bezahlten Plan wechseln, ohne eine zweite Instanz anzulegen."
                           : "Upgrade, Downgrade, Kündigung und Rechnungen laufen über das Stripe Customer Portal."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-4">
                         {isTrial ? (
-                          <Link href="/" className="fc-button fc-button-secondary">
-                            Pläne ansehen
-                          </Link>
+                          <>
+                            <UpgradePlanButton
+                              planId="hosted_byok"
+                              className="fc-button fc-button-primary"
+                            >
+                              Standardplan buchen
+                            </UpgradePlanButton>
+                            <span className="fc-button fc-button-secondary opacity-60">
+                              Managed folgt nach Aktivierung
+                            </span>
+                          </>
                         ) : (
                           <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
                             Stripe-Portal öffnen
@@ -533,14 +542,49 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                         Kauf. Verbrauch erst nach dem Monatskontingent.
                       </p>
                       <div className="mt-4">
-                        <span className="fc-button fc-button-secondary opacity-60">
-                          Einmalkauf folgt
-                        </span>
+                        {isTrial ? (
+                          <span className="fc-button fc-button-secondary opacity-60">
+                            Im Testzugang nicht verfügbar
+                          </span>
+                        ) : (
+                          <span className="fc-button fc-button-secondary opacity-60">
+                            Einmalkauf folgt
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {isTrial ? (
+                <div className="mt-6 grid gap-4 lg:grid-cols-3">
+                  <div className="border border-[var(--fc-border)] bg-black/20 p-5">
+                    <p className="section-kicker">Standardplan</p>
+                    <h3 className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">19 € / Monat</h3>
+                    <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+                      Eigene gehostete Instanz mit eigenem Modell-Key. Deine Testinstanz wird dabei
+                      in denselben Account übernommen.
+                    </p>
+                  </div>
+                  <div className="border border-[var(--fc-border)] bg-black/20 p-5">
+                    <p className="section-kicker">Managed Starter</p>
+                    <h3 className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">9,90 € / Monat</h3>
+                    <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+                      500.000 Standard-Tokens mit GPT-5.2. Dieser Plan bleibt aktuell noch gesperrt,
+                      bis der Managed-Checkout freigegeben ist.
+                    </p>
+                  </div>
+                  <div className="border border-[var(--fc-border)] bg-black/20 p-5">
+                    <p className="section-kicker">Managed Plus / Advanced</p>
+                    <h3 className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">39 € / 59 €</h3>
+                    <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+                      Größere GPT-5.2-Kontingente mit Nachbuchung. Sie erscheinen im Upgrade-Flow,
+                      sobald Managed vollständig freigeschaltet ist.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
             </section>
 
             <section id="einstellungen" className="panel-cut fc-panel">

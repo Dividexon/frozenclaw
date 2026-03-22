@@ -332,6 +332,27 @@ export async function writeProviderKey(slug: string, provider: ProviderId, apiKe
   await fs.writeFile(providerEnvPath, envContent, "utf8");
 }
 
+export async function clearProviderKeys(slug: string) {
+  await ensureCustomerDirectories(slug);
+
+  const providerEnvPath = getCustomerProviderEnvPath(slug);
+  const currentEnv = await readEnvFile(providerEnvPath);
+  currentEnv.delete(providerEnvMap.anthropic);
+  currentEnv.delete(providerEnvMap.openai);
+  currentEnv.delete(providerEnvMap.gemini);
+
+  const envContent = `${Array.from(currentEnv.entries())
+    .map(([key, value]) => `${key}=${value}`)
+    .join("\n")}\n`;
+
+  await fs.writeFile(providerEnvPath, envContent, "utf8");
+  await writeAuthProfileStore(slug, {
+    version: authStoreVersion,
+    profiles: {},
+  });
+  await syncOpenClawModelAllowlist(slug);
+}
+
 export async function readInstanceMetadata(slug: string) {
   const values = await readEnvFile(getCustomerInstanceEnvPath(slug));
 
