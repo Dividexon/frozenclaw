@@ -323,6 +323,9 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                         Zugang verwalten
                       </a>
                     ) : null}
+                    <Link href="/erste-schritte" className="fc-button fc-button-secondary">
+                      Erste Schritte
+                    </Link>
                   </div>
                 </div>
 
@@ -712,6 +715,9 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                         Passwort & Zugang verwalten
                       </a>
                     ) : null}
+                    <Link href="/erste-schritte" className="fc-button fc-button-secondary">
+                      Erste Schritte
+                    </Link>
                     <LogoutButton className="fc-button fc-button-secondary" />
                     <a href={`mailto:${legalProfile.email}`} className="fc-button fc-button-secondary">
                       Support kontaktieren

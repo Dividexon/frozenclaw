@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 type ProviderStatus = {
@@ -444,6 +445,26 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
             Modelle freischalten kann.
           </p>
         )}
+      </div>
+
+      <div className="rounded-none border border-[var(--fc-border)] bg-black/20 p-5">
+        <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+          Orientierung
+        </p>
+        <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
+          Wenn du gerade erst startest, findest du in den ersten Schritten kurze Tipps für den
+          Einstieg, sinnvolle erste Aufgaben und Hinweise zu Kanälen und Cronjobs.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-4">
+          <Link href="/erste-schritte" className="fc-button fc-button-secondary">
+            Erste Schritte
+          </Link>
+          {state?.agentUrl ? (
+            <a href={state.agentUrl} className="fc-button fc-button-primary" target="_blank">
+              OpenClaw Ã¶ffnen
+            </a>
+          ) : null}
+        </div>
       </div>
 
       <div className="rounded-none border border-[var(--fc-border)] bg-black/20 p-5">
