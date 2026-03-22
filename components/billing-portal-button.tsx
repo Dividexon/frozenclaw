@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 type BillingPortalButtonProps = {
-  token: string;
+  token?: string;
   children: React.ReactNode;
   className: string;
 };
@@ -28,7 +28,7 @@ export function BillingPortalButton({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify(token ? { token } : {}),
       });
 
       const payload = (await response.json()) as { error?: string; url?: string };

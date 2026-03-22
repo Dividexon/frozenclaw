@@ -3,6 +3,7 @@ import { getBaseUrlFromRequest } from "@/lib/env";
 import { resolveLoginToken } from "@/lib/login-links";
 import { getStripe } from "@/lib/stripe";
 import { getDb, logOrderEvent } from "@/lib/db";
+import { resolveSessionAccessFromCookies } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -80,16 +81,11 @@ async function backfillStripeCustomer(orderId: number) {
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as PortalBody;
-  const token = body.token?.trim();
-
-  if (!token) {
-    return NextResponse.json({ error: "Login-Token fehlt." }, { status: 400 });
-  }
-
-  const access = resolveLoginToken(token);
+  const loginToken = body.token?.trim();
+  const access = loginToken ? resolveLoginToken(loginToken) : await resolveSessionAccessFromCookies();
 
   if (!access) {
-    return NextResponse.json({ error: "Ungültiger Login-Link." }, { status: 403 });
+    return NextResponse.json({ error: "Ungültige Sitzung oder ungültiger Login-Link." }, { status: 403 });
   }
 
   try {
@@ -105,10 +101,15 @@ export async function POST(request: Request) {
       );
     }
 
+    const returnUrl =
+      access.authType === "login_link" && loginToken
+        ? `${getBaseUrlFromRequest(request)}/konto?token=${encodeURIComponent(loginToken)}#plan-verbrauch`
+        : `${getBaseUrlFromRequest(request)}/konto#plan-verbrauch`;
+
     const stripe = getStripe();
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: identity.stripe_customer_id,
-      return_url: `${getBaseUrlFromRequest(request)}/konto?token=${encodeURIComponent(token)}#plan-verbrauch`,
+      return_url: returnUrl,
     });
 
     logOrderEvent(access.orderId, "billing_portal_opened", {

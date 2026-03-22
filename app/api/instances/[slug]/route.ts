@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasPasswordForEmail } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { getManagedUsageSummary } from "@/lib/managed";
 import { readProviderStatus } from "@/lib/customer-instances";
@@ -17,6 +18,7 @@ function findOrderBySlug(slug: string) {
     .prepare(`
       SELECT
       id,
+      email,
       instance_slug,
       gateway_token,
       usage_mode,
@@ -27,6 +29,7 @@ function findOrderBySlug(slug: string) {
     .get(slug) as
     | {
         id: number;
+        email: string | null;
         instance_slug: string;
         gateway_token: string | null;
         usage_mode: string;
@@ -60,6 +63,7 @@ export async function GET(request: Request, context: RouteContext) {
     instanceState: order.instance_state,
     providerStatus,
     managed,
+    passwordConfigured: hasPasswordForEmail(order.email),
     setupUrl: buildSetupUrl(order.instance_slug, order.gateway_token),
     agentUrl: buildAgentUrl(order.instance_slug, order.gateway_token),
   });

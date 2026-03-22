@@ -5,7 +5,7 @@ import { getDb, logOrderEvent } from "@/lib/db";
 import { getManagedUsageSummary, type ManagedUsageSummary } from "@/lib/managed";
 import { buildAgentUrl, buildSetupUrl } from "@/lib/provisioning";
 
-type LoginTarget = {
+export type LoginTarget = {
   id: number;
   email: string | null;
   plan: string;
@@ -18,7 +18,7 @@ type LoginTarget = {
   updated_at: string;
 };
 
-export type ResolvedLoginToken = {
+export type AccountAccess = {
   orderId: number;
   email: string | null;
   plan: string;
@@ -30,9 +30,12 @@ export type ResolvedLoginToken = {
   agentUrl: string | null;
   createdAt: string;
   updatedAt: string;
-  expiresAt: string;
+  expiresAt: string | null;
+  authType: "login_link" | "password_session";
   managed: ManagedUsageSummary | null;
 };
+
+export type ResolvedLoginToken = AccountAccess;
 
 function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -85,6 +88,29 @@ export function createLoginToken(orderId: number, email: string) {
   return token;
 }
 
+export function buildAccessFromOrder(
+  row: LoginTarget,
+  authType: "login_link" | "password_session",
+  expiresAt: string | null,
+): AccountAccess {
+  return {
+    orderId: row.id,
+    email: row.email,
+    plan: row.plan,
+    usageMode: row.usage_mode,
+    paymentStatus: row.payment_status,
+    instanceState: row.instance_state,
+    instanceSlug: row.instance_slug,
+    activationUrl: buildSetupUrl(row.instance_slug, row.gateway_token),
+    agentUrl: buildAgentUrl(row.instance_slug, row.gateway_token),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    expiresAt,
+    authType,
+    managed: row.usage_mode === "managed" ? getManagedUsageSummary(row.id) : null,
+  };
+}
+
 export function resolveLoginToken(rawToken: string): ResolvedLoginToken | null {
   const db = getDb();
   const tokenHash = hashToken(rawToken);
@@ -115,19 +141,5 @@ export function resolveLoginToken(rawToken: string): ResolvedLoginToken | null {
     return null;
   }
 
-  return {
-    orderId: row.id,
-    email: row.email,
-    plan: row.plan,
-    usageMode: row.usage_mode,
-    paymentStatus: row.payment_status,
-    instanceState: row.instance_state,
-    instanceSlug: row.instance_slug,
-    activationUrl: buildSetupUrl(row.instance_slug, row.gateway_token),
-    agentUrl: buildAgentUrl(row.instance_slug, row.gateway_token),
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    expiresAt: row.expires_at,
-    managed: row.usage_mode === "managed" ? getManagedUsageSummary(row.id) : null,
-  };
+  return buildAccessFromOrder(row, "login_link", row.expires_at);
 }

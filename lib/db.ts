@@ -89,12 +89,29 @@ function migrate(db: DbInstance) {
       FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS account_credentials (
+      email TEXT PRIMARY KEY,
+      password_hash TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS auth_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL,
+      token_hash TEXT NOT NULL UNIQUE,
+      expires_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status);
     CREATE INDEX IF NOT EXISTS idx_orders_instance_state ON orders(instance_state);
     CREATE INDEX IF NOT EXISTS idx_usage_events_order_id ON usage_events(order_id);
     CREATE INDEX IF NOT EXISTS idx_topup_purchases_order_id ON topup_purchases(order_id);
     CREATE INDEX IF NOT EXISTS idx_login_tokens_order_id ON login_tokens(order_id);
     CREATE INDEX IF NOT EXISTS idx_login_tokens_email ON login_tokens(email);
+    CREATE INDEX IF NOT EXISTS idx_auth_sessions_email ON auth_sessions(email);
+    CREATE INDEX IF NOT EXISTS idx_auth_sessions_expires_at ON auth_sessions(expires_at);
   `);
 
   const orderColumns = db.prepare("PRAGMA table_info(orders)").all() as Array<{ name: string }>;

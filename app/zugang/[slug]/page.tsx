@@ -28,6 +28,7 @@ async function loadInstance(slug: string, token: string) {
       slug: string;
       usageMode: string;
       instanceState: string;
+      passwordConfigured: boolean;
       providerStatus: {
         anthropic: boolean;
         openai: boolean;
@@ -73,7 +74,7 @@ export default async function ZugangPage({ params, searchParams }: AccessPagePro
             Zur Startseite
           </Link>
           <Link href="/anmelden" className="fc-button fc-button-secondary">
-            Neuer Login-Link
+            Zur Anmeldung
           </Link>
         </div>
 

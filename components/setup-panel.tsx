@@ -25,6 +25,7 @@ type SetupState = {
   slug: string;
   usageMode: string;
   instanceState: string;
+  passwordConfigured: boolean;
   providerStatus: ProviderStatus;
   managed: ManagedState | null;
   agentUrl: string | null;
@@ -40,6 +41,13 @@ type SaveResponse = {
   ok: boolean;
   providerStatus: ProviderStatus;
   agentUrl: string | null;
+};
+
+type PasswordResponse = {
+  ok: boolean;
+  passwordConfigured: boolean;
+  message?: string;
+  error?: string;
 };
 
 const providerMeta = {
@@ -77,8 +85,13 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
   const [apiKey, setApiKey] = useState("");
   const [state, setState] = useState(initialState);
   const [isSaving, setIsSaving] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const activeProviders = (Object.keys(providerMeta) as Array<keyof typeof providerMeta>).filter(
     (providerKey) => Boolean(state?.providerStatus[providerKey]),
@@ -150,6 +163,60 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
       );
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handlePasswordSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!password || !passwordConfirm) {
+      setPasswordError("Bitte Passwort und Bestätigung eingeben.");
+      setPasswordSuccess(null);
+      return;
+    }
+
+    setIsSavingPassword(true);
+    setPasswordError(null);
+    setPasswordSuccess(null);
+
+    try {
+      const response = await fetch(`/api/instances/${slug}/password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token,
+          password,
+          passwordConfirm,
+        }),
+      });
+
+      const payload = (await response.json()) as PasswordResponse;
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Das Passwort konnte nicht gespeichert werden.");
+      }
+
+      setState((current) =>
+        current
+          ? {
+              ...current,
+              passwordConfigured: payload.passwordConfigured,
+            }
+          : current,
+      );
+      setPassword("");
+      setPasswordConfirm("");
+      setPasswordSuccess(payload.message ?? "Passwort gespeichert.");
+    } catch (submitError) {
+      setPasswordError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Das Passwort konnte nicht gespeichert werden.",
+      );
+    } finally {
+      setIsSavingPassword(false);
     }
   }
 
@@ -377,6 +444,72 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
             Modelle freischalten kann.
           </p>
         )}
+      </div>
+
+      <div className="rounded-none border border-[var(--fc-border)] bg-black/20 p-5">
+        <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+          Konto-Passwort
+        </p>
+        <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
+          Hier legst du dein Passwort für das Dashboard fest. Danach meldest du dich direkt mit
+          E-Mail-Adresse und Passwort an, ohne auf einen Mail-Link zu warten.
+        </p>
+        <div className="mt-4 grid gap-3">
+          <div className="signal-row">
+            <span className="signal-index">+</span>
+            <span>
+              {state?.passwordConfigured ? "Passwort ist bereits gesetzt" : "Es ist noch kein Passwort gesetzt"}
+            </span>
+          </div>
+        </div>
+        <form className="mt-6 grid gap-4" onSubmit={handlePasswordSubmit}>
+          <label className="grid gap-2">
+            <span className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+              Neues Passwort
+            </span>
+            <input
+              type="password"
+              className="rounded-none border border-[var(--fc-border)] bg-black/30 px-4 py-3 text-[var(--fc-text)]"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="new-password"
+              placeholder="Mindestens 8 Zeichen"
+            />
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+              Passwort wiederholen
+            </span>
+            <input
+              type="password"
+              className="rounded-none border border-[var(--fc-border)] bg-black/30 px-4 py-3 text-[var(--fc-text)]"
+              value={passwordConfirm}
+              onChange={(event) => setPasswordConfirm(event.target.value)}
+              autoComplete="new-password"
+              placeholder="Passwort bestätigen"
+            />
+          </label>
+
+          {passwordSuccess ? (
+            <p className="rounded-none border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+              {passwordSuccess}
+            </p>
+          ) : null}
+          {passwordError ? <p className="text-sm text-[var(--fc-accent)]">{passwordError}</p> : null}
+
+          <button
+            type="submit"
+            className="fc-button fc-button-secondary"
+            disabled={isSavingPassword}
+          >
+            {isSavingPassword
+              ? "Passwort wird gespeichert..."
+              : state?.passwordConfigured
+                ? "Passwort ändern"
+                : "Passwort speichern"}
+          </button>
+        </form>
       </div>
 
       <div className="rounded-none border border-[var(--fc-border)] bg-black/20 p-5">

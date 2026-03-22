@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/logout-button";
 import { BillingPortalButton } from "@/components/billing-portal-button";
 import { CopyField } from "@/components/copy-field";
+import { resolveSessionAccessFromCookies } from "@/lib/auth";
 import { buildDashboardSnapshot } from "@/lib/dashboard";
 import { legalProfile } from "@/lib/legal";
 import { resolveLoginToken } from "@/lib/login-links";
@@ -35,9 +37,10 @@ function StatusPill({
 
 export default async function KontoPage({ searchParams }: KontoPageProps) {
   const { token } = await searchParams;
-  const access = token ? resolveLoginToken(token) : null;
+  const access = token ? resolveLoginToken(token) : await resolveSessionAccessFromCookies();
   const dashboard = access ? await buildDashboardSnapshot(access) : null;
   const managed = access?.managed;
+  const billingToken = access?.authType === "login_link" ? token : undefined;
   const managedProgressPercent =
     managed && managed.includedStandardTokens > 0
       ? Math.min(100, Math.round((managed.usedStandardTokens / managed.includedStandardTokens) * 100))
@@ -50,8 +53,8 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
           <p className="section-kicker">Konto</p>
           <h1 className="section-title mt-3 text-5xl">Dein Dashboard ist nicht erreichbar.</h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
-            Der Link ist ungültig oder abgelaufen. Fordere einfach einen neuen Login-Link an und
-            öffne dein Dashboard erneut.
+            Deine Sitzung ist ungültig oder abgelaufen. Melde dich einfach erneut an und öffne
+            dein Dashboard erneut.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/anmelden" className="fc-button fc-button-primary">
@@ -122,7 +125,13 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 </div>
                 <div className="text-right text-sm uppercase tracking-[0.16em] text-[var(--fc-text-muted)]">
                   <p>{access.email ?? "Keine E-Mail hinterlegt"}</p>
-                  <p className="mt-2">Login-Link gültig bis {access.expiresAt}</p>
+                  <p className="mt-2">
+                    {access.authType === "login_link" && access.expiresAt
+                      ? `Login-Link gültig bis ${access.expiresAt}`
+                      : access.expiresAt
+                        ? `Sitzung gültig bis ${access.expiresAt}`
+                        : "Passwort-Sitzung aktiv"}
+                  </p>
                 </div>
               </div>
 
@@ -501,7 +510,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                         Customer Portal.
                       </p>
                       <div className="mt-4 flex flex-wrap gap-4">
-                        <BillingPortalButton token={token!} className="fc-button fc-button-secondary">
+                        <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
                           Stripe-Portal öffnen
                         </BillingPortalButton>
                       </div>
@@ -544,13 +553,22 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     </div>
                     <div className="signal-row">
                       <span className="signal-index">+</span>
-                      <span>Magic-Link gültig bis {access.expiresAt}</span>
+                      <span>
+                        {access.authType === "login_link" && access.expiresAt
+                          ? `Login-Link gültig bis ${access.expiresAt}`
+                          : access.expiresAt
+                            ? `Sitzung gültig bis ${access.expiresAt}`
+                            : "Passwort-Sitzung aktiv"}
+                      </span>
                     </div>
                   </div>
                   <div className="mt-6 flex flex-wrap gap-4">
-                    <Link href="/anmelden" className="fc-button fc-button-secondary">
-                      Neuen Login-Link anfordern
-                    </Link>
+                    {access.activationUrl ? (
+                      <a href={access.activationUrl} className="fc-button fc-button-secondary">
+                        Passwort & Zugang verwalten
+                      </a>
+                    ) : null}
+                    <LogoutButton className="fc-button fc-button-secondary" />
                     <a href={`mailto:${legalProfile.email}`} className="fc-button fc-button-secondary">
                       Support kontaktieren
                     </a>
@@ -586,7 +604,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                   <Link href="/beta-bedingungen" className="transition hover:text-[var(--fc-text)]">
                     Beta-Bedingungen
                   </Link>
-                  <BillingPortalButton token={token!} className="fc-button fc-button-secondary">
+                  <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
                     Rechnungen & Abo
                   </BillingPortalButton>
               </div>
