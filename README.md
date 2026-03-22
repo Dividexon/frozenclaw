@@ -81,14 +81,15 @@ Frozenclaw kann nach erfolgreicher Bereitstellung und bei fehlgeschlagener Provi
 
 OpenClaw verlangt für die Browser-Control-UI standardmäßig zusätzlich Device-Auth/Pairing. Für die aktuelle Beta kann pro Instanz `OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH=true` gesetzt werden, damit der Zugriff ausschließlich über Gateway-Token läuft. Das ist bewusst ein Sicherheits-Downgrade und sollte nur verwendet werden, solange keine saubere Geräte-Pairing- oder Session-Lösung davorsteht.
 
-## Managed Beta
+## Managed
 
 Der Managed-Pfad ist technisch vorbereitet, bleibt aber gesperrt, bis `OPENAI_MANAGED_API_KEY` serverseitig gesetzt ist und das echte Usage-Tracking am Providerpfad hängt.
 
 Aktueller Zielzustand:
 
 - Modell: `openai/gpt-5.2`
-- Inklusivkontingent: `3.000.000` Standard-Tokens pro Monat
+- `Managed Starter`: `500.000` Standard-Tokens fuer `9,90 EUR / Monat`
+- `Managed Advanced`: `5.000.000` Standard-Tokens fuer `59 EUR / Monat`
 - Nachbuchung geplant:
   - `1.000.000` Standard-Tokens für `9 EUR`
   - `2.500.000` Standard-Tokens für `19 EUR`
@@ -106,21 +107,21 @@ Sobald `OPENAI_MANAGED_API_KEY` auf dem Server gesetzt ist, kann ein Managed-Tes
 
 ```bash
 cd /opt/frozenclaw/app
-node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com
+node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com --plan managed_starter
 ```
 
 Optional laesst sich gezielt eine bestehende Instanz umstellen:
 
 ```bash
 cd /opt/frozenclaw/app
-node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com --slug fc-451a2857ca
+node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com --slug fc-451a2857ca --plan managed_advanced
 ```
 
 Das Skript:
 
-- setzt die Bestellung auf `managed_beta`
+- setzt die Bestellung auf `managed_starter` oder `managed_advanced`
 - hinterlegt `openai/gpt-5.2`
-- setzt `3.000.000` Standard-Tokens
+- setzt das Tokenkontingent passend zur gewaehlten Stufe
 - erzeugt einen frischen Login-Link
 - laesst die Bereitstellung ueber den bestehenden Recovery-Lauf der App wieder anlaufen
 

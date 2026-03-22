@@ -9,6 +9,7 @@ function parseArgs(argv) {
   const args = {
     email: "",
     slug: "",
+    plan: "managed_advanced",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -26,6 +27,12 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (value === "--plan") {
+      args.plan = argv[index + 1] ?? "";
+      index += 1;
+      continue;
+    }
+
     throw new Error(`Unbekanntes Argument: ${value}`);
   }
 
@@ -36,6 +43,7 @@ function parseArgs(argv) {
   return {
     email: args.email.trim(),
     slug: args.slug.trim(),
+    plan: args.plan.trim() || "managed_advanced",
   };
 }
 
@@ -103,10 +111,23 @@ loadEnvFile(path.join(process.cwd(), ".env.local"));
 const dataDir = process.env.DATA_DIR || path.join(process.cwd(), "data");
 const dbFile = path.join(dataDir, "frozenclaw.db");
 const appBaseUrl = process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+const managedPlans = {
+  managed_starter: {
+    name: "Managed Starter",
+    includedStandardTokens: 500_000,
+    includedBudgetCents: 250,
+  },
+  managed_advanced: {
+    name: "Managed Advanced",
+    includedStandardTokens: 5_000_000,
+    includedBudgetCents: 2500,
+  },
+};
 const managedProvider = "openai";
 const managedModel = "openai/gpt-5.2";
-const includedStandardTokens = 3_000_000;
-const includedBudgetCents = 2000;
+const selectedPlan = managedPlans[args.plan] || managedPlans.managed_advanced;
+const includedStandardTokens = selectedPlan.includedStandardTokens;
+const includedBudgetCents = selectedPlan.includedBudgetCents;
 const managedApiKeyConfigured = Boolean(process.env.OPENAI_MANAGED_API_KEY);
 
 if (!fs.existsSync(dbFile)) {
@@ -150,7 +171,7 @@ if (order) {
     UPDATE orders
     SET
       email = @email,
-      plan = 'managed_beta',
+      plan = @plan,
       usage_mode = 'managed',
       payment_status = 'paid',
       instance_state = 'pending',
@@ -164,6 +185,7 @@ if (order) {
   `).run({
     orderId,
     email: args.email,
+    plan: args.plan,
     managedProvider,
     managedModel,
     includedStandardTokens,
@@ -191,7 +213,7 @@ if (order) {
     VALUES (
       @sessionId,
       @email,
-      'managed_beta',
+      @plan,
       'managed',
       'paid',
       'pending',
@@ -205,6 +227,7 @@ if (order) {
   `).run({
     sessionId,
     email: args.email,
+    plan: args.plan,
     managedProvider,
     managedModel,
     includedStandardTokens,
@@ -242,6 +265,7 @@ db.prepare(`
 
 printLine("Order", orderId);
 printLine("E-Mail", args.email);
+printLine("Plan", selectedPlan.name);
 printLine("Modus", "managed");
 printLine("Modell", managedModel);
 printLine("Inklusive Tokens", includedStandardTokens.toLocaleString("de-DE"));

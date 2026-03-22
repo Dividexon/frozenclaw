@@ -61,13 +61,23 @@ const byokIncludes = [
   "Öffentliches Standardangebot zum Start",
 ];
 
-const managedIncludes = [
+const managedStarterIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "GPT-5.2 als festes Modell",
-  "3 Mio. Standard-Tokens pro Monat",
+  "500.000 Standard-Tokens pro Monat",
   "Modellzugang wird von Frozenclaw gestellt",
   "Verbrauch wird automatisch mitgerechnet",
-  "Pilot mit wenigen Plätzen zum Start",
+  "Geeignet für den Einstieg",
+  "Nachbuchung später zubuchbar",
+];
+
+const managedAdvancedIncludes = [
+  "1 gehostete OpenClaw-Instanz",
+  "GPT-5.2 als festes Modell",
+  "5 Mio. Standard-Tokens pro Monat",
+  "Modellzugang wird von Frozenclaw gestellt",
+  "Verbrauch wird automatisch mitgerechnet",
+  "Mehr Spielraum für regelmäßige Nutzung",
   "Nachbuchung später zubuchbar",
 ];
 
@@ -101,7 +111,7 @@ const specRows = [
   ["Modell-Key", "Zum Start vom Kunden gestellt"],
   ["Support", "E-Mail + Startanleitung"],
   ["Bereitstellung", "In der Regel am selben Tag"],
-  ["Managed", "GPT-5.2 Pilot mit 3 Mio. Standard-Tokens"],
+  ["Managed", "GPT-5.2 mit Starter und Advanced"],
 ];
 
 const faqs = [
@@ -116,9 +126,14 @@ const faqs = [
       "Managed ist der Plan für Nutzer, die keinen eigenen API-Key verwalten möchten. Frozenclaw stellt dafür GPT-5.2 bereit, rechnet den Verbrauch automatisch mit und startet zunächst mit einem klar begrenzten Tokenkontingent pro Monat.",
   },
   {
+    question: "Welche Managed-Stufen gibt es?",
+    answer:
+      "Zum Start planen wir zwei Managed-Stufen mit demselben Modell. Starter liegt bei 9,90 EUR mit 500.000 Standard-Tokens pro Monat. Advanced liegt bei 59 EUR mit 5 Mio. Standard-Tokens pro Monat.",
+  },
+  {
     question: "Wie funktioniert die Nutzung im Managed-Plan?",
     answer:
-      "Der Start ist mit einem festen Modell und einem festen Monatskontingent geplant. Für die erste Variante testen wir GPT-5.2 mit 3 Mio. Standard-Tokens pro Monat. So bleiben Angebot, Kosten und Nachbuchung sauber steuerbar.",
+      "Managed nutzt immer GPT-5.2 als festes Modell. Der Unterschied liegt nur im Monatskontingent. Dadurch bleiben Angebot, Kosten und spätere Nachbuchung sauber steuerbar.",
   },
   {
     question: "Brauche ich eigene Server oder Docker-Kenntnisse?",
@@ -301,7 +316,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
+          <div className="mt-8 grid gap-5 lg:grid-cols-2">
             {steps.map((step) => (
               <article key={step.id} className="panel-cut fc-panel h-full">
                 <p className="font-display text-5xl leading-none text-[var(--fc-accent)]">
@@ -408,7 +423,7 @@ export default function Home() {
             <h2 className="section-title">Das Startangebot ist bewusst klar aufgebaut.</h2>
           </div>
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-2">
+          <div className="mt-8 grid gap-5 lg:grid-cols-3">
             <article className="panel-cut fc-panel pricing-panel">
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
@@ -455,12 +470,12 @@ export default function Home() {
                     Pilot in Vorbereitung
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
-                    Managed Beta
+                    Managed Starter
                   </h3>
                 </div>
                 <div className="text-right">
                   <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
-                    EUR 39
+                    EUR 9,90
                   </p>
                   <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
                     pro Monat
@@ -469,7 +484,7 @@ export default function Home() {
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {managedIncludes.map((item) => (
+                {managedStarterIncludes.map((item) => (
                   <div key={item} className="signal-row">
                     <span className="signal-index">+</span>
                     <span>{item}</span>
@@ -478,9 +493,53 @@ export default function Home() {
               </div>
 
               <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Für die erste Managed-Variante testen wir GPT-5.2 als festes Modell mit
-                3 Mio. Standard-Tokens pro Monat. Der Verbrauch wird automatisch
-                mitgerechnet, damit spätere Nachbuchungen sauber zubuchbar sind.
+                Der Einstiegsplan ist bewusst knapp gehalten. Er ist für Nutzer gedacht, die
+                Managed erst ausprobieren wollen, ohne direkt in ein größeres Monatskontingent
+                zu gehen.
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-4">
+                <a href="#preise" className="fc-button fc-button-secondary">
+                  Interesse vormerken
+                </a>
+                <a href="#faq" className="fc-button fc-button-secondary">
+                  Mehr dazu
+                </a>
+              </div>
+            </article>
+
+            <article className="panel-cut fc-panel">
+              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
+                    Pilot in Vorbereitung
+                  </p>
+                  <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
+                    Managed Advanced
+                  </h3>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
+                    EUR 59
+                  </p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+                    pro Monat
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {managedAdvancedIncludes.map((item) => (
+                  <div key={item} className="signal-row">
+                    <span className="signal-index">+</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+                Advanced ist die stärkere Managed-Stufe für Nutzer, die GPT-5.2 regelmäßig
+                einsetzen und deutlich mehr Spielraum pro Monat brauchen.
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">

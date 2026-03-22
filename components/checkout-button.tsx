@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 type CheckoutButtonProps = {
-  planId: "hosted_byok" | "managed_beta";
+  planId: "hosted_byok" | "managed_starter" | "managed_advanced";
   children: React.ReactNode;
   className: string;
 };

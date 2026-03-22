@@ -65,11 +65,11 @@ export default function DatenschutzPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-[var(--fc-text)]">
-              5. Bring Your Own Key und Managed Beta
+              5. Bring Your Own Key und Managed-Tarife
             </h2>
             <p className="mt-3">
-              Im Standardmodus nutzt du deinen eigenen Modell-Key. Wenn später eine Managed Beta
-              freigeschaltet wird, werden zusätzlich Nutzungs- und Verbrauchsdaten verarbeitet,
+              Im Standardmodus nutzt du deinen eigenen Modell-Key. Wenn später Managed-Tarife
+              freigeschaltet werden, werden zusätzlich Nutzungs- und Verbrauchsdaten verarbeitet,
               um Limits, Warnschwellen und Abrechnung nachvollziehbar steuern zu können.
             </p>
           </section>

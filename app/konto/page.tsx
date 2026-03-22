@@ -69,7 +69,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
             {access.managed ? (
               <div className="mt-8 border border-[var(--fc-border)] bg-black/20 p-5">
                 <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
-                  Managed Beta
+                  Managed
                 </p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <div className="signal-row">

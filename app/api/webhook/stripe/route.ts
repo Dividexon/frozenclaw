@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       const planId = isPlanId(rawPlanId) ? rawPlanId : "hosted_byok";
       const usageMode = (session.metadata?.usageMode as UsageMode | undefined) ?? plans[planId].usageMode;
       const email = session.customer_details?.email ?? session.customer_email ?? null;
-      const managedSeed = usageMode === "managed" ? buildManagedOrderSeed() : null;
+      const managedSeed = usageMode === "managed" ? buildManagedOrderSeed(planId) : null;
 
       db.prepare(`
         INSERT INTO orders (

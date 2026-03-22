@@ -3,9 +3,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { getDb } from "@/lib/db";
 import { getAppConfig } from "@/lib/env";
-import { plans } from "@/lib/plans";
-
-const managedPlan = plans.managed_beta;
+import { plans, type PlanId } from "@/lib/plans";
 
 export type ManagedUsageSummary = {
   provider: string;
@@ -35,21 +33,31 @@ export function isManagedApiKeyConfigured() {
   return Boolean(getAppConfig().managedOpenAiApiKey);
 }
 
-export function getManagedDefaults() {
+function getManagedPlanDefinition(planId?: string | null) {
+  if (planId === "managed_starter") {
+    return plans.managed_starter;
+  }
+
+  return plans.managed_advanced;
+}
+
+export function getManagedDefaults(planId?: string | null) {
+  const managedPlan = getManagedPlanDefinition(planId);
+
   return {
     provider: managedPlan.managedProvider ?? "openai",
     model: managedPlan.managedModel ?? "openai/gpt-5.2",
-    includedStandardTokens: managedPlan.includedStandardTokens ?? 3_000_000,
-    includedBudgetCents: 2000,
+    includedStandardTokens: managedPlan.includedStandardTokens ?? 5_000_000,
+    includedBudgetCents: managedPlan.includedBudgetCents ?? 2500,
   };
 }
 
-export function getManagedTopUps() {
-  return managedPlan.topUps ?? [];
+export function getManagedTopUps(planId?: string | null) {
+  return getManagedPlanDefinition(planId).topUps ?? [];
 }
 
-export function buildManagedOrderSeed() {
-  const defaults = getManagedDefaults();
+export function buildManagedOrderSeed(planId: PlanId) {
+  const defaults = getManagedDefaults(planId);
 
   return {
     managedProvider: defaults.provider,
@@ -61,11 +69,11 @@ export function buildManagedOrderSeed() {
 
 export function getManagedUsageSummary(orderId: number): ManagedUsageSummary {
   const db = getDb();
-  const defaults = getManagedDefaults();
 
   const order = db
     .prepare(`
       SELECT
+        plan,
         managed_provider,
         managed_model,
         included_standard_tokens,
@@ -75,6 +83,7 @@ export function getManagedUsageSummary(orderId: number): ManagedUsageSummary {
     `)
     .get(orderId) as
     | {
+        plan: string;
         managed_provider: string | null;
         managed_model: string | null;
         included_standard_tokens: number | null;
@@ -109,6 +118,7 @@ export function getManagedUsageSummary(orderId: number): ManagedUsageSummary {
       topup_budget_cents: number;
     };
 
+  const defaults = getManagedDefaults(order?.plan);
   const includedStandardTokens = order?.included_standard_tokens ?? defaults.includedStandardTokens;
   const includedBudgetCents = order?.included_budget_cents ?? defaults.includedBudgetCents;
   const topUpStandardTokens = topUps.topup_standard_tokens ?? 0;

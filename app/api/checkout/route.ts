@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   const planId = body.planId && isPlanId(body.planId) ? body.planId : "hosted_byok";
   const plan = plans[planId];
-  const managedSeed = plan.usageMode === "managed" ? buildManagedOrderSeed() : null;
+  const managedSeed = plan.usageMode === "managed" ? buildManagedOrderSeed(plan.id) : null;
 
   if (!plan.active) {
     return NextResponse.json(
