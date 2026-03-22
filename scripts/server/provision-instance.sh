@@ -84,6 +84,7 @@ OPENCLAW_CONFIG_JSON="${CONFIG_DIR}/openclaw.json"
 AUTH_PROFILES_JSON="${AGENT_DIR}/auth-profiles.json"
 MANAGED_PLUGIN_DIR="${WORKSPACE_DIR}/.openclaw/extensions/frozenclaw-managed-usage"
 MANAGED_PLUGIN_FILE="${MANAGED_PLUGIN_DIR}/index.cjs"
+MANAGED_PLUGIN_MANIFEST="${MANAGED_PLUGIN_DIR}/openclaw.plugin.json"
 CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 OPENAI_MANAGED_API_KEY="${OPENAI_MANAGED_API_KEY:-}"
 
@@ -195,6 +196,19 @@ module.exports = {
   }
 };
 EOF
+
+  cat > "$MANAGED_PLUGIN_MANIFEST" <<EOF
+{
+  "id": "frozenclaw-managed-usage",
+  "name": "Frozenclaw Managed Usage",
+  "version": "1.0.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
+EOF
 else
   if [[ ! -f "$AUTH_PROFILES_JSON" ]]; then
     cat > "$AUTH_PROFILES_JSON" <<EOF
@@ -263,9 +277,10 @@ chmod 640 "$INSTANCE_ENV" "$PROVIDER_ENV" "$OPENCLAW_CONFIG_JSON" "$AUTH_PROFILE
 if [[ -f "$MANAGED_PLUGIN_FILE" ]]; then
   chown "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$WORKSPACE_DIR"
   chmod 750 "$WORKSPACE_DIR"
-  chown root:root "${WORKSPACE_DIR}/.openclaw" "${WORKSPACE_DIR}/.openclaw/extensions" "$MANAGED_PLUGIN_DIR" "$MANAGED_PLUGIN_FILE"
+  chown root:root "${WORKSPACE_DIR}/.openclaw" "${WORKSPACE_DIR}/.openclaw/extensions" "$MANAGED_PLUGIN_DIR" "$MANAGED_PLUGIN_FILE" "$MANAGED_PLUGIN_MANIFEST"
   chmod 755 "${WORKSPACE_DIR}/.openclaw" "${WORKSPACE_DIR}/.openclaw/extensions" "$MANAGED_PLUGIN_DIR"
   chmod 640 "$MANAGED_PLUGIN_FILE"
+  chmod 644 "$MANAGED_PLUGIN_MANIFEST"
 fi
 
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
