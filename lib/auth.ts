@@ -140,6 +140,10 @@ export function createPasswordSession(email: string) {
   };
 }
 
+export function createSessionForEmail(email: string) {
+  return createPasswordSession(email);
+}
+
 export function revokePasswordSession(rawToken: string | null | undefined) {
   if (!rawToken) {
     return;
