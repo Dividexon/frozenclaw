@@ -70,4 +70,39 @@ if content != patched:
     target.write_text(patched, encoding="utf-8")
 PY
 
+python3 - <<'PY' "$OPENCLAW_REPO_DIR/ui/src/ui/storage.ts"
+from pathlib import Path
+import sys
+
+target = Path(sys.argv[1])
+content = target.read_text(encoding="utf-8")
+
+old = """function persistSessionToken(gatewayUrl: string, token: string) {\n  try {\n    const storage = getSessionStorage();\n    if (!storage) {\n      return;\n    }\n    storage.removeItem(LEGACY_TOKEN_SESSION_KEY);\n    const key = tokenSessionKeyForGateway(gatewayUrl);\n    const normalized = token.trim();\n    if (normalized) {\n      storage.setItem(key, normalized);\n      return;\n    }\n    storage.removeItem(key);\n  } catch {\n    // best-effort\n  }\n}\n"""
+new = """export function persistSessionToken(gatewayUrl: string, token: string) {\n  try {\n    const storage = getSessionStorage();\n    if (!storage) {\n      return;\n    }\n    storage.removeItem(LEGACY_TOKEN_SESSION_KEY);\n    const key = tokenSessionKeyForGateway(gatewayUrl);\n    const normalized = token.trim();\n    if (normalized) {\n      storage.setItem(key, normalized);\n      return;\n    }\n    storage.removeItem(key);\n  } catch {\n    // best-effort\n  }\n}\n\nexport function clearSessionTokens() {\n  try {\n    const storage = getSessionStorage();\n    if (!storage) {\n      return;\n    }\n    const keys: string[] = [];\n    for (let index = 0; index < storage.length; index += 1) {\n      const key = storage.key(index);\n      if (!key) {\n        continue;\n      }\n      if (key === LEGACY_TOKEN_SESSION_KEY || key.startsWith(TOKEN_SESSION_KEY_PREFIX)) {\n        keys.push(key);\n      }\n    }\n    for (const key of keys) {\n      storage.removeItem(key);\n    }\n  } catch {\n    // best-effort\n  }\n}\n"""
+patched = content.replace(old, new)
+
+if content != patched:
+    target.write_text(patched, encoding="utf-8")
+PY
+
+python3 - <<'PY' "$OPENCLAW_REPO_DIR/ui/src/ui/app-settings.ts"
+from pathlib import Path
+import sys
+
+target = Path(sys.argv[1])
+content = target.read_text(encoding="utf-8")
+
+patched = content.replace(
+    'import { saveSettings, type UiSettings } from "./storage.ts";',
+    'import { clearSessionTokens, persistSessionToken, saveSettings, type UiSettings } from "./storage.ts";',
+)
+
+old = """  if (tokenRaw != null) {\n    const token = tokenRaw.trim();\n    if (token && gatewayUrlChanged) {\n      host.pendingGatewayToken = token;\n    } else if (token && token !== host.settings.token) {\n      applySettings(host, { ...host.settings, token });\n    }\n    hashParams.delete(\"token\");\n    shouldCleanUrl = true;\n  }\n"""
+new = """  if (tokenRaw != null) {\n    const token = tokenRaw.trim();\n    if (token) {\n      clearSessionTokens();\n      persistSessionToken(nextGatewayUrl || host.settings.gatewayUrl, token);\n    }\n    if (token && gatewayUrlChanged) {\n      host.pendingGatewayToken = token;\n    } else if (token) {\n      applySettings(host, { ...host.settings, token });\n    }\n    hashParams.delete(\"token\");\n    shouldCleanUrl = true;\n  }\n"""
+patched = patched.replace(old, new)
+
+if content != patched:
+    target.write_text(patched, encoding="utf-8")
+PY
+
 DOCKER_BUILDKIT=1 docker build -t "$OPENCLAW_IMAGE" "$OPENCLAW_REPO_DIR"
