@@ -45,6 +45,9 @@ type OpenClawConfig = {
   };
   agents?: {
     defaults?: {
+      model?: {
+        primary?: string;
+      };
       models?: Record<string, { alias?: string }>;
     };
   };
@@ -262,8 +265,15 @@ async function syncOpenClawModelAllowlist(slug: string) {
       },
     },
   };
+  const primaryModel =
+    order?.usage_mode === "managed" && order.managed_model
+      ? order.managed_model
+      : Array.from(allowedModels)[0];
 
   if (allowedModels.size > 0) {
+    nextConfig.agents!.defaults!.model = {
+      primary: primaryModel,
+    };
     nextConfig.agents!.defaults!.models = Object.fromEntries(
       Array.from(allowedModels).map((model) => [
         model,
@@ -274,6 +284,9 @@ async function syncOpenClawModelAllowlist(slug: string) {
     );
   } else if (nextConfig.agents?.defaults?.models) {
     delete nextConfig.agents.defaults.models;
+    if (nextConfig.agents.defaults.model) {
+      delete nextConfig.agents.defaults.model;
+    }
   }
 
   await writeOpenClawConfig(slug, nextConfig);

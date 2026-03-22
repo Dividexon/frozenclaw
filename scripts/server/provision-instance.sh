@@ -217,6 +217,9 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
   },
   "agents": {
     "defaults": {
+      "model": {
+        "primary": "$MANAGED_MODEL"
+      },
       "models": {
         "$MANAGED_MODEL": {
           "alias": "gpt-5.2"
