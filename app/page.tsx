@@ -193,7 +193,7 @@ function PricingCard({
   note?: string;
 }) {
   return (
-    <article className="panel-cut fc-panel pricing-panel">
+    <article className="panel-cut fc-panel pricing-panel flex h-full flex-col">
       <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
         <div>
           <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">{kicker}</p>
@@ -204,20 +204,22 @@ function PricingCard({
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {includes.map((item) => (
-          <div key={item} className="signal-row">
-            <span className="signal-index">+</span>
-            <span>{item}</span>
-          </div>
-        ))}
-      </div>
-
-      {note ? (
-        <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-          {note}
+      <div className="flex flex-1 flex-col">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {includes.map((item) => (
+            <div key={item} className="signal-row">
+              <span className="signal-index">+</span>
+              <span>{item}</span>
+            </div>
+          ))}
         </div>
-      ) : null}
+
+        {note ? (
+          <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+            {note}
+          </div>
+        ) : null}
+      </div>
 
       <div className="mt-8 flex flex-wrap gap-4">
         {cta}
