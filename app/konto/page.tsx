@@ -191,31 +191,31 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
             <nav className="mt-8 grid gap-2 text-sm uppercase tracking-[0.16em] text-[var(--fc-text-muted)]">
               <a
                 href="#uebersicht"
-                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:border-[var(--fc-accent)] hover:bg-[rgba(255,77,77,0.08)] hover:text-[var(--fc-text)]"
               >
                 Übersicht
               </a>
               <a
                 href="#agent"
-                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:border-[var(--fc-accent)] hover:bg-[rgba(255,77,77,0.08)] hover:text-[var(--fc-text)]"
               >
                 Agent
               </a>
               <a
                 href="#automationen"
-                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:border-[var(--fc-accent)] hover:bg-[rgba(255,77,77,0.08)] hover:text-[var(--fc-text)]"
               >
                 Automationen
               </a>
               <a
                 href="#plan-verbrauch"
-                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:border-[var(--fc-accent)] hover:bg-[rgba(255,77,77,0.08)] hover:text-[var(--fc-text)]"
               >
                 Plan & Verbrauch
               </a>
               <a
                 href="#einstellungen"
-                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:border-[var(--fc-accent)] hover:bg-[rgba(255,77,77,0.08)] hover:text-[var(--fc-text)]"
               >
                 Einstellungen
               </a>
