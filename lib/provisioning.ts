@@ -61,14 +61,14 @@ export function buildAgentUrl(slug: string | null, token: string | null) {
   }
 
   const config = getAppConfig();
-  const pathValue = `${config.agentBasePath}/${slug}/`;
-  const fragment = token ? `#token=${encodeURIComponent(token)}` : "";
+  const pathValue = `/agent-start/${slug}`;
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
 
   if (!config.appBaseUrl) {
-    return `${pathValue}${fragment}`;
+    return `${pathValue}${query}`;
   }
 
-  return `${config.appBaseUrl}${pathValue}${fragment}`;
+  return `${config.appBaseUrl}${pathValue}${query}`;
 }
 
 export function buildSetupUrl(slug: string | null, token: string | null) {
