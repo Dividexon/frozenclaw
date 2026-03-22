@@ -198,7 +198,9 @@ function PricingCard({
       <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
         <div>
           <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">{kicker}</p>
-          <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">{title}</h3>
+          <h3 className="mt-2 whitespace-pre-line font-display text-5xl uppercase text-[var(--fc-text)]">
+            {title}
+          </h3>
         </div>
         <div className="text-right">
           <p className="font-display text-6xl leading-none text-[var(--fc-text)]">{price}</p>
@@ -519,8 +521,8 @@ export default async function Home() {
 
           <div className="mt-5 grid gap-5 lg:grid-cols-3">
             <PricingCard
-              kicker="Managed"
-              title="Starter"
+              kicker="Jetzt buchbar"
+              title={"Managed\nStarter"}
               price="EUR 9,90"
               includes={managedStarterIncludes}
               note="Der Einstiegsplan ist bewusst knapp gehalten und eignet sich für den ersten Managed-Einstieg."
@@ -537,8 +539,8 @@ export default async function Home() {
             />
 
             <PricingCard
-              kicker="Managed"
-              title="Plus"
+              kicker="Jetzt buchbar"
+              title={"Managed\nPlus"}
               price="EUR 39"
               includes={managedPlusIncludes}
               note="Der mittlere Managed-Plan für regelmäßige Nutzung mit deutlich mehr Spielraum."
@@ -555,8 +557,8 @@ export default async function Home() {
             />
 
             <PricingCard
-              kicker="Managed"
-              title="Advanced"
+              kicker="Jetzt buchbar"
+              title={"Managed\nAdvanced"}
               price="EUR 59"
               includes={managedAdvancedIncludes}
               note="Für Nutzer, die GPT-5.2 regelmäßig einsetzen und mehr Reserve pro Monat wollen."
