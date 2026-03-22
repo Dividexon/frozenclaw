@@ -292,11 +292,10 @@ export default async function Home() {
                 Dein eigener
                 <span className="block text-[var(--fc-accent)]">KI-Agent.</span>
               </h1>
-              <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
-                Frozenclaw hostet deine private OpenClaw-Instanz auf deutscher Infrastruktur. Du
-                kannst erst mit einem kleinen Free Tier testen und danach in BYOK oder Managed
-                wechseln.
-              </p>
+                <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
+                  Frozenclaw hostet deine private OpenClaw-Instanz auf eigener Infrastruktur in
+                  einer kontrollierten Umgebung in Deutschland.
+                </p>
             </div>
 
             <div className="flex flex-wrap gap-4">
