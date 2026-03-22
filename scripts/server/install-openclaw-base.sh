@@ -56,4 +56,18 @@ if content != patched:
     target.write_text(patched, encoding="utf-8")
 PY
 
+python3 - <<'PY' "$OPENCLAW_REPO_DIR/src/gateway/server.impl.ts"
+from pathlib import Path
+import sys
+
+target = Path(sys.argv[1])
+content = target.read_text(encoding="utf-8")
+old = """function createGatewayAuthRateLimiters(rateLimitConfig: AuthRateLimitConfig | undefined): {\n  rateLimiter?: AuthRateLimiter;\n  browserRateLimiter: AuthRateLimiter;\n} {\n  const rateLimiter = rateLimitConfig ? createAuthRateLimiter(rateLimitConfig) : undefined;\n  // Browser-origin WS auth attempts always use loopback-non-exempt throttling.\n  const browserRateLimiter = createAuthRateLimiter({\n    ...rateLimitConfig,\n    exemptLoopback: false,\n  });\n  return { rateLimiter, browserRateLimiter };\n}\n"""
+new = """function createGatewayAuthRateLimiters(rateLimitConfig: AuthRateLimitConfig | undefined): {\n  rateLimiter?: AuthRateLimiter;\n  browserRateLimiter: AuthRateLimiter;\n} {\n  const rateLimiter = rateLimitConfig ? createAuthRateLimiter(rateLimitConfig) : undefined;\n  // Frozenclaw proxies the Control UI over loopback via Caddy. When every browser\n  // request appears as 127.0.0.1, loopback throttling locks out all users together.\n  // Keep the shared limiter configurable, but exempt loopback for the browser UI.\n  const browserRateLimiter = createAuthRateLimiter({\n    ...rateLimitConfig,\n    exemptLoopback: true,\n  });\n  return { rateLimiter, browserRateLimiter };\n}\n"""
+patched = content.replace(old, new)
+
+if content != patched:
+    target.write_text(patched, encoding="utf-8")
+PY
+
 DOCKER_BUILDKIT=1 docker build -t "$OPENCLAW_IMAGE" "$OPENCLAW_REPO_DIR"
