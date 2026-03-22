@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const stripe = getStripe();
     const baseUrl = getBaseUrlFromRequest(request);
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
+      mode: "subscription",
       payment_method_types: ["card"],
       line_items: [
         {
@@ -51,14 +51,25 @@ export async function POST(request: Request) {
               name: plan.name,
               description: plan.description,
             },
+            recurring: {
+              interval: "month",
+            },
             unit_amount: plan.amountCents,
           },
           quantity: 1,
         },
       ],
+      billing_address_collection: "auto",
+      allow_promotion_codes: true,
       metadata: {
         planId: plan.id,
         usageMode: plan.usageMode,
+      },
+      subscription_data: {
+        metadata: {
+          planId: plan.id,
+          usageMode: plan.usageMode,
+        },
       },
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/#preise`,

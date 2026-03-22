@@ -7,6 +7,37 @@ import { isPlanId, plans, type UsageMode } from "@/lib/plans";
 
 export const runtime = "nodejs";
 
+function updateSubscriptionState(
+  subscriptionId: string,
+  next: {
+    customerId: string | null;
+    status: string | null;
+  },
+) {
+  getDb()
+    .prepare(
+      `
+        UPDATE orders
+        SET
+          stripe_customer_id = COALESCE(@customerId, stripe_customer_id),
+          stripe_subscription_id = @subscriptionId,
+          stripe_subscription_status = @status,
+          updated_at = datetime('now')
+        WHERE stripe_subscription_id = @subscriptionId
+           OR stripe_session_id IN (
+             SELECT stripe_session_id
+             FROM orders
+             WHERE stripe_subscription_id = @subscriptionId
+           )
+      `,
+    )
+    .run({
+      customerId: next.customerId,
+      subscriptionId,
+      status: next.status,
+    });
+}
+
 export async function POST(request: Request) {
   startRuntimeRecovery();
 
@@ -46,6 +77,9 @@ export async function POST(request: Request) {
         INSERT INTO orders (
           stripe_event_id,
           stripe_session_id,
+          stripe_customer_id,
+          stripe_subscription_id,
+          stripe_subscription_status,
           email,
           plan,
           usage_mode,
@@ -59,6 +93,9 @@ export async function POST(request: Request) {
         VALUES (
           @eventId,
           @sessionId,
+          @customerId,
+          @subscriptionId,
+          @subscriptionStatus,
           @email,
           @plan,
           @usageMode,
@@ -71,6 +108,9 @@ export async function POST(request: Request) {
         )
         ON CONFLICT(stripe_session_id) DO UPDATE SET
           stripe_event_id = excluded.stripe_event_id,
+          stripe_customer_id = COALESCE(excluded.stripe_customer_id, orders.stripe_customer_id),
+          stripe_subscription_id = COALESCE(excluded.stripe_subscription_id, orders.stripe_subscription_id),
+          stripe_subscription_status = COALESCE(excluded.stripe_subscription_status, orders.stripe_subscription_status),
           email = COALESCE(excluded.email, orders.email),
           plan = excluded.plan,
           usage_mode = excluded.usage_mode,
@@ -83,6 +123,10 @@ export async function POST(request: Request) {
       `).run({
         eventId: event.id,
         sessionId: session.id,
+        customerId: typeof session.customer === "string" ? session.customer : null,
+        subscriptionId: typeof session.subscription === "string" ? session.subscription : null,
+        subscriptionStatus:
+          session.mode === "subscription" ? session.status ?? session.payment_status ?? null : null,
         email,
         plan: planId,
         usageMode,
@@ -107,6 +151,38 @@ export async function POST(request: Request) {
       if (order?.id) {
         queueProvisioning(order.id);
       }
+    } else if (event.type === "customer.subscription.updated") {
+      const subscription = event.data.object;
+      updateSubscriptionState(subscription.id, {
+        customerId: typeof subscription.customer === "string" ? subscription.customer : null,
+        status: subscription.status,
+      });
+
+      logOrderEvent(null, "subscription_updated", {
+        stripeEventId: event.id,
+        subscriptionId: subscription.id,
+        status: subscription.status,
+      });
+    } else if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object;
+      updateSubscriptionState(subscription.id, {
+        customerId: typeof subscription.customer === "string" ? subscription.customer : null,
+        status: subscription.status,
+      });
+
+      logOrderEvent(null, "subscription_deleted", {
+        stripeEventId: event.id,
+        subscriptionId: subscription.id,
+        status: subscription.status,
+      });
+    } else if (event.type === "invoice.paid" || event.type === "invoice.payment_failed") {
+      const invoice = event.data.object;
+      logOrderEvent(null, event.type === "invoice.paid" ? "invoice_paid" : "invoice_payment_failed", {
+        stripeEventId: event.id,
+        invoiceId: invoice.id,
+        customerId: typeof invoice.customer === "string" ? invoice.customer : null,
+        status: invoice.status ?? null,
+      });
     } else {
       logOrderEvent(null, "webhook_ignored", {
         stripeEventId: event.id,

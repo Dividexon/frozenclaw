@@ -20,6 +20,9 @@ function migrate(db: DbInstance) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       stripe_event_id TEXT UNIQUE,
       stripe_session_id TEXT UNIQUE NOT NULL,
+      stripe_customer_id TEXT,
+      stripe_subscription_id TEXT,
+      stripe_subscription_status TEXT,
       email TEXT,
       plan TEXT NOT NULL,
       usage_mode TEXT NOT NULL,
@@ -103,6 +106,18 @@ function migrate(db: DbInstance) {
 
   if (!orderColumnSet.has("managed_provider")) {
     db.exec("ALTER TABLE orders ADD COLUMN managed_provider TEXT");
+  }
+
+  if (!orderColumnSet.has("stripe_customer_id")) {
+    db.exec("ALTER TABLE orders ADD COLUMN stripe_customer_id TEXT");
+  }
+
+  if (!orderColumnSet.has("stripe_subscription_id")) {
+    db.exec("ALTER TABLE orders ADD COLUMN stripe_subscription_id TEXT");
+  }
+
+  if (!orderColumnSet.has("stripe_subscription_status")) {
+    db.exec("ALTER TABLE orders ADD COLUMN stripe_subscription_status TEXT");
   }
 
   if (!orderColumnSet.has("managed_tracking_token")) {

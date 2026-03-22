@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BillingPortalButton } from "@/components/billing-portal-button";
 import { CopyField } from "@/components/copy-field";
 import { buildDashboardSnapshot } from "@/lib/dashboard";
 import { legalProfile } from "@/lib/legal";
@@ -496,12 +497,13 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     <div className="border border-[var(--fc-border)] bg-black/25 p-4">
                       <h3 className="text-xl font-semibold text-[var(--fc-text)]">Plan wechseln</h3>
                       <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
-                        Upgrade, Downgrade und Rechnungen laufen im finalen Zustand über Stripe.
+                        Upgrade, Downgrade, Kündigung und Rechnungen laufen über das Stripe
+                        Customer Portal.
                       </p>
-                      <div className="mt-4">
-                        <span className="fc-button fc-button-secondary opacity-60">
-                          Kommt mit Stripe-Portal
-                        </span>
+                      <div className="mt-4 flex flex-wrap gap-4">
+                        <BillingPortalButton token={token!} className="fc-button fc-button-secondary">
+                          Stripe-Portal öffnen
+                        </BillingPortalButton>
                       </div>
                     </div>
 
@@ -564,7 +566,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     </div>
                     <div className="signal-row">
                       <span className="signal-index">+</span>
-                      <span>Kündigung und Zahlungsverwaltung folgen mit Stripe</span>
+                      <span>Kündigung und Zahlungsverwaltung laufen über das Stripe-Portal</span>
                     </div>
                     <div className="signal-row">
                       <span className="signal-index">+</span>
@@ -581,9 +583,12 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 <Link href="/datenschutz" className="transition hover:text-[var(--fc-text)]">
                   Datenschutz
                 </Link>
-                <Link href="/beta-bedingungen" className="transition hover:text-[var(--fc-text)]">
-                  Beta-Bedingungen
-                </Link>
+                  <Link href="/beta-bedingungen" className="transition hover:text-[var(--fc-text)]">
+                    Beta-Bedingungen
+                  </Link>
+                  <BillingPortalButton token={token!} className="fc-button fc-button-secondary">
+                    Rechnungen & Abo
+                  </BillingPortalButton>
               </div>
             </section>
           </div>
