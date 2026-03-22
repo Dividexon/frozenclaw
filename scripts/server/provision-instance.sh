@@ -82,6 +82,7 @@ PROVIDER_ENV="${CONFIG_DIR}/.env"
 OPENCLAW_CONFIG_JSON="${CONFIG_DIR}/openclaw.json"
 AUTH_PROFILES_JSON="${AGENT_DIR}/auth-profiles.json"
 MANAGED_PLUGIN_FILE="${WORKSPACE_DIR}/frozenclaw-managed-usage.cjs"
+MANAGED_PLUGIN_CONTAINER_FILE="/home/node/.openclaw/workspace/frozenclaw-managed-usage.cjs"
 CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 OPENAI_MANAGED_API_KEY="${OPENAI_MANAGED_API_KEY:-}"
 
@@ -208,7 +209,7 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
   },
   "plugins": {
     "load": {
-      "paths": ["$MANAGED_PLUGIN_FILE"]
+      "paths": ["$MANAGED_PLUGIN_CONTAINER_FILE"]
     }
   }
 }
