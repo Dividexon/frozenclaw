@@ -261,6 +261,7 @@ docker run -d \
 caddy validate --config /etc/caddy/Caddyfile
 systemctl reload caddy
 
+CODE="000"
 for _ in $(seq 1 30); do
   CODE="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/healthz" || true)"
   if [[ "$CODE" != "000" ]]; then
