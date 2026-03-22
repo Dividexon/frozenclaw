@@ -9,8 +9,8 @@ export default function AnmeldenPage() {
         <h1 className="section-title mt-3 text-5xl">Zugang mit E-Mail und Passwort.</h1>
         <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
           Melde dich mit der E-Mail-Adresse deiner Frozenclaw-Bestellung und deinem Passwort an.
-          Falls du noch kein Passwort gesetzt hast, kannst du einmalig weiterhin einen Login-Link
-          per Mail anfordern.
+          Falls du dein Passwort noch nicht gesetzt hast, nutze zuerst deinen Zugangslink aus der
+          Bereitstellungs-Mail.
         </p>
 
         <div className="mt-8 max-w-xl">
@@ -19,7 +19,7 @@ export default function AnmeldenPage() {
 
         <div className="mt-8 flex flex-wrap gap-4">
           <Link href="/registrieren" className="fc-button fc-button-secondary">
-            Erst registrieren
+            Plan wählen
           </Link>
           <Link href="/" className="fc-button fc-button-secondary">
             Zur Startseite

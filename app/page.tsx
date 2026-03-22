@@ -5,7 +5,7 @@ import { CheckoutButton } from "@/components/checkout-button";
 const launchSignals = [
   "Eigene OpenClaw-Instanz pro Kunde",
   "Hosting in Deutschland",
-  "Start mit eigenem Modell-Key",
+  "BYOK oder Managed direkt buchbar",
   "Bereitstellung in der Regel am selben Tag",
 ];
 
@@ -199,17 +199,14 @@ export default function Home() {
             <a href="#faq" className="transition hover:text-[var(--fc-text)]">
               Fragen
             </a>
-            <Link href="/registrieren" className="transition hover:text-[var(--fc-text)]">
-              Registrieren
-            </Link>
             <Link href="/anmelden" className="transition hover:text-[var(--fc-text)]">
               Anmelden
             </Link>
           </nav>
           <div className="hidden items-center gap-3 md:flex">
-            <Link href="/registrieren" className="fc-button fc-button-primary">
-              Testzugang erstellen
-            </Link>
+            <a href="#preise" className="fc-button fc-button-primary">
+              Pläne wählen
+            </a>
             <Link href="/anmelden" className="fc-button fc-button-secondary">
               Anmelden
             </Link>
@@ -240,9 +237,9 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <Link href="/registrieren" className="fc-button fc-button-primary">
-                Kostenlos testen
-              </Link>
+              <a href="#preise" className="fc-button fc-button-primary">
+                Jetzt starten
+              </a>
               <Link href="/anmelden" className="fc-button fc-button-secondary">
                 Anmelden
               </Link>
@@ -478,7 +475,7 @@ export default function Home() {
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Pilot in Vorbereitung
+                    Jetzt buchbar
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
                     Managed Starter
@@ -510,9 +507,9 @@ export default function Home() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
-                <a href="#preise" className="fc-button fc-button-secondary">
-                  Interesse vormerken
-                </a>
+                <CheckoutButton planId="managed_starter" className="fc-button fc-button-primary">
+                  Jetzt starten
+                </CheckoutButton>
                 <a href="#faq" className="fc-button fc-button-secondary">
                   Mehr dazu
                 </a>
@@ -523,7 +520,7 @@ export default function Home() {
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Pilot in Vorbereitung
+                    Jetzt buchbar
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
                     Managed Plus
@@ -554,9 +551,9 @@ export default function Home() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
-                <a href="#preise" className="fc-button fc-button-secondary">
-                  Interesse vormerken
-                </a>
+                <CheckoutButton planId="managed_immediate" className="fc-button fc-button-primary">
+                  Jetzt starten
+                </CheckoutButton>
                 <a href="#faq" className="fc-button fc-button-secondary">
                   Mehr dazu
                 </a>
@@ -567,7 +564,7 @@ export default function Home() {
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                    Pilot in Vorbereitung
+                    Jetzt buchbar
                   </p>
                   <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
                     Managed Advanced
@@ -598,9 +595,9 @@ export default function Home() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
-                <a href="#preise" className="fc-button fc-button-secondary">
-                  Interesse vormerken
-                </a>
+                <CheckoutButton planId="managed_advanced" className="fc-button fc-button-primary">
+                  Jetzt starten
+                </CheckoutButton>
                 <a href="#faq" className="fc-button fc-button-secondary">
                   Mehr dazu
                 </a>
