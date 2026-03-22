@@ -157,9 +157,9 @@ const faqs = [
       "Nein. Du musst keinen eigenen Server betreiben und keine Infrastruktur selbst dauerhaft am Laufen halten.",
   },
   {
-    question: "Ist das schon ein komplett ausgereiftes SaaS?",
+    question: "Warum ist der Tokenverbrauch am Anfang oft höher?",
     answer:
-      "Nein. Es ist eine bezahlte Beta mit bewusst klarem Scope. Der Kern soll funktionieren, bevor der Rest ausgebaut wird.",
+      "Beim ersten Einlesen einer frischen Instanz kann OpenClaw deutlich mehr Tokens verbrauchen, weil initialer Kontext und Workspace-Dateien mit verarbeitet werden. Danach läuft der Verbrauch in der Regel deutlich normaler.",
   },
 ];
 
