@@ -6,12 +6,14 @@ import { UpgradePlanButton } from "@/components/upgrade-plan-button";
 import { resolveSessionAccessFromCookies } from "@/lib/auth";
 import { buildDashboardSnapshot } from "@/lib/dashboard";
 import { legalProfile } from "@/lib/legal";
-import { resolveLoginToken } from "@/lib/login-links";
+import { resolveLoginToken, resolveSetupAccess } from "@/lib/login-links";
 import { formatStandardTokens } from "@/lib/managed";
 
 type KontoPageProps = {
   searchParams: Promise<{
     token?: string;
+    slug?: string;
+    setupToken?: string;
   }>;
 };
 
@@ -37,8 +39,12 @@ function StatusPill({
 }
 
 export default async function KontoPage({ searchParams }: KontoPageProps) {
-  const { token } = await searchParams;
-  const access = token ? resolveLoginToken(token) : await resolveSessionAccessFromCookies();
+  const { token, slug, setupToken } = await searchParams;
+  const access = token
+    ? resolveLoginToken(token)
+    : slug && setupToken
+      ? resolveSetupAccess(slug, setupToken)
+      : await resolveSessionAccessFromCookies();
   const dashboard = access ? await buildDashboardSnapshot(access) : null;
   const managed = access?.managed;
   const billingToken = access?.authType === "login_link" ? token : undefined;

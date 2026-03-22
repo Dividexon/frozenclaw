@@ -70,7 +70,10 @@ export default async function ZugangPage({ params, searchParams }: AccessPagePro
         </p>
 
         <div className="mt-8 flex flex-wrap gap-4">
-          <Link href="/konto" className="fc-button fc-button-secondary">
+          <Link
+            href={token ? `/konto?slug=${encodeURIComponent(slug)}&setupToken=${encodeURIComponent(token)}` : "/konto"}
+            className="fc-button fc-button-secondary"
+          >
             Zum Dashboard
           </Link>
         </div>

@@ -31,7 +31,7 @@ export type AccountAccess = {
   createdAt: string;
   updatedAt: string;
   expiresAt: string | null;
-  authType: "login_link" | "password_session";
+  authType: "login_link" | "password_session" | "setup_token";
   managed: ManagedUsageSummary | null;
 };
 
@@ -90,7 +90,7 @@ export function createLoginToken(orderId: number, email: string) {
 
 export function buildAccessFromOrder(
   row: LoginTarget,
-  authType: "login_link" | "password_session",
+  authType: "login_link" | "password_session" | "setup_token",
   expiresAt: string | null,
 ): AccountAccess {
   return {
@@ -142,4 +142,32 @@ export function resolveLoginToken(rawToken: string): ResolvedLoginToken | null {
   }
 
   return buildAccessFromOrder(row, "login_link", row.expires_at);
+}
+
+export function resolveSetupAccess(slug: string, rawToken: string): AccountAccess | null {
+  const row = getDb()
+    .prepare(`
+      SELECT
+        id,
+        email,
+        plan,
+        usage_mode,
+        payment_status,
+        instance_state,
+        instance_slug,
+        gateway_token,
+        created_at,
+        updated_at
+      FROM orders
+      WHERE instance_slug = ?
+        AND gateway_token = ?
+      LIMIT 1
+    `)
+    .get(slug, rawToken) as LoginTarget | undefined;
+
+  if (!row) {
+    return null;
+  }
+
+  return buildAccessFromOrder(row, "setup_token", null);
 }
