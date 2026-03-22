@@ -210,18 +210,11 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                   </p>
                   <div className="mt-6 flex flex-wrap gap-4">
                     {dashboard.nextAction.href ? (
-                      <a href={dashboard.nextAction.href} className="fc-button fc-button-primary">
-                        {dashboard.nextAction.label}
-                      </a>
-                    ) : null}
-                    {access.agentUrl ? (
                       <a
-                        href={access.agentUrl}
-                        className="fc-button fc-button-secondary"
-                        target="_blank"
-                        rel="noreferrer noopener"
+                        href={dashboard.nextAction.href}
+                        className="fc-button fc-button-primary"
                       >
-                        Agent öffnen
+                        {dashboard.nextAction.label}
                       </a>
                     ) : null}
                     {access.activationUrl ? (
