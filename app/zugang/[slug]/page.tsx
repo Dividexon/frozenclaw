@@ -70,11 +70,8 @@ export default async function ZugangPage({ params, searchParams }: AccessPagePro
         </p>
 
         <div className="mt-8 flex flex-wrap gap-4">
-          <Link href="/" className="fc-button fc-button-secondary">
-            Zur Startseite
-          </Link>
-          <Link href="/anmelden" className="fc-button fc-button-secondary">
-            Zur Anmeldung
+          <Link href="/konto" className="fc-button fc-button-secondary">
+            Zum Dashboard
           </Link>
         </div>
 
