@@ -1,7 +1,15 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/login-form";
+import { resolveSessionAccessFromCookies } from "@/lib/auth";
 
-export default function AnmeldenPage() {
+export default async function AnmeldenPage() {
+  const access = await resolveSessionAccessFromCookies();
+
+  if (access) {
+    redirect("/konto");
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-[94%] max-w-4xl items-center justify-center py-16 text-[var(--fc-text)]">
       <section className="panel-cut fc-panel w-full">

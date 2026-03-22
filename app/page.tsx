@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { CheckoutButton } from "@/components/checkout-button";
+import { resolveSessionAccessFromCookies } from "@/lib/auth";
 
 const launchSignals = [
   "Eigene OpenClaw-Instanz pro Kunde",
@@ -229,7 +230,11 @@ function PricingCard({
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const access = await resolveSessionAccessFromCookies();
+  const accountHref = access ? "/konto" : "/anmelden";
+  const accountLabel = access ? "Dashboard" : "Anmelden";
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-[var(--fc-bg)] text-[var(--fc-text)]">
       <div className="pointer-events-none fixed inset-0 z-0">
@@ -256,16 +261,16 @@ export default function Home() {
             <a href="#faq" className="transition hover:text-[var(--fc-text)]">
               Fragen
             </a>
-            <Link href="/anmelden" className="transition hover:text-[var(--fc-text)]">
-              Anmelden
+            <Link href={accountHref} className="transition hover:text-[var(--fc-text)]">
+              {accountLabel}
             </Link>
           </nav>
           <div className="hidden items-center gap-3 md:flex">
             <Link href="/registrieren" className="fc-button fc-button-primary">
               Kostenlos testen
             </Link>
-            <Link href="/anmelden" className="fc-button fc-button-secondary">
-              Anmelden
+            <Link href={accountHref} className="fc-button fc-button-secondary">
+              {accountLabel}
             </Link>
           </div>
         </header>
@@ -299,8 +304,8 @@ export default function Home() {
               <a href="#preise" className="fc-button fc-button-secondary">
                 Pläne ansehen
               </a>
-              <Link href="/anmelden" className="fc-button fc-button-secondary">
-                Anmelden
+              <Link href={accountHref} className="fc-button fc-button-secondary">
+                {accountLabel}
               </Link>
             </div>
 
