@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { LogoutButton } from "@/components/logout-button";
 import { BillingPortalButton } from "@/components/billing-portal-button";
 import { CopyField } from "@/components/copy-field";
+import { LogoutButton } from "@/components/logout-button";
 import { UpgradePlanButton } from "@/components/upgrade-plan-button";
 import { resolveSessionAccessFromCookies } from "@/lib/auth";
 import { buildDashboardSnapshot } from "@/lib/dashboard";
@@ -17,6 +17,43 @@ type KontoPageProps = {
   }>;
 };
 
+type PlanCardDefinition = {
+  id: "hosted_byok" | "managed_starter" | "managed_immediate" | "managed_advanced";
+  kicker: string;
+  price: string;
+  description: string;
+};
+
+const planCards: PlanCardDefinition[] = [
+  {
+    id: "hosted_byok",
+    kicker: "Standardplan",
+    price: "19 € / Monat",
+    description:
+      "Eigene gehostete Instanz mit eigenem Modell-Key. Geeignet, wenn du Modellkosten selbst steuern willst.",
+  },
+  {
+    id: "managed_starter",
+    kicker: "Managed Starter",
+    price: "9,90 € / Monat",
+    description: "500.000 Standard-Tokens mit GPT-5.2 für einen günstigen Einstieg in Managed.",
+  },
+  {
+    id: "managed_immediate",
+    kicker: "Managed Plus",
+    price: "39 € / Monat",
+    description:
+      "3 Mio. Standard-Tokens mit GPT-5.2 für regelmäßige Nutzung mit klarem Monatsrahmen.",
+  },
+  {
+    id: "managed_advanced",
+    kicker: "Managed Advanced",
+    price: "59 € / Monat",
+    description:
+      "5 Mio. Standard-Tokens mit GPT-5.2 für mehr Spielraum und höhere laufende Nutzung.",
+  },
+];
+
 function StatusPill({
   tone,
   label,
@@ -31,10 +68,47 @@ function StatusPill({
   } as const;
 
   return (
-    <span className={`inline-flex items-center gap-2 border px-3 py-2 text-xs uppercase tracking-[0.18em] ${toneStyles[tone]}`}>
+    <span
+      className={`inline-flex items-center gap-2 border px-3 py-2 text-xs uppercase tracking-[0.18em] ${toneStyles[tone]}`}
+    >
       <span className="h-2 w-2 rounded-full bg-current" />
       {label}
     </span>
+  );
+}
+
+function PlanCard({
+  card,
+  currentPlanId,
+  isLegacyTrial,
+  billingToken,
+}: {
+  card: PlanCardDefinition;
+  currentPlanId: string;
+  isLegacyTrial: boolean;
+  billingToken?: string;
+}) {
+  const isCurrent = currentPlanId === card.id;
+
+  return (
+    <div className="border border-[var(--fc-border)] bg-black/20 p-5">
+      <p className="section-kicker">{card.kicker}</p>
+      <h3 className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">{card.price}</h3>
+      <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">{card.description}</p>
+      <div className="mt-5">
+        {isCurrent ? (
+          <span className="fc-button fc-button-secondary opacity-60">Aktiver Plan</span>
+        ) : isLegacyTrial ? (
+          <UpgradePlanButton planId={card.id} className="fc-button fc-button-primary">
+            Diesen Plan wählen
+          </UpgradePlanButton>
+        ) : (
+          <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
+            Im Portal wechseln
+          </BillingPortalButton>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -48,11 +122,20 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
   const dashboard = access ? await buildDashboardSnapshot(access) : null;
   const managed = access?.managed;
   const billingToken = access?.authType === "login_link" ? token : undefined;
-  const isTrial = access?.plan === "trial";
+  const isLegacyTrial = access?.plan === "trial";
   const managedProgressPercent =
     managed && managed.includedStandardTokens > 0
-      ? Math.min(100, Math.round((managed.usedStandardTokens / managed.includedStandardTokens) * 100))
+      ? Math.min(
+          100,
+          Math.round((managed.usedStandardTokens / managed.includedStandardTokens) * 100),
+        )
       : 0;
+  const sessionText =
+    access?.authType === "login_link" && access.expiresAt
+      ? `Login-Link gültig bis ${access.expiresAt}`
+      : access?.expiresAt
+        ? `Sitzung gültig bis ${access.expiresAt}`
+        : "Passwort-Sitzung aktiv";
 
   return (
     <main className="mx-auto min-h-screen w-[94%] max-w-7xl py-12 text-[var(--fc-text)]">
@@ -61,8 +144,8 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
           <p className="section-kicker">Konto</p>
           <h1 className="section-title mt-3 text-5xl">Dein Dashboard ist nicht erreichbar.</h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
-            Deine Sitzung ist ungültig oder abgelaufen. Melde dich einfach erneut an und öffne
-            dein Dashboard erneut.
+            Deine Sitzung ist ungültig oder abgelaufen. Melde dich einfach erneut an und öffne dein
+            Dashboard erneut.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/anmelden" className="fc-button fc-button-primary">
@@ -104,19 +187,34 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
             </div>
 
             <nav className="mt-8 grid gap-2 text-sm uppercase tracking-[0.16em] text-[var(--fc-text-muted)]">
-              <a href="#uebersicht" className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]">
+              <a
+                href="#uebersicht"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+              >
                 Übersicht
               </a>
-              <a href="#agent" className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]">
+              <a
+                href="#agent"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+              >
                 Agent
               </a>
-              <a href="#automationen" className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]">
+              <a
+                href="#automationen"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+              >
                 Automationen
               </a>
-              <a href="#plan-verbrauch" className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]">
+              <a
+                href="#plan-verbrauch"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+              >
                 Plan & Verbrauch
               </a>
-              <a href="#einstellungen" className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]">
+              <a
+                href="#einstellungen"
+                className="border border-[var(--fc-border)] bg-black/20 px-4 py-3 transition hover:text-[var(--fc-text)]"
+              >
                 Einstellungen
               </a>
             </nav>
@@ -133,13 +231,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 </div>
                 <div className="text-right text-sm uppercase tracking-[0.16em] text-[var(--fc-text-muted)]">
                   <p>{access.email ?? "Keine E-Mail hinterlegt"}</p>
-                  <p className="mt-2">
-                    {access.authType === "login_link" && access.expiresAt
-                      ? `Login-Link gültig bis ${access.expiresAt}`
-                      : access.expiresAt
-                        ? `Sitzung gültig bis ${access.expiresAt}`
-                        : "Passwort-Sitzung aktiv"}
-                  </p>
+                  <p className="mt-2">{sessionText}</p>
                 </div>
               </div>
 
@@ -194,7 +286,8 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     {dashboard.lastActivityAt ? "Erfasst" : "Noch keine"}
                   </p>
                   <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">
-                    {dashboard.lastActivityAt ?? "Sobald dein Agent genutzt wird, erscheint hier der letzte Aufruf."}
+                    {dashboard.lastActivityAt ??
+                      "Sobald dein Agent genutzt wird, erscheint hier der letzte Aufruf."}
                   </p>
                 </div>
               </div>
@@ -457,13 +550,12 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 )}
               </div>
             </section>
-
             <section id="plan-verbrauch" className="panel-cut fc-panel">
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--fc-border)] pb-5">
                 <div>
                   <p className="section-kicker">Plan & Verbrauch</p>
                   <h2 className="mt-3 text-4xl font-semibold text-[var(--fc-text)]">
-                    Tarif, Kontingent und nächste Schritte
+                    Tarif, Kontingent und Planwechsel
                   </h2>
                 </div>
                 <span className="fc-chip">{dashboard.planLabel}</span>
@@ -477,8 +569,8 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                   </h3>
                   <p className="mt-4 text-base leading-8 text-[var(--fc-text-muted)]">
                     {access.usageMode === "managed"
-                      ? "Managed bündelt Hosting und Modellzugang in einem festen Tarif. Nachbuchungen werden nach dem Monatskontingent verbraucht."
-                      : "BYOK trennt Hosting und Modellkosten. Du bringst deinen eigenen Provider-Key mit und zahlst nur das Hosting an Frozenclaw."}
+                      ? "Managed bündelt Hosting und Modellzugang in einem festen Tarif. Nachbuchungen werden erst nach dem Monatskontingent verbraucht."
+                      : "BYOK trennt Hosting und Modellkosten. Du bringst deinen eigenen Provider-Key mit und zahlst an Frozenclaw nur das Hosting."}
                   </p>
 
                   {managed ? (
@@ -492,15 +584,11 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                       </div>
                       <div className="signal-row">
                         <span className="signal-index">+</span>
-                        <span>
-                          Verbleibend: {formatStandardTokens(managed.remainingStandardTokens)}
-                        </span>
+                        <span>Verbleibend: {formatStandardTokens(managed.remainingStandardTokens)}</span>
                       </div>
                       <div className="signal-row">
                         <span className="signal-index">+</span>
-                        <span>
-                          Top-up separat: {formatStandardTokens(managed.topUpStandardTokens)}
-                        </span>
+                        <span>Top-up separat: {formatStandardTokens(managed.topUpStandardTokens)}</span>
                       </div>
                     </div>
                   ) : (
@@ -518,30 +606,25 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 </div>
 
                 <div className="border border-[var(--fc-border)] bg-black/20 p-5">
-                  <p className="section-kicker">Aktionen</p>
+                  <p className="section-kicker">Planverwaltung</p>
                   <div className="mt-4 grid gap-4">
                     <div className="border border-[var(--fc-border)] bg-black/25 p-4">
                       <h3 className="text-xl font-semibold text-[var(--fc-text)]">
-                        {isTrial ? "Nächster Schritt" : "Plan wechseln"}
+                        {isLegacyTrial ? "Bezahlten Plan aktivieren" : "Plan wechseln"}
                       </h3>
                       <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
-                        {isTrial
-                          ? "Dein Testzugang ist aktiv. Von hier aus kannst du direkt auf einen bezahlten Plan wechseln, ohne eine zweite Instanz anzulegen."
-                          : "Upgrade, Downgrade, Kündigung und Rechnungen laufen über das Stripe Customer Portal."}
+                        {isLegacyTrial
+                          ? "Dieses alte Testkonto kann direkt in einen bezahlten Plan überführt werden, ohne eine zweite Instanz anzulegen."
+                          : "Bei laufenden Abos laufen Wechsel, Kündigung, Rechnungen und Zahlungsmethode über das Stripe Customer Portal."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-4">
-                        {isTrial ? (
-                          <>
-                            <UpgradePlanButton
-                              planId="hosted_byok"
-                              className="fc-button fc-button-primary"
-                            >
-                              Standardplan buchen
-                            </UpgradePlanButton>
-                            <span className="fc-button fc-button-secondary opacity-60">
-                              Managed folgt nach Aktivierung
-                            </span>
-                          </>
+                        {isLegacyTrial ? (
+                          <UpgradePlanButton
+                            planId="hosted_byok"
+                            className="fc-button fc-button-primary"
+                          >
+                            Standardplan buchen
+                          </UpgradePlanButton>
                         ) : (
                           <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
                             Stripe-Portal öffnen
@@ -553,17 +636,17 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     <div className="border border-[var(--fc-border)] bg-black/25 p-4">
                       <h3 className="text-xl font-semibold text-[var(--fc-text)]">Nachbuchung</h3>
                       <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
-                        Geplante Pakete: 1 Mio. oder 2,5 Mio. zusätzliche Einheiten als einmaliger
-                        Kauf. Verbrauch erst nach dem Monatskontingent.
+                        Geplante Pakete: 1 Mio. oder 2,5 Mio. zusätzliche Standard-Tokens als
+                        Einmalkauf. Verbrauch erst nach dem Monatskontingent.
                       </p>
                       <div className="mt-4">
-                        {isTrial ? (
+                        {access.usageMode === "managed" ? (
                           <span className="fc-button fc-button-secondary opacity-60">
-                            Im Testzugang nicht verfügbar
+                            Einmalkauf folgt
                           </span>
                         ) : (
                           <span className="fc-button fc-button-secondary opacity-60">
-                            Einmalkauf folgt
+                            Nur für Managed-Pläne relevant
                           </span>
                         )}
                       </div>
@@ -572,34 +655,17 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 </div>
               </div>
 
-              {isTrial ? (
-                <div className="mt-6 grid gap-4 lg:grid-cols-3">
-                  <div className="border border-[var(--fc-border)] bg-black/20 p-5">
-                    <p className="section-kicker">Standardplan</p>
-                    <h3 className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">19 € / Monat</h3>
-                    <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                      Eigene gehostete Instanz mit eigenem Modell-Key. Deine Testinstanz wird dabei
-                      in denselben Account übernommen.
-                    </p>
-                  </div>
-                  <div className="border border-[var(--fc-border)] bg-black/20 p-5">
-                    <p className="section-kicker">Managed Starter</p>
-                    <h3 className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">9,90 € / Monat</h3>
-                    <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                      500.000 Standard-Tokens mit GPT-5.2. Dieser Plan bleibt aktuell noch gesperrt,
-                      bis der Managed-Checkout freigegeben ist.
-                    </p>
-                  </div>
-                  <div className="border border-[var(--fc-border)] bg-black/20 p-5">
-                    <p className="section-kicker">Managed Plus / Advanced</p>
-                    <h3 className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">39 € / 59 €</h3>
-                    <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">
-                      Größere GPT-5.2-Kontingente mit Nachbuchung. Sie erscheinen im Upgrade-Flow,
-                      sobald Managed vollständig freigeschaltet ist.
-                    </p>
-                  </div>
-                </div>
-              ) : null}
+              <div className="mt-6 grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+                {planCards.map((card) => (
+                  <PlanCard
+                    key={card.id}
+                    card={card}
+                    currentPlanId={access.plan}
+                    isLegacyTrial={isLegacyTrial}
+                    billingToken={billingToken}
+                  />
+                ))}
+              </div>
             </section>
 
             <section id="einstellungen" className="panel-cut fc-panel">
@@ -622,13 +688,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     </div>
                     <div className="signal-row">
                       <span className="signal-index">+</span>
-                      <span>
-                        {access.authType === "login_link" && access.expiresAt
-                          ? `Login-Link gültig bis ${access.expiresAt}`
-                          : access.expiresAt
-                            ? `Sitzung gültig bis ${access.expiresAt}`
-                            : "Passwort-Sitzung aktiv"}
-                      </span>
+                      <span>{sessionText}</span>
                     </div>
                   </div>
                   <div className="mt-6 flex flex-wrap gap-4">
@@ -657,7 +717,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     </div>
                     <div className="signal-row">
                       <span className="signal-index">+</span>
-                      <span>Instanz-Reset wird bewusst erst nach sauberem Backup-Flow freigegeben</span>
+                      <span>Instanz-Reset wird erst nach sauberem Backup-Flow freigegeben</span>
                     </div>
                   </div>
                 </div>
@@ -670,14 +730,14 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 <Link href="/datenschutz" className="transition hover:text-[var(--fc-text)]">
                   Datenschutz
                 </Link>
-                  <Link href="/beta-bedingungen" className="transition hover:text-[var(--fc-text)]">
-                    Beta-Bedingungen
-                  </Link>
-                  {!isTrial ? (
-                    <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
-                      Rechnungen & Abo
-                    </BillingPortalButton>
-                  ) : null}
+                <Link href="/beta-bedingungen" className="transition hover:text-[var(--fc-text)]">
+                  Beta-Bedingungen
+                </Link>
+                {!isLegacyTrial ? (
+                  <BillingPortalButton token={billingToken} className="fc-button fc-button-secondary">
+                    Rechnungen & Abo
+                  </BillingPortalButton>
+                ) : null}
               </div>
             </section>
           </div>
