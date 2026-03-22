@@ -176,6 +176,10 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
             <div className="mt-6 grid gap-3">
               <div className="signal-row">
                 <span className="signal-index">+</span>
+                <span>{dashboard.accountLabel}</span>
+              </div>
+              <div className="signal-row">
+                <span className="signal-index">+</span>
                 <span>{dashboard.planLabel}</span>
               </div>
               <div className="signal-row">
@@ -232,6 +236,9 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                   </h2>
                 </div>
                 <div className="text-right text-sm uppercase tracking-[0.16em] text-[var(--fc-text-muted)]">
+                  {access.isAdmin ? (
+                    <p className="mb-2 text-[var(--fc-accent-strong)]">Admin-Konto</p>
+                  ) : null}
                   <p>{access.email ?? "Keine E-Mail hinterlegt"}</p>
                   <p className="mt-2">{sessionText}</p>
                 </div>

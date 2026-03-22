@@ -2,6 +2,7 @@ import "server-only";
 
 import crypto from "node:crypto";
 import { getDb, logOrderEvent } from "@/lib/db";
+import { isAdminEmail } from "@/lib/admin";
 import { getManagedUsageSummary, type ManagedUsageSummary } from "@/lib/managed";
 import { buildAgentUrl, buildSetupUrl } from "@/lib/provisioning";
 
@@ -21,6 +22,7 @@ export type LoginTarget = {
 export type AccountAccess = {
   orderId: number;
   email: string | null;
+  isAdmin: boolean;
   plan: string;
   usageMode: string;
   paymentStatus: string;
@@ -99,6 +101,7 @@ export function buildAccessFromOrder(
   return {
     orderId: row.id,
     email: row.email,
+    isAdmin: isAdminEmail(row.email),
     plan: row.plan,
     usageMode: row.usage_mode,
     paymentStatus: row.payment_status,

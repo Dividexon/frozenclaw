@@ -57,6 +57,7 @@ export type DashboardNextAction = {
 };
 
 export type DashboardSnapshot = {
+  accountLabel: string;
   planLabel: string;
   usageModeLabel: string;
   instanceStatusLabel: string;
@@ -325,6 +326,7 @@ export async function buildDashboardSnapshot(access: ResolvedLoginToken): Promis
     .sort((left, right) => right - left)[0] ?? null;
 
   return {
+    accountLabel: access.isAdmin ? "Admin-Konto" : "Kundenkonto",
     planLabel: planLabels[access.plan] ?? access.plan,
     usageModeLabel: access.usageMode === "managed" ? "Managed" : "BYOK",
     instanceStatusLabel: instanceStatus.label,
