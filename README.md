@@ -89,6 +89,7 @@ Aktueller Zielzustand:
 
 - Modell: `openai/gpt-5.2`
 - `Managed Starter`: `500.000` Standard-Tokens fuer `9,90 EUR / Monat`
+- `Managed Immediate`: `3.000.000` Standard-Tokens fuer `39 EUR / Monat`
 - `Managed Advanced`: `5.000.000` Standard-Tokens fuer `59 EUR / Monat`
 - Nachbuchung geplant:
   - `1.000.000` Standard-Tokens für `9 EUR`
@@ -110,6 +111,11 @@ cd /opt/frozenclaw/app
 node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com --plan managed_starter
 ```
 
+```bash
+cd /opt/frozenclaw/app
+node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com --plan managed_immediate
+```
+
 Optional laesst sich gezielt eine bestehende Instanz umstellen:
 
 ```bash
@@ -119,7 +125,7 @@ node scripts/server/seed-managed-order.mjs --email Frozenclaw9@gmail.com --slug 
 
 Das Skript:
 
-- setzt die Bestellung auf `managed_starter` oder `managed_advanced`
+- setzt die Bestellung auf `managed_starter`, `managed_immediate` oder `managed_advanced`
 - hinterlegt `openai/gpt-5.2`
 - setzt das Tokenkontingent passend zur gewaehlten Stufe
 - erzeugt einen frischen Login-Link

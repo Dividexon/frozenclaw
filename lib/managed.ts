@@ -38,6 +38,10 @@ function getManagedPlanDefinition(planId?: string | null) {
     return plans.managed_starter;
   }
 
+  if (planId === "managed_immediate") {
+    return plans.managed_immediate;
+  }
+
   return plans.managed_advanced;
 }
 

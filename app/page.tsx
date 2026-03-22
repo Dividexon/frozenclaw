@@ -71,6 +71,16 @@ const managedStarterIncludes = [
   "Nachbuchung später zubuchbar",
 ];
 
+const managedImmediateIncludes = [
+  "1 gehostete OpenClaw-Instanz",
+  "GPT-5.2 als festes Modell",
+  "3 Mio. Standard-Tokens pro Monat",
+  "Modellzugang wird von Frozenclaw gestellt",
+  "Verbrauch wird automatisch mitgerechnet",
+  "Für regelmäßige Nutzung mit klarem Monatsrahmen",
+  "Nachbuchung später zubuchbar",
+];
+
 const managedAdvancedIncludes = [
   "1 gehostete OpenClaw-Instanz",
   "GPT-5.2 als festes Modell",
@@ -111,7 +121,7 @@ const specRows = [
   ["Modell-Key", "Zum Start vom Kunden gestellt"],
   ["Support", "E-Mail + Startanleitung"],
   ["Bereitstellung", "In der Regel am selben Tag"],
-  ["Managed", "GPT-5.2 mit Starter und Advanced"],
+  ["Managed", "GPT-5.2 mit Starter, Immediate und Advanced"],
 ];
 
 const faqs = [
@@ -128,7 +138,7 @@ const faqs = [
   {
     question: "Welche Managed-Stufen gibt es?",
     answer:
-      "Zum Start planen wir zwei Managed-Stufen mit demselben Modell. Starter liegt bei 9,90 EUR mit 500.000 Standard-Tokens pro Monat. Advanced liegt bei 59 EUR mit 5 Mio. Standard-Tokens pro Monat.",
+      "Zum Start planen wir drei Managed-Stufen mit demselben Modell. Starter liegt bei 9,90 EUR mit 500.000 Standard-Tokens pro Monat. Immediate liegt bei 39 EUR mit 3 Mio. Standard-Tokens pro Monat. Advanced liegt bei 59 EUR mit 5 Mio. Standard-Tokens pro Monat.",
   },
   {
     question: "Wie funktioniert die Nutzung im Managed-Plan?",
@@ -423,7 +433,7 @@ export default function Home() {
             <h2 className="section-title">Das Startangebot ist bewusst klar aufgebaut.</h2>
           </div>
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
+          <div className="mt-8 grid gap-5 lg:grid-cols-2">
             <article className="panel-cut fc-panel pricing-panel">
               <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
                 <div>
@@ -496,6 +506,50 @@ export default function Home() {
                 Der Einstiegsplan ist bewusst knapp gehalten. Er ist für Nutzer gedacht, die
                 Managed erst ausprobieren wollen, ohne direkt in ein größeres Monatskontingent
                 zu gehen.
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-4">
+                <a href="#preise" className="fc-button fc-button-secondary">
+                  Interesse vormerken
+                </a>
+                <a href="#faq" className="fc-button fc-button-secondary">
+                  Mehr dazu
+                </a>
+              </div>
+            </article>
+
+            <article className="panel-cut fc-panel">
+              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
+                    Pilot in Vorbereitung
+                  </p>
+                  <h3 className="mt-2 font-display text-5xl uppercase text-[var(--fc-text)]">
+                    Managed Immediate
+                  </h3>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-6xl leading-none text-[var(--fc-text)]">
+                    EUR 39
+                  </p>
+                  <p className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
+                    pro Monat
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {managedImmediateIncludes.map((item) => (
+                  <div key={item} className="signal-row">
+                    <span className="signal-index">+</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 border border-[var(--fc-border)] bg-[rgba(255,255,255,0.025)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+                Immediate ist der mittlere Managed-Plan für Nutzer, die GPT-5.2 regelmäßig
+                einsetzen wollen, aber noch kein großes Monatskontingent brauchen.
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">

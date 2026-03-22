@@ -1,6 +1,10 @@
 export type UsageMode = "byok" | "managed";
 
-export type PlanId = "hosted_byok" | "managed_starter" | "managed_advanced";
+export type PlanId =
+  | "hosted_byok"
+  | "managed_starter"
+  | "managed_immediate"
+  | "managed_advanced";
 
 export type TopUpPackage = {
   id: string;
@@ -44,6 +48,33 @@ export const plans: Record<PlanId, PlanDefinition> = {
     managedModel: "openai/gpt-5.2",
     includedStandardTokens: 500_000,
     includedBudgetCents: 250,
+    topUps: [
+      {
+        id: "managed_topup_1m",
+        label: "1 Mio. Standard-Tokens",
+        standardTokens: 1_000_000,
+        amountCents: 900,
+      },
+      {
+        id: "managed_topup_2_5m",
+        label: "2,5 Mio. Standard-Tokens",
+        standardTokens: 2_500_000,
+        amountCents: 1900,
+      },
+    ],
+  },
+  managed_immediate: {
+    id: "managed_immediate",
+    name: "Managed Immediate",
+    description:
+      "Managed mit GPT-5.2, klarem Monatskontingent und zubuchbaren Tokenpaketen.",
+    usageMode: "managed",
+    amountCents: 3900,
+    active: false,
+    managedProvider: "openai",
+    managedModel: "openai/gpt-5.2",
+    includedStandardTokens: 3_000_000,
+    includedBudgetCents: 1500,
     topUps: [
       {
         id: "managed_topup_1m",

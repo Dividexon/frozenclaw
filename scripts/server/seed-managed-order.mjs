@@ -117,6 +117,11 @@ const managedPlans = {
     includedStandardTokens: 500_000,
     includedBudgetCents: 250,
   },
+  managed_immediate: {
+    name: "Managed Immediate",
+    includedStandardTokens: 3_000_000,
+    includedBudgetCents: 1500,
+  },
   managed_advanced: {
     name: "Managed Advanced",
     includedStandardTokens: 5_000_000,
