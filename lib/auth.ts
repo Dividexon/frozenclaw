@@ -6,7 +6,7 @@ import { getDb, logOrderEvent } from "@/lib/db";
 import { buildAccessFromOrder, findLatestOrderByEmail, type AccountAccess } from "@/lib/login-links";
 
 const SESSION_COOKIE_NAME = "fc_session";
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 3;
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
