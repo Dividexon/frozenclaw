@@ -82,8 +82,8 @@ INSTANCE_ENV="${CUSTOMER_DIR}/instance.env"
 PROVIDER_ENV="${CONFIG_DIR}/.env"
 OPENCLAW_CONFIG_JSON="${CONFIG_DIR}/openclaw.json"
 AUTH_PROFILES_JSON="${AGENT_DIR}/auth-profiles.json"
-MANAGED_PLUGIN_FILE="${WORKSPACE_DIR}/frozenclaw-managed-usage.cjs"
-MANAGED_PLUGIN_CONTAINER_FILE="/home/node/.openclaw/workspace/frozenclaw-managed-usage.cjs"
+MANAGED_PLUGIN_DIR="${WORKSPACE_DIR}/.openclaw/extensions/frozenclaw-managed-usage"
+MANAGED_PLUGIN_FILE="${MANAGED_PLUGIN_DIR}/index.cjs"
 CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 OPENAI_MANAGED_API_KEY="${OPENAI_MANAGED_API_KEY:-}"
 
@@ -122,6 +122,7 @@ OPENCLAW_IMAGE=$OPENCLAW_IMAGE
 EOF
 
 if [[ "$USAGE_MODE" == "managed" ]]; then
+  mkdir -p "$MANAGED_PLUGIN_DIR"
   sed -i '/^ANTHROPIC_API_KEY=/d;/^OPENAI_API_KEY=/d;/^GEMINI_API_KEY=/d' "$PROVIDER_ENV"
 
   if [[ -n "$OPENAI_MANAGED_API_KEY" ]]; then
@@ -226,6 +227,10 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
         }
       }
     }
+  },
+  "plugins": {
+    "enabled": true,
+    "allow": ["frozenclaw-managed-usage"]
   }
 }
 EOF
@@ -256,8 +261,8 @@ chown -R "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$CUSTOMER_DIR"
 chmod 750 "$CUSTOMER_DIR" "$CONFIG_DIR" "$WORKSPACE_DIR" "${CONFIG_DIR}/agents" "${CONFIG_DIR}/agents/main" "$AGENT_DIR"
 chmod 640 "$INSTANCE_ENV" "$PROVIDER_ENV" "$OPENCLAW_CONFIG_JSON" "$AUTH_PROFILES_JSON"
 if [[ -f "$MANAGED_PLUGIN_FILE" ]]; then
-  chown "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$WORKSPACE_DIR" "$MANAGED_PLUGIN_FILE"
-  chmod 750 "$WORKSPACE_DIR"
+  chown "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$WORKSPACE_DIR" "${WORKSPACE_DIR}/.openclaw" "${WORKSPACE_DIR}/.openclaw/extensions" "$MANAGED_PLUGIN_DIR" "$MANAGED_PLUGIN_FILE"
+  chmod 750 "$WORKSPACE_DIR" "${WORKSPACE_DIR}/.openclaw" "${WORKSPACE_DIR}/.openclaw/extensions" "$MANAGED_PLUGIN_DIR"
   chmod 640 "$MANAGED_PLUGIN_FILE"
 fi
 
