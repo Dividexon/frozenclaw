@@ -29,6 +29,9 @@ type ProvisionableOrder = {
   instance_slug: string | null;
   instance_port: number | null;
   gateway_token: string | null;
+  managed_tracking_token: string | null;
+  managed_provider: string | null;
+  managed_model: string | null;
 };
 
 declare global {
@@ -46,6 +49,10 @@ function generateSlug() {
 
 function generateGatewayToken() {
   return crypto.randomBytes(18).toString("base64url");
+}
+
+function generateManagedTrackingToken() {
+  return crypto.randomBytes(24).toString("base64url");
 }
 
 export function buildAgentUrl(slug: string | null, token: string | null) {
@@ -95,7 +102,10 @@ function getOrderById(orderId: number) {
         instance_state,
         instance_slug,
         instance_port,
-        gateway_token
+        gateway_token,
+        managed_tracking_token,
+        managed_provider,
+        managed_model
       FROM orders
       WHERE id = ?
     `)
@@ -129,6 +139,7 @@ function ensureIdentity(orderId: number) {
   const existing = db
     .prepare(`
       SELECT instance_slug, instance_port, gateway_token
+      , managed_tracking_token
       FROM orders
       WHERE id = ?
     `)
@@ -137,6 +148,7 @@ function ensureIdentity(orderId: number) {
         instance_slug: string | null;
         instance_port: number | null;
         gateway_token: string | null;
+        managed_tracking_token: string | null;
       }
     | undefined;
 
@@ -171,6 +183,9 @@ function ensureIdentity(orderId: number) {
 
   const port = existing.instance_port ?? pickNextPort();
   const token = existing.gateway_token ?? generateGatewayToken();
+  const managedTrackingToken =
+    existing.managed_tracking_token ??
+    (getOrderById(orderId)?.usage_mode === "managed" ? generateManagedTrackingToken() : null);
 
   db.prepare(`
     UPDATE orders
@@ -178,6 +193,7 @@ function ensureIdentity(orderId: number) {
       instance_slug = @slug,
       instance_port = @port,
       gateway_token = @token,
+      managed_tracking_token = @managedTrackingToken,
       updated_at = datetime('now')
     WHERE id = @orderId
   `).run({
@@ -185,9 +201,10 @@ function ensureIdentity(orderId: number) {
     slug,
     port,
     token,
+    managedTrackingToken,
   });
 
-  return { slug, port, token };
+  return { slug, port, token, managedTrackingToken };
 }
 
 async function runMockProvisioning(order: ProvisionableOrder) {
@@ -201,10 +218,11 @@ async function runMockProvisioning(order: ProvisionableOrder) {
         orderId: order.id,
         email: order.email,
         plan: order.plan,
-        usageMode: order.usage_mode,
-        port: identity.port,
-        setupUrl: buildSetupUrl(identity.slug, identity.token),
-        agentUrl: buildAgentUrl(identity.slug, identity.token),
+      usageMode: order.usage_mode,
+      port: identity.port,
+      managedTrackingToken: identity.managedTrackingToken,
+      setupUrl: buildSetupUrl(identity.slug, identity.token),
+      agentUrl: buildAgentUrl(identity.slug, identity.token),
         createdAt: new Date().toISOString(),
       },
       null,
@@ -232,6 +250,14 @@ async function runScriptProvisioning(order: ProvisionableOrder) {
     String(identity.port),
     "--token",
     identity.token,
+    "--usage-mode",
+    order.usage_mode,
+    "--managed-provider",
+    order.managed_provider ?? "",
+    "--managed-model",
+    order.managed_model ?? "",
+    "--managed-tracking-token",
+    identity.managedTrackingToken ?? "",
   ]);
 }
 

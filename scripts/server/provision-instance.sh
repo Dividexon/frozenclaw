@@ -14,6 +14,10 @@ ORDER_ID=""
 SLUG=""
 PORT=""
 TOKEN=""
+USAGE_MODE="byok"
+MANAGED_PROVIDER=""
+MANAGED_MODEL=""
+MANAGED_TRACKING_TOKEN=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -31,6 +35,22 @@ while [[ $# -gt 0 ]]; do
       ;;
     --token)
       TOKEN="$2"
+      shift 2
+      ;;
+    --usage-mode)
+      USAGE_MODE="$2"
+      shift 2
+      ;;
+    --managed-provider)
+      MANAGED_PROVIDER="$2"
+      shift 2
+      ;;
+    --managed-model)
+      MANAGED_MODEL="$2"
+      shift 2
+      ;;
+    --managed-tracking-token)
+      MANAGED_TRACKING_TOKEN="$2"
       shift 2
       ;;
     *)
@@ -61,7 +81,9 @@ INSTANCE_ENV="${CUSTOMER_DIR}/instance.env"
 PROVIDER_ENV="${CONFIG_DIR}/.env"
 OPENCLAW_CONFIG_JSON="${CONFIG_DIR}/openclaw.json"
 AUTH_PROFILES_JSON="${AGENT_DIR}/auth-profiles.json"
+MANAGED_PLUGIN_FILE="${WORKSPACE_DIR}/frozenclaw-managed-usage.cjs"
 CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
+OPENAI_MANAGED_API_KEY="${OPENAI_MANAGED_API_KEY:-}"
 
 mkdir -p "$CONFIG_DIR" "$WORKSPACE_DIR" "$AGENT_DIR" /etc/caddy/customers.d
 
@@ -90,7 +112,109 @@ CONTAINER_NAME=$CONTAINER_NAME
 OPENCLAW_IMAGE=$OPENCLAW_IMAGE
 EOF
 
-cat > "$OPENCLAW_CONFIG_JSON" <<EOF
+if [[ "$USAGE_MODE" == "managed" ]]; then
+  if [[ -n "$OPENAI_MANAGED_API_KEY" ]]; then
+    grep -q '^OPENAI_API_KEY=' "$PROVIDER_ENV" \
+      && sed -i "s/^OPENAI_API_KEY=.*/OPENAI_API_KEY=$OPENAI_MANAGED_API_KEY/" "$PROVIDER_ENV" \
+      || printf 'OPENAI_API_KEY=%s\n' "$OPENAI_MANAGED_API_KEY" >> "$PROVIDER_ENV"
+
+    cat > "$AUTH_PROFILES_JSON" <<EOF
+{
+  "version": 1,
+  "profiles": {
+    "openai:default": {
+      "type": "api_key",
+      "provider": "openai",
+      "key": "$OPENAI_MANAGED_API_KEY"
+    }
+  },
+  "order": {
+    "openai": ["openai:default"]
+  }
+}
+EOF
+  elif [[ ! -f "$AUTH_PROFILES_JSON" ]]; then
+    cat > "$AUTH_PROFILES_JSON" <<EOF
+{
+  "version": 1,
+  "profiles": {}
+}
+EOF
+  fi
+
+  cat > "$MANAGED_PLUGIN_FILE" <<EOF
+module.exports = {
+  id: "frozenclaw-managed-usage",
+  register(api) {
+    api.on("llm_output", async (event) => {
+      if (!event || event.provider !== "openai" || !event.usage) {
+        return;
+      }
+
+      try {
+        await fetch("${APP_BASE_URL}/api/internal/managed-usage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer ${MANAGED_TRACKING_TOKEN}"
+          },
+          body: JSON.stringify({
+            slug: "${SLUG}",
+            usageKey: event.runId,
+            provider: event.provider,
+            model: event.model,
+            source: "llm_output",
+            usage: {
+              input: event.usage.input ?? 0,
+              output: event.usage.output ?? 0,
+              total: event.usage.total ?? ((event.usage.input ?? 0) + (event.usage.output ?? 0))
+            }
+          })
+        });
+      } catch {
+        // Usage logging must never break the agent run.
+      }
+    });
+  }
+};
+EOF
+else
+  if [[ ! -f "$AUTH_PROFILES_JSON" ]]; then
+    cat > "$AUTH_PROFILES_JSON" <<EOF
+{
+  "version": 1,
+  "profiles": {}
+}
+EOF
+  fi
+  rm -f "$MANAGED_PLUGIN_FILE"
+fi
+
+if [[ "$USAGE_MODE" == "managed" ]]; then
+  cat > "$OPENCLAW_CONFIG_JSON" <<EOF
+{
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": ["$APP_BASE_URL"],
+      "dangerouslyDisableDeviceAuth": $OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH
+    }
+  },
+  "plugins": {
+    "load": {
+      "paths": ["$MANAGED_PLUGIN_FILE"]
+    }
+  },
+  "models": {
+    "providers": {
+      "$MANAGED_PROVIDER": {
+        "api": "openai-responses"
+      }
+    }
+  }
+}
+EOF
+else
+  cat > "$OPENCLAW_CONFIG_JSON" <<EOF
 {
   "gateway": {
     "controlUi": {
@@ -98,14 +222,6 @@ cat > "$OPENCLAW_CONFIG_JSON" <<EOF
       "dangerouslyDisableDeviceAuth": $OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH
     }
   }
-}
-EOF
-
-if [[ ! -f "$AUTH_PROFILES_JSON" ]]; then
-  cat > "$AUTH_PROFILES_JSON" <<EOF
-{
-  "version": 1,
-  "profiles": {}
 }
 EOF
 fi
@@ -123,6 +239,9 @@ EOF
 chown -R "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$CUSTOMER_DIR"
 chmod 750 "$CUSTOMER_DIR" "$CONFIG_DIR" "$WORKSPACE_DIR" "${CONFIG_DIR}/agents" "${CONFIG_DIR}/agents/main" "$AGENT_DIR"
 chmod 640 "$INSTANCE_ENV" "$PROVIDER_ENV" "$OPENCLAW_CONFIG_JSON" "$AUTH_PROFILES_JSON"
+if [[ -f "$MANAGED_PLUGIN_FILE" ]]; then
+  chmod 640 "$MANAGED_PLUGIN_FILE"
+fi
 
 docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
 

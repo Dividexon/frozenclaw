@@ -1,5 +1,6 @@
 import "server-only";
 
+import crypto from "node:crypto";
 import { getDb } from "@/lib/db";
 import { getAppConfig } from "@/lib/env";
 import { plans } from "@/lib/plans";
@@ -17,6 +18,17 @@ export type ManagedUsageSummary = {
   topUpBudgetCents: number;
   usedCostMicros: number;
   managedApiKeyConfigured: boolean;
+};
+
+export type ManagedUsageEvent = {
+  usageKey: string;
+  orderId: number;
+  provider: string;
+  model: string;
+  source: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens?: number;
 };
 
 export function isManagedApiKeyConfigured() {
@@ -121,4 +133,89 @@ export function getManagedUsageSummary(orderId: number): ManagedUsageSummary {
 
 export function formatStandardTokens(tokens: number) {
   return new Intl.NumberFormat("de-DE").format(tokens);
+}
+
+export function generateManagedTrackingToken() {
+  return crypto.randomBytes(24).toString("base64url");
+}
+
+function roundToInt(value: number) {
+  return Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+}
+
+function getOpenAiTokenRatesMicros(model: string) {
+  if (model === "openai/gpt-5.2" || model === "gpt-5.2") {
+    return {
+      inputMicrosPerToken: 1.75,
+      outputMicrosPerToken: 14,
+    };
+  }
+
+  return {
+    inputMicrosPerToken: 1.75,
+    outputMicrosPerToken: 14,
+  };
+}
+
+export function calculateManagedUsage(event: ManagedUsageEvent) {
+  const rates = getOpenAiTokenRatesMicros(event.model);
+  const costInputMicros = roundToInt(event.inputTokens * rates.inputMicrosPerToken);
+  const costOutputMicros = roundToInt(event.outputTokens * rates.outputMicrosPerToken);
+  const costTotalMicros = costInputMicros + costOutputMicros;
+
+  return {
+    standardTokensCharged: roundToInt(event.totalTokens ?? event.inputTokens + event.outputTokens),
+    costInputMicros,
+    costOutputMicros,
+    costTotalMicros,
+  };
+}
+
+export function recordManagedUsage(event: ManagedUsageEvent) {
+  const usage = calculateManagedUsage(event);
+  const db = getDb();
+
+  db.prepare(`
+    INSERT INTO usage_events (
+      order_id,
+      provider,
+      model,
+      source,
+      usage_key,
+      input_tokens,
+      output_tokens,
+      standard_tokens_charged,
+      cost_input_micros,
+      cost_output_micros,
+      cost_total_micros
+    )
+    VALUES (
+      @orderId,
+      @provider,
+      @model,
+      @source,
+      @usageKey,
+      @inputTokens,
+      @outputTokens,
+      @standardTokensCharged,
+      @costInputMicros,
+      @costOutputMicros,
+      @costTotalMicros
+    )
+    ON CONFLICT(usage_key) DO NOTHING
+  `).run({
+    orderId: event.orderId,
+    provider: event.provider,
+    model: event.model,
+    source: event.source,
+    usageKey: event.usageKey,
+    inputTokens: event.inputTokens,
+    outputTokens: event.outputTokens,
+    standardTokensCharged: usage.standardTokensCharged,
+    costInputMicros: usage.costInputMicros,
+    costOutputMicros: usage.costOutputMicros,
+    costTotalMicros: usage.costTotalMicros,
+  });
+
+  return usage;
 }

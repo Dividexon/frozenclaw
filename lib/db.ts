@@ -28,6 +28,7 @@ function migrate(db: DbInstance) {
       instance_port INTEGER UNIQUE,
       instance_state TEXT NOT NULL DEFAULT 'pending',
       gateway_token TEXT,
+      managed_tracking_token TEXT,
       checkout_url TEXT,
       managed_provider TEXT,
       managed_model TEXT,
@@ -52,6 +53,7 @@ function migrate(db: DbInstance) {
       provider TEXT NOT NULL,
       model TEXT NOT NULL,
       source TEXT NOT NULL,
+      usage_key TEXT UNIQUE,
       input_tokens INTEGER NOT NULL DEFAULT 0,
       output_tokens INTEGER NOT NULL DEFAULT 0,
       credits_charged INTEGER NOT NULL DEFAULT 0,
@@ -103,6 +105,10 @@ function migrate(db: DbInstance) {
     db.exec("ALTER TABLE orders ADD COLUMN managed_provider TEXT");
   }
 
+  if (!orderColumnSet.has("managed_tracking_token")) {
+    db.exec("ALTER TABLE orders ADD COLUMN managed_tracking_token TEXT");
+  }
+
   if (!orderColumnSet.has("managed_model")) {
     db.exec("ALTER TABLE orders ADD COLUMN managed_model TEXT");
   }
@@ -132,6 +138,12 @@ function migrate(db: DbInstance) {
   if (!usageColumnSet.has("cost_total_micros")) {
     db.exec("ALTER TABLE usage_events ADD COLUMN cost_total_micros INTEGER NOT NULL DEFAULT 0");
   }
+
+  if (!usageColumnSet.has("usage_key")) {
+    db.exec("ALTER TABLE usage_events ADD COLUMN usage_key TEXT");
+  }
+
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_usage_events_usage_key ON usage_events(usage_key)");
 }
 
 export function getDb() {
