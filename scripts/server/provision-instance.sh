@@ -215,9 +215,13 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
       "dangerouslyDisableDeviceAuth": $OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH
     }
   },
-  "plugins": {
-    "load": {
-      "paths": ["$MANAGED_PLUGIN_CONTAINER_FILE"]
+  "agents": {
+    "defaults": {
+      "models": {
+        "$MANAGED_MODEL": {
+          "alias": "gpt-5.2"
+        }
+      }
     }
   }
 }
