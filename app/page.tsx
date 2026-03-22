@@ -479,7 +479,7 @@ export default function Home() {
               title="Free Tier"
               price="EUR 0"
               includes={freeTierIncludes}
-              note="Der Free Tier ist für einen kurzen echten Produkttest gedacht und führt danach in einen bezahlten Plan."
+              note="Der Free Tier ist für einen kurzen Produkttest gedacht."
               cta={
                 <Link href="/registrieren" className="fc-button fc-button-primary">
                   Kostenlos testen
