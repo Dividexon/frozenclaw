@@ -86,7 +86,7 @@ const providerLabels: Record<ProviderId, string> = {
 };
 
 const planLabels: Record<string, string> = {
-  trial: "Interner Altzugang",
+  trial: "Testzugang",
   hosted_byok: "Standardplan",
   managed_starter: "Managed Starter",
   managed_immediate: "Managed Plus",

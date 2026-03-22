@@ -184,6 +184,20 @@ function resolveChargedStandardTokens(event: ManagedUsageEvent) {
 }
 
 function getOpenAiTokenRatesMicros(model: string) {
+  if (model === "openai/gpt-4o-mini" || model === "gpt-4o-mini") {
+    return {
+      inputMicrosPerToken: 0.15,
+      outputMicrosPerToken: 0.6,
+    };
+  }
+
+  if (model === "openai/gpt-4o" || model === "gpt-4o") {
+    return {
+      inputMicrosPerToken: 2.5,
+      outputMicrosPerToken: 10,
+    };
+  }
+
   if (model === "openai/gpt-5.2" || model === "gpt-5.2") {
     return {
       inputMicrosPerToken: 1.75,

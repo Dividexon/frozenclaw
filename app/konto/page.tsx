@@ -616,7 +616,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                       </h3>
                       <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
                         {isLegacyTrial
-                          ? "Dieses alte Testkonto kann direkt in einen bezahlten Plan überführt werden, ohne eine zweite Instanz anzulegen."
+                          ? "Dein Testzugang kann direkt in einen bezahlten Plan überführt werden, ohne eine zweite Instanz anzulegen."
                           : "Bei laufenden Abos laufen Wechsel, Kündigung, Rechnungen und Zahlungsmethode über das Stripe Customer Portal."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-4">

@@ -204,6 +204,27 @@ function migrate(db: DbInstance) {
     WHERE plan = 'trial'
       AND payment_status = 'checkout_created'
   `);
+  db.exec(`
+    UPDATE orders
+    SET managed_provider = 'openai',
+        managed_model = 'openai/gpt-4o-mini',
+        included_standard_tokens = 100000,
+        included_budget_cents = 5,
+        updated_at = datetime('now')
+    WHERE plan = 'trial'
+  `);
+  db.exec(`
+    UPDATE usage_events
+    SET model = 'openai/gpt-4o-mini',
+        cost_input_micros = ROUND(COALESCE(input_tokens, 0) * 0.15),
+        cost_output_micros = ROUND(COALESCE(output_tokens, 0) * 0.6),
+        cost_total_micros = ROUND(COALESCE(input_tokens, 0) * 0.15) + ROUND(COALESCE(output_tokens, 0) * 0.6)
+    WHERE order_id IN (
+      SELECT id
+      FROM orders
+      WHERE plan = 'trial'
+    )
+  `);
 }
 
 export function getDb() {

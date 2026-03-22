@@ -87,6 +87,7 @@ MANAGED_PLUGIN_FILE="${MANAGED_PLUGIN_DIR}/index.cjs"
 MANAGED_PLUGIN_MANIFEST="${MANAGED_PLUGIN_DIR}/openclaw.plugin.json"
 CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 OPENAI_MANAGED_API_KEY="${OPENAI_MANAGED_API_KEY:-}"
+MANAGED_MODEL_ALIAS="${MANAGED_MODEL#*/}"
 
 mkdir -p "$CONFIG_DIR" "$WORKSPACE_DIR" "$AGENT_DIR" /etc/caddy/customers.d
 
@@ -237,7 +238,7 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
       },
       "models": {
         "$MANAGED_MODEL": {
-          "alias": "gpt-5.2"
+          "alias": "$MANAGED_MODEL_ALIAS"
         }
       }
     }

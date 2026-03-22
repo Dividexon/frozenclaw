@@ -31,15 +31,15 @@ export type PlanDefinition = {
 export const plans: Record<PlanId, PlanDefinition> = {
   trial: {
     id: "trial",
-    name: "Interner Altzugang",
-    description: "Interner Altzugang für bestehende Testkonten.",
+    name: "Testzugang",
+    description: "Begrenzter Testzugang mit GPT-4o mini fuer kurze Produkttests.",
     usageMode: "managed",
     amountCents: 0,
     active: false,
     managedProvider: "openai",
-    managedModel: "openai/gpt-5.2",
+    managedModel: "openai/gpt-4o-mini",
     includedStandardTokens: 100_000,
-    includedBudgetCents: 50,
+    includedBudgetCents: 5,
   },
   hosted_byok: {
     id: "hosted_byok",
@@ -107,7 +107,7 @@ export const plans: Record<PlanId, PlanDefinition> = {
     id: "managed_advanced",
     name: "Managed Advanced",
     description:
-      "Managed mit GPT-5.2, größerem Monatskontingent und zubuchbaren Tokenpaketen.",
+      "Managed mit GPT-5.2, groesserem Monatskontingent und zubuchbaren Tokenpaketen.",
     usageMode: "managed",
     amountCents: 5900,
     active: true,

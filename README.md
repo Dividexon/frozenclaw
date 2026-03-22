@@ -127,6 +127,12 @@ Das Skript:
 
 - setzt die Bestellung auf `managed_starter`, `managed_immediate` oder `managed_advanced`
 - hinterlegt `openai/gpt-5.2`
+
+## Testzugang
+
+- bestehende Testkonten laufen auf `openai/gpt-4o-mini`
+- Kontingent: `100.000` Standard-Tokens
+- internes Ziel: etwa `0,05 USD` Modellkosten pro Testzugang
 - setzt das Tokenkontingent passend zur gewaehlten Stufe
 - erzeugt einen frischen Login-Link
 - laesst die Bereitstellung ueber den bestehenden Recovery-Lauf der App wieder anlaufen

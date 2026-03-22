@@ -61,6 +61,7 @@ const providerAllowedModels: Record<ProviderId, string[]> = {
     "anthropic/claude-haiku-3-5",
   ],
   openai: [
+    "openai/gpt-4o-mini",
     "openai/gpt-5.2",
     "openai/gpt-5.1",
     "openai/gpt-4.1",
