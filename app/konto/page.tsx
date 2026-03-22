@@ -722,6 +722,11 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                         Passwort & Zugang verwalten
                       </a>
                     ) : null}
+                    {access.isAdmin ? (
+                      <Link href="/admin" className="fc-button fc-button-secondary">
+                        Adminpanel
+                      </Link>
+                    ) : null}
                     <Link href="/erste-schritte" className="fc-button fc-button-secondary">
                       Erste Schritte
                     </Link>
