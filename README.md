@@ -43,6 +43,12 @@ npm run dev
 - `MAIL_FROM`: sichtbarer Absender, bei Gmail am besten dieselbe Adresse wie `SMTP_USER`
 - `SUPPORT_EMAIL`: Reply-To für Rückfragen
 - `OPENAI_MANAGED_API_KEY`: zentraler Betreiber-Key für den späteren Managed-Beta-Pfad
+- `PIPER_ENABLED`: aktiviert serverseitige TTS über Piper
+- `PIPER_COMMAND`: Pfad zur Piper-CLI, z. B. `/opt/frozenclaw/piper-venv/bin/piper`
+- `PIPER_MODEL_PATH`: Pfad zur installierten Voice-Datei `.onnx`
+- `PIPER_CONFIG_PATH`: Pfad zur Voice-Konfiguration `.onnx.json`
+- `PIPER_MAX_TEXT_LENGTH`: maximale Zeichenzahl pro TTS-Request
+- `PIPER_TIMEOUT_MS`: Timeout für einen TTS-Lauf
 
 ## Provisionierungsmodi
 
@@ -76,6 +82,28 @@ Auf einem Linux-Host sollte die Web-App selbst weiterhin als unprivilegierter Nu
 ## Mailversand
 
 Frozenclaw kann nach erfolgreicher Bereitstellung und bei fehlgeschlagener Provisionierung automatisch E-Mails versenden. Für Gmail funktioniert das mit `smtp.gmail.com`, Port `587`, `SMTP_SECURE=false` und einem Google-App-Passwort.
+
+## TTS mit Piper
+
+Für bessere kostenlose Sprachausgabe kann Frozenclaw serverseitig `Piper` nutzen. Der empfohlene Startpfad ist:
+
+```bash
+cd /opt/frozenclaw/app
+bash scripts/server/install-piper.sh
+```
+
+Danach in `/etc/frozenclaw/frozenclaw.env` setzen:
+
+```bash
+PIPER_ENABLED=true
+PIPER_COMMAND=/opt/frozenclaw/piper-venv/bin/piper
+PIPER_MODEL_PATH=/opt/frozenclaw/piper/voices/de_DE-thorsten-medium.onnx
+PIPER_CONFIG_PATH=/opt/frozenclaw/piper/voices/de_DE-thorsten-medium.onnx.json
+PIPER_MAX_TEXT_LENGTH=800
+PIPER_TIMEOUT_MS=20000
+```
+
+Anschließend die App neu bauen und neu starten. Die OpenClaw-Control-UI ruft dann serverseitig `/api/tts` auf und fällt nur noch bei Fehlern auf die Browserstimme zurück.
 
 ## Control UI
 

@@ -28,6 +28,12 @@ export type AppConfig = {
   mailFrom: string | null;
   supportEmail: string | null;
   managedOpenAiApiKey: string | null;
+  piperEnabled: boolean;
+  piperCommand: string | null;
+  piperModelPath: string | null;
+  piperConfigPath: string | null;
+  piperMaxTextLength: number;
+  piperTimeoutMs: number;
 };
 
 let cachedConfig: AppConfig | null = null;
@@ -132,6 +138,16 @@ export function getAppConfig() {
       mailFrom: process.env.MAIL_FROM ?? null,
       supportEmail: process.env.SUPPORT_EMAIL ?? null,
       managedOpenAiApiKey: process.env.OPENAI_MANAGED_API_KEY ?? null,
+      piperEnabled: parseBoolean(process.env.PIPER_ENABLED, false),
+      piperCommand: process.env.PIPER_COMMAND ?? null,
+      piperModelPath: process.env.PIPER_MODEL_PATH ?? null,
+      piperConfigPath: process.env.PIPER_CONFIG_PATH ?? null,
+      piperMaxTextLength: parsePositiveInt(
+        process.env.PIPER_MAX_TEXT_LENGTH,
+        800,
+        "PIPER_MAX_TEXT_LENGTH"
+      ),
+      piperTimeoutMs: parsePositiveInt(process.env.PIPER_TIMEOUT_MS, 20000, "PIPER_TIMEOUT_MS"),
     };
   }
 
