@@ -194,14 +194,12 @@ function PricingCard({
 }) {
   return (
     <article className="panel-cut fc-panel pricing-panel flex h-full flex-col">
-      <div className="flex flex-wrap items-start justify-between gap-5 border-b border-[var(--fc-border)] pb-6">
-        <div>
-          <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">{kicker}</p>
-          <h3 className="mt-2 whitespace-pre-line font-display text-5xl uppercase text-[var(--fc-text)]">
-            {title}
-          </h3>
-        </div>
-        <div className="text-right">
+      <div className="border-b border-[var(--fc-border)] pb-6">
+        <p className="text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">{kicker}</p>
+        <h3 className="mt-2 whitespace-pre-line font-display text-5xl uppercase text-[var(--fc-text)]">
+          {title}
+        </h3>
+        <div className="mt-4">
           <p className="font-display text-6xl leading-none text-[var(--fc-text)]">{price}</p>
         </div>
       </div>
