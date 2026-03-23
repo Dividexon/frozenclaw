@@ -105,4 +105,18 @@ if content != patched:
     target.write_text(patched, encoding="utf-8")
 PY
 
+python3 - <<'PY' "$OPENCLAW_REPO_DIR/ui/src/ui/chat/speech.ts"
+from pathlib import Path
+import sys
+
+target = Path(sys.argv[1])
+content = target.read_text(encoding="utf-8")
+old = """  const utterance = new SpeechSynthesisUtterance(cleaned);\n  utterance.rate = 1.0;\n  utterance.pitch = 1.0;\n"""
+new = """  const utterance = new SpeechSynthesisUtterance(cleaned);\n  utterance.lang = \"de-DE\";\n  utterance.rate = 1.0;\n  utterance.pitch = 1.0;\n\n  const voices = typeof speechSynthesis.getVoices === \"function\" ? speechSynthesis.getVoices() : [];\n  const germanVoice = voices.find((voice) => voice.lang?.toLowerCase().startsWith(\"de\"));\n  if (germanVoice) {\n    utterance.voice = germanVoice;\n    utterance.lang = germanVoice.lang || \"de-DE\";\n  }\n"""
+patched = content.replace(old, new)
+
+if content != patched:
+    target.write_text(patched, encoding="utf-8")
+PY
+
 DOCKER_BUILDKIT=1 docker build -t "$OPENCLAW_IMAGE" "$OPENCLAW_REPO_DIR"
