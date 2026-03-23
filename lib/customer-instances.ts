@@ -240,8 +240,7 @@ async function syncOpenClawModelAllowlist(slug: string) {
   if (
     order?.usage_mode === "managed" &&
     order.managed_provider === "openai" &&
-    order.managed_model &&
-    hasProviderProfile(authStore, "openai")
+    order.managed_model
   ) {
     allowedModels.add(order.managed_model);
   } else {
