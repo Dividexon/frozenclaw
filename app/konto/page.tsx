@@ -499,7 +499,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                   <div className="mt-6 flex flex-wrap gap-4">
                     {access.activationUrl ? (
                       <a href={access.activationUrl} className="fc-button fc-button-secondary">
-                        Provider verwalten
+                        API-Key ?ndern
                       </a>
                     ) : null}
                     <span className="fc-button fc-button-secondary opacity-60">
