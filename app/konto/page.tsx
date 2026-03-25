@@ -124,6 +124,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
   const managed = access?.managed;
   const billingToken = access?.authType === "login_link" ? token : undefined;
   const isLegacyTrial = access?.plan === "trial";
+  const isFreeTierLocked = Boolean(access?.plan === "trial" && access.freeTierLocked);
   const topUpPackages = access ? getManagedTopUps(access.plan) : [];
   const managedProgressPercent =
     managed && managed.includedStandardTokens > 0
@@ -274,14 +275,18 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     Kontingent / Keys
                   </p>
                   <p className="mt-3 text-2xl font-semibold text-[var(--fc-text)]">
-                    {access.usageMode === "managed"
+                    {isFreeTierLocked
+                      ? "Aufgebraucht"
+                      : access.usageMode === "managed"
                       ? `${formatStandardTokens(managed?.remainingStandardTokens ?? 0)} frei`
                       : dashboard.providers.some((provider) => provider.configured)
                         ? "Provider aktiv"
                         : "Key fehlt"}
                   </p>
                   <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">
-                    {access.usageMode === "managed"
+                    {isFreeTierLocked
+                      ? "Dein einmaliges Free-Tier-Kontingent ist verbraucht. Wähle einen bezahlten Plan, um weiterzuarbeiten."
+                      : access.usageMode === "managed"
                       ? "Verbleibendes Kontingent deiner Managed-Instanz."
                       : "Zeigt, ob für BYOK bereits ein eigener Provider hinterlegt ist."}
                   </p>
@@ -626,7 +631,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                       </h3>
                       <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
                         {isLegacyTrial
-                          ? "Dein Testzugang kann direkt in einen bezahlten Plan überführt werden, ohne eine zweite Instanz anzulegen."
+                          ? "Dein Free Tier kann direkt in einen bezahlten Plan überführt werden, ohne eine zweite Instanz anzulegen."
                           : "Bei laufenden Abos laufen Wechsel, Kündigung, Rechnungen und Zahlungsmethode über das Stripe Customer Portal."}
                       </p>
                       <div className="mt-4 flex flex-wrap gap-4">

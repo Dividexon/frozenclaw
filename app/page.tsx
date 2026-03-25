@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { resolveSessionAccessFromCookies } from "@/lib/auth";
+import { getFreeTierAvailability } from "@/lib/trial";
 
 const launchSignals = [
   "Eigene OpenClaw-Instanz pro Kunde",
@@ -15,7 +16,7 @@ const steps = [
     id: "01",
     title: "Konto anlegen und starten",
     copy:
-      "Du registrierst dich mit E-Mail und Passwort, landest direkt im Dashboard und entscheidest dort über Testzugang oder bezahlten Plan.",
+      "Du registrierst dich mit E-Mail und Passwort, landest direkt im Dashboard und entscheidest dort über Free Tier oder bezahlten Plan.",
   },
   {
     id: "02",
@@ -36,7 +37,7 @@ const features = [
     kicker: "Eigene Instanz",
     title: "Jeder Zugang läuft in einer eigenen Umgebung.",
     copy:
-      "Jede Bestellung und jeder Testzugang bekommt einen eigenen Laufzeitkontext mit eigener URL und eigener OpenClaw-Instanz.",
+      "Jede Bestellung und jeder Free-Tier-Zugang bekommt einen eigenen Laufzeitkontext mit eigener URL und eigener OpenClaw-Instanz.",
   },
   {
     kicker: "Weniger Infrastruktur",
@@ -55,10 +56,10 @@ const features = [
 const freeTierIncludes = [
   "1 gehostete Testinstanz",
   "GPT-4o mini als Testmodell",
-  "100.000 Tokens für einen kurzen echten Test",
+  "100.000 Tokens einmalig pro E-Mail-Adresse",
   "E-Mail + Passwort statt Mail-Warten",
   "Upgrade auf bezahlte Pläne jederzeit möglich",
-  "Für Produkttest statt Dauerbetrieb gedacht",
+  "Global auf 100 Free-Tier-Konten begrenzt",
 ];
 
 const byokIncludes = [
@@ -124,7 +125,7 @@ const specRows = [
   ["Zielgruppe", "Founder, Power-User, kleine Teams"],
   ["Region", "Deutschland"],
   ["Zugang", "Eigene URL pro Instanz"],
-  ["Testzugang", "GPT-4o mini mit 100.000 Tokens"],
+  ["Free Tier", "GPT-4o mini mit 100.000 Tokens"],
   ["Managed", "GPT-5.2 mit Starter, Plus und Advanced"],
   ["Support", "E-Mail + Startanleitung"],
 ];
@@ -133,7 +134,7 @@ const faqs = [
   {
     question: "Gibt es einen kostenlosen Testzugang?",
     answer:
-      "Ja. Der Free Tier läuft auf GPT-4o mini mit 100.000 Tokens und ist für einen kurzen echten Produkttest gedacht.",
+      "Ja. Der Free Tier läuft auf GPT-4o mini mit 100.000 Tokens, ist einmalig pro E-Mail-Adresse und auf insgesamt 100 Konten begrenzt.",
   },
   {
     question: "Muss ich meinen eigenen API-Key mitbringen?",
@@ -231,6 +232,7 @@ function PricingCard({
 
 export default async function Home() {
   const access = await resolveSessionAccessFromCookies();
+  const freeTierAvailability = getFreeTierAvailability();
   const accountHref = access ? "/konto" : "/anmelden";
   const accountLabel = access ? "Dashboard" : "Anmelden";
 
@@ -266,7 +268,7 @@ export default async function Home() {
           </nav>
           <div className="hidden items-center gap-3 md:flex">
             <Link href="/registrieren" className="fc-button fc-button-primary">
-              Kostenlos testen
+              {freeTierAvailability.isAvailable ? "Kostenlos testen" : "Free Tier voll"}
             </Link>
             <Link href={accountHref} className="fc-button fc-button-secondary">
               {accountLabel}
@@ -484,10 +486,14 @@ export default async function Home() {
               title="Free Tier"
               price="EUR 0"
               includes={freeTierIncludes}
-              note="Der Free Tier ist für einen kurzen Produkttest gedacht."
+              note={
+                freeTierAvailability.isAvailable
+                  ? `Der Free Tier ist für einen kurzen Produkttest gedacht. Aktuell sind noch ${freeTierAvailability.remainingAccounts} von ${freeTierAvailability.accountLimit} Konten frei.`
+                  : "Der Free Tier ist aktuell ausgeschöpft. Neue Nutzer wählen direkt einen bezahlten Plan."
+              }
               cta={
                 <Link href="/registrieren" className="fc-button fc-button-primary">
-                  Kostenlos testen
+                  {freeTierAvailability.isAvailable ? "Kostenlos testen" : "Verfügbarkeit prüfen"}
                 </Link>
               }
               secondary={

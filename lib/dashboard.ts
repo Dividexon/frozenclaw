@@ -87,7 +87,7 @@ const providerLabels: Record<ProviderId, string> = {
 };
 
 const planLabels: Record<string, string> = {
-  trial: "Testzugang",
+  trial: "Free Tier",
   hosted_byok: "Standardplan",
   managed_starter: "Managed Starter",
   managed_immediate: "Managed Plus",
@@ -265,6 +265,16 @@ function readLastEventLog(orderId: number) {
 }
 
 function buildNextAction(access: ResolvedLoginToken, providerCount: number) {
+  if (access.plan === "trial" && access.freeTierLocked) {
+    return {
+      title: "Free Tier ist aufgebraucht",
+      description:
+        "Dein einmaliges Free-Tier-Kontingent ist verbraucht. Wähle jetzt einen bezahlten Plan, um weiter mit deiner Instanz zu arbeiten.",
+      label: "Plan wählen",
+      href: "#plan-verbrauch",
+    };
+  }
+
   if (access.instanceState !== "ready") {
     return {
       title: "Bereitstellung läuft noch",
@@ -333,7 +343,9 @@ export async function buildDashboardSnapshot(access: ResolvedLoginToken): Promis
     instanceStatusTone: instanceStatus.tone,
     providerStatusSummary:
       access.usageMode === "managed"
-        ? "Frozenclaw stellt den Modellzugang zentral bereit."
+        ? access.plan === "trial" && access.freeTierLocked
+          ? "Free Tier verbraucht. Bitte Plan wählen, um weiterzuarbeiten."
+          : "Frozenclaw stellt den Modellzugang zentral bereit."
         : providerCount > 0
           ? `${providerCount} Provider aktiv`
           : "Noch kein Provider konfiguriert",

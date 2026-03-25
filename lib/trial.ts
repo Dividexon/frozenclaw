@@ -3,6 +3,7 @@ import "server-only";
 import crypto from "node:crypto";
 import { createPasswordSession, hasPasswordForEmail, setPasswordForEmail } from "@/lib/auth";
 import { getDb, logOrderEvent } from "@/lib/db";
+import { getAppConfig } from "@/lib/env";
 import { buildManagedOrderSeed } from "@/lib/managed";
 import { queueProvisioning } from "@/lib/provisioning";
 
@@ -10,11 +11,85 @@ function generateTrialSessionId() {
   return `trial-${crypto.randomBytes(12).toString("hex")}`;
 }
 
+export type FreeTierAvailability = {
+  currentAccounts: number;
+  accountLimit: number;
+  remainingAccounts: number;
+  isAvailable: boolean;
+};
+
+export function getFreeTierAvailability(): FreeTierAvailability {
+  const accountLimit = getAppConfig().freeTierAccountLimit;
+  const row = getDb()
+    .prepare(
+      `
+        SELECT COUNT(DISTINCT id) AS count
+        FROM (
+          SELECT id
+          FROM orders
+          WHERE plan = 'trial'
+          UNION
+          SELECT o.id
+          FROM orders o
+          INNER JOIN event_log e ON e.order_id = o.id
+          WHERE e.action = 'trial_registered'
+        ) AS free_accounts
+      `,
+    )
+    .get() as { count: number | null };
+  const currentAccounts = Number(row?.count ?? 0);
+  const remainingAccounts = Math.max(0, accountLimit - currentAccounts);
+
+  return {
+    currentAccounts,
+    accountLimit,
+    remainingAccounts,
+    isAvailable: accountLimit > 0 && remainingAccounts > 0,
+  };
+}
+
+function hasClaimedFreeTierForEmail(email: string) {
+  const row = getDb()
+    .prepare(
+      `
+        SELECT 1
+        FROM orders o
+        WHERE lower(o.email) = lower(?)
+          AND (
+            o.plan = 'trial'
+            OR EXISTS (
+              SELECT 1
+              FROM event_log e
+              WHERE e.order_id = o.id
+                AND e.action = 'trial_registered'
+            )
+          )
+        LIMIT 1
+      `,
+    )
+    .get(email) as { 1: number } | undefined;
+
+  return Boolean(row);
+}
+
 export function createTrialAccount(email: string, password: string) {
   const normalizedEmail = email.trim().toLowerCase();
   const managedSeed = buildManagedOrderSeed("trial");
   const stripeSessionId = generateTrialSessionId();
   const db = getDb();
+  const availability = getFreeTierAvailability();
+
+  if (!availability.isAvailable) {
+    throw new Error(
+      "Der Free Tier ist aktuell ausgeschöpft. Bitte wähle direkt einen bezahlten Plan.",
+    );
+  }
+
+  if (hasClaimedFreeTierForEmail(normalizedEmail)) {
+    throw new Error(
+      "Für diese E-Mail-Adresse wurde der Free Tier bereits genutzt. Bitte melde dich an oder wähle einen Plan.",
+    );
+  }
 
   const existing = db
     .prepare(
@@ -45,7 +120,8 @@ export function createTrialAccount(email: string, password: string) {
           managed_provider,
           managed_model,
           included_standard_tokens,
-          included_budget_cents
+          included_budget_cents,
+          free_tier_locked
         )
         VALUES (
           @stripeSessionId,
@@ -56,7 +132,8 @@ export function createTrialAccount(email: string, password: string) {
           @managedProvider,
           @managedModel,
           @includedStandardTokens,
-          @includedBudgetCents
+          @includedBudgetCents,
+          0
         )
       `,
     )
@@ -78,6 +155,7 @@ export function createTrialAccount(email: string, password: string) {
     email: normalizedEmail,
     managedModel: managedSeed.managedModel,
     includedStandardTokens: managedSeed.includedStandardTokens,
+    freeTierAccountLimit: availability.accountLimit,
   });
 
   queueProvisioning(orderId);

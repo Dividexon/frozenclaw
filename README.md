@@ -49,6 +49,7 @@ npm run dev
 - `PIPER_CONFIG_PATH`: Pfad zur Voice-Konfiguration `.onnx.json`
 - `PIPER_MAX_TEXT_LENGTH`: maximale Zeichenzahl pro TTS-Request
 - `PIPER_TIMEOUT_MS`: Timeout für einen TTS-Lauf
+- `FREE_TIER_ACCOUNT_LIMIT`: globale Obergrenze für einmalige Free-Tier-Konten, standardmäßig `100`
 
 ## Provisionierungsmodi
 
@@ -156,11 +157,13 @@ Das Skript:
 - setzt die Bestellung auf `managed_starter`, `managed_immediate` oder `managed_advanced`
 - hinterlegt `openai/gpt-5.2`
 
-## Testzugang
+## Free Tier
 
-- bestehende Testkonten laufen auf `openai/gpt-4o-mini`
-- Kontingent: `100.000` Standard-Tokens
-- internes Ziel: etwa `0,05 USD` Modellkosten pro Testzugang
+- bestehende Free-Tier-Konten laufen auf `openai/gpt-4o-mini`
+- Kontingent: `100.000` Standard-Tokens einmalig pro E-Mail-Adresse
+- globale Obergrenze: standardmäßig `100` Free-Tier-Konten
+- nach Verbrauch ist ein Upgrade auf einen bezahlten Plan nötig
+- internes Ziel: etwa `0,05 USD` Modellkosten pro Free-Tier-Konto
 - setzt das Tokenkontingent passend zur gewaehlten Stufe
 - erzeugt einen frischen Login-Link
 - laesst die Bereitstellung ueber den bestehenden Recovery-Lauf der App wieder anlaufen

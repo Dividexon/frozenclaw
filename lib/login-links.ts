@@ -11,6 +11,7 @@ export type LoginTarget = {
   email: string | null;
   plan: string;
   usage_mode: string;
+  free_tier_locked: number;
   payment_status: string;
   instance_state: string;
   instance_slug: string | null;
@@ -35,6 +36,7 @@ export type AccountAccess = {
   expiresAt: string | null;
   authType: "login_link" | "password_session" | "setup_token";
   managed: ManagedUsageSummary | null;
+  freeTierLocked: boolean;
 };
 
 export type ResolvedLoginToken = AccountAccess;
@@ -51,6 +53,7 @@ export function findLatestOrderByEmail(email: string) {
         email,
         plan,
         usage_mode,
+        free_tier_locked,
         payment_status,
         instance_state,
         instance_slug,
@@ -104,6 +107,7 @@ export function buildAccessFromOrder(
     isAdmin: isAdminEmail(row.email),
     plan: row.plan,
     usageMode: row.usage_mode,
+    freeTierLocked: Boolean(row.free_tier_locked),
     paymentStatus: row.payment_status,
     instanceState: row.instance_state,
     instanceSlug: row.instance_slug,
@@ -128,6 +132,7 @@ export function resolveLoginToken(rawToken: string): ResolvedLoginToken | null {
         o.email,
         o.plan,
         o.usage_mode,
+        o.free_tier_locked,
         o.payment_status,
         o.instance_state,
         o.instance_slug,
@@ -158,6 +163,7 @@ export function resolveSetupAccess(slug: string, rawToken: string): AccountAcces
         email,
         plan,
         usage_mode,
+        free_tier_locked,
         payment_status,
         instance_state,
         instance_slug,

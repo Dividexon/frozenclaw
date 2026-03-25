@@ -224,7 +224,8 @@ async function syncOpenClawModelAllowlist(slug: string) {
   const allowedModels = new Set<string>();
   const order = getDb()
     .prepare(`
-      SELECT usage_mode, managed_provider, managed_model
+      SELECT usage_mode, plan, managed_provider, managed_model
+      , free_tier_locked
       FROM orders
       WHERE instance_slug = ?
       LIMIT 1
@@ -232,13 +233,16 @@ async function syncOpenClawModelAllowlist(slug: string) {
     .get(slug) as
     | {
         usage_mode: string;
+        plan: string;
         managed_provider: string | null;
         managed_model: string | null;
+        free_tier_locked: number;
       }
     | undefined;
 
   if (
     order?.usage_mode === "managed" &&
+    !(order.plan === "trial" && order.free_tier_locked) &&
     order.managed_provider === "openai" &&
     order.managed_model
   ) {
@@ -266,7 +270,9 @@ async function syncOpenClawModelAllowlist(slug: string) {
     },
   };
   const primaryModel =
-    order?.usage_mode === "managed" && order.managed_model
+    order?.usage_mode === "managed" &&
+    !(order?.plan === "trial" && order?.free_tier_locked) &&
+    order.managed_model
       ? order.managed_model
       : Array.from(allowedModels)[0];
 

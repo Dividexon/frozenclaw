@@ -34,6 +34,7 @@ export type AppConfig = {
   piperConfigPath: string | null;
   piperMaxTextLength: number;
   piperTimeoutMs: number;
+  freeTierAccountLimit: number;
 };
 
 let cachedConfig: AppConfig | null = null;
@@ -79,6 +80,20 @@ function parsePositiveInt(value: string | undefined, fallback: number, name: str
 
   if (!Number.isFinite(parsed) || parsed <= 0) {
     throw new Error(`${name} muss eine positive Zahl sein.`);
+  }
+
+  return parsed;
+}
+
+function parseNonNegativeInt(value: string | undefined, fallback: number, name: string) {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(`${name} muss eine Zahl >= 0 sein.`);
   }
 
   return parsed;
@@ -148,6 +163,11 @@ export function getAppConfig() {
         "PIPER_MAX_TEXT_LENGTH"
       ),
       piperTimeoutMs: parsePositiveInt(process.env.PIPER_TIMEOUT_MS, 20000, "PIPER_TIMEOUT_MS"),
+      freeTierAccountLimit: parseNonNegativeInt(
+        process.env.FREE_TIER_ACCOUNT_LIMIT,
+        100,
+        "FREE_TIER_ACCOUNT_LIMIT"
+      ),
     };
   }
 

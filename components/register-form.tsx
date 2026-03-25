@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-export function RegisterForm() {
+export function RegisterForm({
+  disabled = false,
+  disabledReason,
+}: {
+  disabled?: boolean;
+  disabledReason?: string;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -11,6 +17,11 @@ export function RegisterForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (disabled) {
+      setError(disabledReason ?? "Der Free Tier ist aktuell nicht verfügbar.");
+      return;
+    }
 
     if (!email.trim() || !password || !passwordConfirm) {
       setError("Bitte E-Mail-Adresse und Passwort vollständig eingeben.");
@@ -97,8 +108,16 @@ export function RegisterForm() {
 
       {error ? <p className="text-sm text-[var(--fc-accent)]">{error}</p> : null}
 
-      <button type="submit" className="fc-button fc-button-primary" disabled={isSubmitting}>
-        {isSubmitting ? "Konto wird erstellt..." : "Konto erstellen"}
+      {disabledReason ? (
+        <p className="text-sm text-[var(--fc-text-muted)]">{disabledReason}</p>
+      ) : null}
+
+      <button
+        type="submit"
+        className="fc-button fc-button-primary"
+        disabled={isSubmitting || disabled}
+      >
+        {disabled ? "Free Tier aktuell voll" : isSubmitting ? "Konto wird erstellt..." : "Konto erstellen"}
       </button>
     </form>
   );

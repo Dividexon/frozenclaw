@@ -31,8 +31,8 @@ export type PlanDefinition = {
 export const plans: Record<PlanId, PlanDefinition> = {
   trial: {
     id: "trial",
-    name: "Testzugang",
-    description: "Begrenzter Testzugang mit GPT-4o mini fuer kurze Produkttests.",
+    name: "Free Tier",
+    description: "Einmaliger Free Tier mit GPT-4o mini fuer kurze Produkttests.",
     usageMode: "managed",
     amountCents: 0,
     active: false,

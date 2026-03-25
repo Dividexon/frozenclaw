@@ -131,7 +131,7 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
   mkdir -p "$MANAGED_PLUGIN_DIR"
   sed -i '/^ANTHROPIC_API_KEY=/d;/^OPENAI_API_KEY=/d;/^GEMINI_API_KEY=/d' "$PROVIDER_ENV"
 
-  if [[ -n "$OPENAI_MANAGED_API_KEY" ]]; then
+  if [[ -n "$OPENAI_MANAGED_API_KEY" && -n "$MANAGED_MODEL" ]]; then
     printf 'OPENAI_API_KEY=%s\n' "$OPENAI_MANAGED_API_KEY" >> "$PROVIDER_ENV"
 
     cat > "$AUTH_PROFILES_JSON" <<EOF
@@ -149,13 +149,6 @@ if [[ "$USAGE_MODE" == "managed" ]]; then
   }
 }
 EOF
-  elif [[ ! -f "$AUTH_PROFILES_JSON" ]]; then
-    cat > "$AUTH_PROFILES_JSON" <<EOF
-{
-  "version": 1,
-  "profiles": {}
-}
-EOF
   else
     cat > "$AUTH_PROFILES_JSON" <<EOF
 {
@@ -165,7 +158,8 @@ EOF
 EOF
   fi
 
-  cat > "$MANAGED_PLUGIN_FILE" <<EOF
+  if [[ -n "$MANAGED_MODEL" && -n "$MANAGED_TRACKING_TOKEN" ]]; then
+    cat > "$MANAGED_PLUGIN_FILE" <<EOF
 module.exports = {
   id: "frozenclaw-managed-usage",
   register(api) {
@@ -202,7 +196,7 @@ module.exports = {
 };
 EOF
 
-  cat > "$MANAGED_PLUGIN_MANIFEST" <<EOF
+    cat > "$MANAGED_PLUGIN_MANIFEST" <<EOF
 {
   "id": "frozenclaw-managed-usage",
   "name": "Frozenclaw Managed Usage",
@@ -214,6 +208,9 @@ EOF
   }
 }
 EOF
+  else
+    rm -f "$MANAGED_PLUGIN_FILE" "$MANAGED_PLUGIN_MANIFEST"
+  fi
 else
   if [[ ! -f "$AUTH_PROFILES_JSON" ]]; then
     cat > "$AUTH_PROFILES_JSON" <<EOF
@@ -223,10 +220,10 @@ else
 }
 EOF
   fi
-  rm -f "$MANAGED_PLUGIN_FILE"
+  rm -f "$MANAGED_PLUGIN_FILE" "$MANAGED_PLUGIN_MANIFEST"
 fi
 
-if [[ "$USAGE_MODE" == "managed" ]]; then
+if [[ "$USAGE_MODE" == "managed" && -n "$MANAGED_MODEL" ]]; then
   cat > "$OPENCLAW_CONFIG_JSON" <<EOF
 {
   "gateway": {

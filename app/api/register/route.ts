@@ -75,7 +75,7 @@ export async function POST(request: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "Der Testzugang konnte nicht erstellt werden.",
+            : "Der Free Tier konnte nicht erstellt werden.",
       },
       { status: 400 },
     );

@@ -24,6 +24,7 @@ type ProvisionableOrder = {
   email: string | null;
   plan: string;
   usage_mode: string;
+  free_tier_locked: number;
   payment_status: string;
   instance_state: string;
   instance_slug: string | null;
@@ -98,6 +99,7 @@ function getOrderById(orderId: number) {
         email,
         plan,
         usage_mode,
+        free_tier_locked,
         payment_status,
         instance_state,
         instance_slug,
@@ -253,11 +255,11 @@ async function runScriptProvisioning(order: ProvisionableOrder) {
     "--usage-mode",
     order.usage_mode,
     "--managed-provider",
-    order.managed_provider ?? "",
+    order.plan === "trial" && order.free_tier_locked ? "" : (order.managed_provider ?? ""),
     "--managed-model",
-    order.managed_model ?? "",
+    order.plan === "trial" && order.free_tier_locked ? "" : (order.managed_model ?? ""),
     "--managed-tracking-token",
-    identity.managedTrackingToken ?? "",
+    order.plan === "trial" && order.free_tier_locked ? "" : (identity.managedTrackingToken ?? ""),
   ]);
 }
 

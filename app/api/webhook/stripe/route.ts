@@ -186,6 +186,7 @@ export async function POST(request: Request) {
             email = COALESCE(@email, email),
             plan = @plan,
             usage_mode = @usageMode,
+            free_tier_locked = 0,
             payment_status = 'paid',
             instance_state = 'pending',
             managed_provider = @managedProvider,

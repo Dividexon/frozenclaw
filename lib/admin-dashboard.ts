@@ -114,7 +114,7 @@ export type AdminSnapshot = {
 };
 
 const planLabels: Record<string, string> = {
-  trial: "Testzugang",
+  trial: "Free Tier",
   hosted_byok: "Standardplan",
   managed_starter: "Managed Starter",
   managed_immediate: "Managed Plus",
@@ -305,7 +305,7 @@ function buildCustomers(rows: OrderRow[]): AdminCustomerRow[] {
   return getLatestPerEmail(rows).map((row) => ({
     orderId: row.id,
     email: row.email,
-    accountType: row.plan === "trial" ? "Testzugang" : "Kundenkonto",
+    accountType: row.plan === "trial" ? "Free Tier" : "Kundenkonto",
     planLabel: planLabels[row.plan] ?? row.plan,
     usageModeLabel: row.usage_mode === "managed" ? "Managed" : "BYOK",
     paymentStatus: row.payment_status,

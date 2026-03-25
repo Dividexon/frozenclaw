@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb, logOrderEvent } from "@/lib/db";
-import { recordManagedUsage } from "@/lib/managed";
-import { startRuntimeRecovery } from "@/lib/provisioning";
+import { getManagedUsageSummary, recordManagedUsage } from "@/lib/managed";
+import { queueProvisioning, startRuntimeRecovery } from "@/lib/provisioning";
 
 export const runtime = "nodejs";
 
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   const order = getDb()
     .prepare(`
-      SELECT id, usage_mode
+      SELECT id, usage_mode, plan, free_tier_locked
       FROM orders
       WHERE instance_slug = ?
         AND managed_tracking_token = ?
@@ -41,6 +41,8 @@ export async function POST(request: Request) {
     | {
         id: number;
         usage_mode: string;
+        plan: string;
+        free_tier_locked: number;
       }
     | undefined;
 
@@ -79,6 +81,31 @@ export async function POST(request: Request) {
     costTotalMicros: recorded.costTotalMicros,
     standardTokensCharged: recorded.standardTokensCharged,
   });
+
+  if (order.plan === "trial" && !order.free_tier_locked) {
+    const summary = getManagedUsageSummary(order.id);
+
+    if (summary.remainingStandardTokens <= 0) {
+      getDb()
+        .prepare(
+          `
+            UPDATE orders
+            SET free_tier_locked = 1,
+                instance_state = 'pending',
+                updated_at = datetime('now')
+            WHERE id = ?
+          `,
+        )
+        .run(order.id);
+
+      logOrderEvent(order.id, "free_tier_exhausted", {
+        includedStandardTokens: summary.includedStandardTokens,
+        usedStandardTokens: summary.usedStandardTokens,
+      });
+
+      queueProvisioning(order.id);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

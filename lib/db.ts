@@ -32,6 +32,7 @@ function migrate(db: DbInstance) {
       instance_state TEXT NOT NULL DEFAULT 'pending',
       gateway_token TEXT,
       managed_tracking_token TEXT,
+      free_tier_locked INTEGER NOT NULL DEFAULT 0,
       checkout_url TEXT,
       managed_provider TEXT,
       managed_model TEXT,
@@ -147,6 +148,10 @@ function migrate(db: DbInstance) {
     db.exec("ALTER TABLE orders ADD COLUMN managed_tracking_token TEXT");
   }
 
+  if (!orderColumnSet.has("free_tier_locked")) {
+    db.exec("ALTER TABLE orders ADD COLUMN free_tier_locked INTEGER NOT NULL DEFAULT 0");
+  }
+
   if (!orderColumnSet.has("managed_model")) {
     db.exec("ALTER TABLE orders ADD COLUMN managed_model TEXT");
   }
@@ -224,6 +229,24 @@ function migrate(db: DbInstance) {
       FROM orders
       WHERE plan = 'trial'
     )
+  `);
+  db.exec(`
+    UPDATE orders
+    SET free_tier_locked = 1,
+        updated_at = datetime('now')
+    WHERE plan = 'trial'
+      AND id IN (
+        SELECT o.id
+        FROM orders o
+        LEFT JOIN (
+          SELECT
+            order_id,
+            COALESCE(SUM(standard_tokens_charged), 0) AS used_standard_tokens
+          FROM usage_events
+          GROUP BY order_id
+        ) usage ON usage.order_id = o.id
+        WHERE COALESCE(usage.used_standard_tokens, 0) >= COALESCE(o.included_standard_tokens, 0)
+      )
   `);
 }
 
