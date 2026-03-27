@@ -5,12 +5,32 @@ import type {
   FrozenclawConnection,
   FrozenclawMessage,
   FrozenclawTask,
+  FrozenclawTaskAction,
   FrozenclawThreadSummary,
   FrozenclawWorkspaceSnapshot,
 } from "@/lib/frozenclaw-ui";
+import type { DashboardProvider } from "@/lib/dashboard";
 
 type FrozenclawWorkspaceProps = {
   initialSnapshot: FrozenclawWorkspaceSnapshot;
+};
+
+type TaskFormState = {
+  name: string;
+  message: string;
+  scheduleMode: "every" | "cron";
+  every: string;
+  cron: string;
+  enabled: boolean;
+};
+
+const INITIAL_TASK_FORM: TaskFormState = {
+  name: "",
+  message: "",
+  scheduleMode: "every",
+  every: "1h",
+  cron: "",
+  enabled: true,
 };
 
 function formatStandardTokens(value: number | null) {
@@ -29,6 +49,19 @@ function sectionLink(id: string, label: string) {
     >
       {label}
     </a>
+  );
+}
+
+function smallActionButton(label: string, onClick: () => void, disabled = false) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="border border-[var(--fc-border)] bg-black/20 px-3 py-2 text-xs uppercase tracking-[0.16em] text-[var(--fc-text-muted)] transition hover:border-[var(--fc-accent)] hover:bg-[rgba(255,77,77,0.08)] hover:text-[var(--fc-text)] disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {label}
+    </button>
   );
 }
 
@@ -116,7 +149,17 @@ function MessageBubble({ message }: { message: FrozenclawMessage }) {
   );
 }
 
-function TaskCard({ task }: { task: FrozenclawTask }) {
+function TaskCard({
+  task,
+  pendingTaskId,
+  onAction,
+}: {
+  task: FrozenclawTask;
+  pendingTaskId: string | null;
+  onAction: (taskId: string, action: FrozenclawTaskAction) => void;
+}) {
+  const isPending = pendingTaskId === task.id;
+
   return (
     <div className="border border-[var(--fc-border)] bg-black/20 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -130,9 +173,19 @@ function TaskCard({ task }: { task: FrozenclawTask }) {
           {task.status}
         </span>
       </div>
+      {task.message ? (
+        <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">{task.message}</p>
+      ) : null}
       <div className="mt-4 grid gap-2 text-sm text-[var(--fc-text-muted)]">
         <p>Letzter Lauf: {task.lastRunAt ?? "Noch nicht ausgefuehrt"}</p>
         <p>Naechster Lauf: {task.nextRunAt ?? "Nicht geplant"}</p>
+      </div>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {smallActionButton("Jetzt ausfuehren", () => onAction(task.id, "run"), isPending)}
+        {task.enabled
+          ? smallActionButton("Pausieren", () => onAction(task.id, "disable"), isPending)
+          : smallActionButton("Aktivieren", () => onAction(task.id, "enable"), isPending)}
+        {smallActionButton("Loeschen", () => onAction(task.id, "delete"), isPending)}
       </div>
     </div>
   );
@@ -150,10 +203,29 @@ function ConnectionCard({ connection }: { connection: FrozenclawConnection }) {
           {connection.connected ? "Verbunden" : "Nicht verbunden"}
         </span>
       </div>
-      <p className="mt-4 text-xs text-[var(--fc-text-muted)]">
-        {connection.connected
-          ? `Profil: ${connection.authProfileId ?? "aktiv"}`
-          : "Wird in OpenClaw im Hintergrund konfiguriert und hier nur uebersichtlich gezeigt."}
+      <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">{connection.statusDetail}</p>
+    </div>
+  );
+}
+
+function ProviderCard({ provider }: { provider: DashboardProvider }) {
+  return (
+    <div className="border border-[var(--fc-border)] bg-black/20 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-[var(--fc-text)]">{provider.label}</p>
+          <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">
+            {provider.configured
+              ? `API-Key aktiv${provider.maskedKey ? ` (${provider.maskedKey})` : ""}.`
+              : "Noch kein API-Key hinterlegt."}
+          </p>
+        </div>
+        <span className="text-xs uppercase tracking-[0.16em] text-[var(--fc-accent-soft)]">
+          {provider.configured ? "Aktiv" : "Inaktiv"}
+        </span>
+      </div>
+      <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">
+        {provider.lastUsedAt ? `Zuletzt genutzt: ${provider.lastUsedAt}` : "Noch keine Nutzung registriert."}
       </p>
     </div>
   );
@@ -163,8 +235,12 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [selectedThreadId, setSelectedThreadId] = useState(initialSnapshot.selectedThreadId);
   const [draft, setDraft] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [chatError, setChatError] = useState<string | null>(null);
+  const [taskError, setTaskError] = useState<string | null>(null);
+  const [taskForm, setTaskForm] = useState<TaskFormState>(INITIAL_TASK_FORM);
+  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
+  const [isChatPending, startChatTransition] = useTransition();
+  const [isTaskPending, startTaskTransition] = useTransition();
 
   const usageText = useMemo(() => {
     if (snapshot.remainingStandardTokens === null || snapshot.includedStandardTokens === null) {
@@ -176,23 +252,31 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
     )} Tokens frei`;
   }, [snapshot.includedStandardTokens, snapshot.remainingStandardTokens]);
 
+  function applySnapshot(nextSnapshot: FrozenclawWorkspaceSnapshot) {
+    setSnapshot(nextSnapshot);
+    setSelectedThreadId(nextSnapshot.selectedThreadId);
+  }
+
   async function loadThread(sessionId: string) {
     setSelectedThreadId(sessionId);
-    setError(null);
+    setChatError(null);
 
-    const response = await fetch(`/api/chat?sessionId=${encodeURIComponent(sessionId)}`, {
-      method: "GET",
-      credentials: "same-origin",
-    });
+    try {
+      const response = await fetch(`/api/chat?sessionId=${encodeURIComponent(sessionId)}`, {
+        method: "GET",
+        credentials: "same-origin",
+      });
 
-    if (!response.ok) {
-      setError("Die Unterhaltung konnte nicht geladen werden.");
-      return;
+      if (!response.ok) {
+        setChatError("Die Unterhaltung konnte nicht geladen werden.");
+        return;
+      }
+
+      const payload = (await response.json()) as FrozenclawWorkspaceSnapshot;
+      applySnapshot(payload);
+    } catch {
+      setChatError("Die Unterhaltung konnte gerade nicht geladen werden.");
     }
-
-    const payload = (await response.json()) as FrozenclawWorkspaceSnapshot;
-    setSnapshot(payload);
-    setSelectedThreadId(payload.selectedThreadId);
   }
 
   function handleNewThread() {
@@ -203,42 +287,117 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
       messages: [],
     }));
     setDraft("");
-    setError(null);
+    setChatError(null);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!draft.trim()) {
-      setError("Bitte zuerst eine Nachricht eingeben.");
+      setChatError("Bitte zuerst eine Nachricht eingeben.");
       return;
     }
 
-    setError(null);
+    setChatError(null);
 
-    startTransition(async () => {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "same-origin",
-        body: JSON.stringify({
-          sessionId: selectedThreadId,
-          message: draft,
-        }),
-      });
+    startChatTransition(async () => {
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            sessionId: selectedThreadId,
+            message: draft,
+          }),
+        });
 
-      const payload = (await response.json()) as FrozenclawWorkspaceSnapshot & { error?: string };
+        const payload = (await response.json()) as FrozenclawWorkspaceSnapshot & { error?: string };
 
-      if (!response.ok) {
-        setError(payload.error ?? "Die Nachricht konnte nicht gesendet werden.");
-        return;
+        if (!response.ok) {
+          setChatError(payload.error ?? "Die Nachricht konnte nicht gesendet werden.");
+          return;
+        }
+
+        applySnapshot(payload);
+        setDraft("");
+      } catch {
+        setChatError("Die Nachricht konnte gerade nicht gesendet werden.");
       }
+    });
+  }
 
-      setSnapshot(payload);
-      setSelectedThreadId(payload.selectedThreadId);
-      setDraft("");
+  function handleTaskCreate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setTaskError(null);
+
+    startTaskTransition(async () => {
+      try {
+        const response = await fetch("/api/chat/tasks", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            name: taskForm.name,
+            message: taskForm.message,
+            scheduleMode: taskForm.scheduleMode,
+            every: taskForm.scheduleMode === "every" ? taskForm.every : null,
+            cron: taskForm.scheduleMode === "cron" ? taskForm.cron : null,
+            enabled: taskForm.enabled,
+            sessionId: selectedThreadId,
+          }),
+        });
+
+        const payload = (await response.json()) as FrozenclawWorkspaceSnapshot & { error?: string };
+
+        if (!response.ok) {
+          setTaskError(payload.error ?? "Die Aufgabe konnte nicht erstellt werden.");
+          return;
+        }
+
+        applySnapshot(payload);
+        setTaskForm(INITIAL_TASK_FORM);
+      } catch {
+        setTaskError("Die Aufgabe konnte gerade nicht erstellt werden.");
+      }
+    });
+  }
+
+  function handleTaskAction(taskId: string, action: FrozenclawTaskAction) {
+    setPendingTaskId(taskId);
+    setTaskError(null);
+
+    startTaskTransition(async () => {
+      try {
+        const response = await fetch(`/api/chat/tasks/${encodeURIComponent(taskId)}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            action,
+            sessionId: selectedThreadId,
+          }),
+        });
+
+        const payload = (await response.json()) as FrozenclawWorkspaceSnapshot & { error?: string };
+
+        if (!response.ok) {
+          setTaskError(payload.error ?? "Die Aufgabenaktion konnte nicht ausgefuehrt werden.");
+          return;
+        }
+
+        applySnapshot(payload);
+      } catch {
+        setTaskError("Die Aufgabenaktion konnte gerade nicht ausgefuehrt werden.");
+      } finally {
+        setPendingTaskId(null);
+      }
     });
   }
 
@@ -323,13 +482,13 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
                   placeholder="Was soll dein Agent als Naechstes tun?"
                   className="mt-3 min-h-32 w-full border border-[var(--fc-border)] bg-black/30 px-4 py-4 text-sm text-[var(--fc-text)] outline-none transition focus:border-[var(--fc-accent)]"
                 />
-                {error ? <p className="mt-3 text-sm text-[var(--fc-accent-soft)]">{error}</p> : null}
+                {chatError ? <p className="mt-3 text-sm text-[var(--fc-accent-soft)]">{chatError}</p> : null}
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm text-[var(--fc-text-muted)]">
                     Antworten laufen ueber dieselbe OpenClaw-Instanz wie bisher.
                   </p>
-                  <button type="submit" className="fc-button fc-button-primary" disabled={isPending}>
-                    {isPending ? "Wird gesendet..." : "Nachricht senden"}
+                  <button type="submit" className="fc-button fc-button-primary" disabled={isChatPending}>
+                    {isChatPending ? "Wird gesendet..." : "Nachricht senden"}
                   </button>
                 </div>
               </form>
@@ -340,37 +499,149 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
         <section id="aufgaben" className="panel-cut fc-panel">
           <div className="border-b border-[var(--fc-border)] pb-5">
             <p className="section-kicker">Wiederkehrende Aufgaben</p>
-            <h2 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">Automationen im Blick</h2>
+            <h2 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">Automationen direkt verwalten</h2>
             <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--fc-text-muted)]">
-              Frozenclaw zeigt hier die laufenden Aufgaben deiner Instanz. Die tiefe Konfiguration bleibt
-              vorerst in OpenClaw selbst, damit diese Ansicht fuer normale Nutzer klar bleibt.
+              Lege wiederkehrende Aufgaben direkt hier an. Frozenclaw schreibt sie in den OpenClaw-Cronstore
+              deiner Instanz und zeigt den aktuellen Zustand sofort wieder an.
             </p>
           </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {snapshot.tasks.length === 0 ? (
-              <div className="border border-dashed border-[var(--fc-border)] p-5 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Noch keine wiederkehrenden Aufgaben vorhanden. Sobald Cronjobs aktiv sind, erscheinen sie hier.
+
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+            <form onSubmit={handleTaskCreate} className="border border-[var(--fc-border)] bg-black/20 p-5">
+              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Neue Aufgabe</p>
+              <div className="mt-5 grid gap-4">
+                <label className="grid gap-2 text-sm text-[var(--fc-text-muted)]">
+                  Name
+                  <input
+                    value={taskForm.name}
+                    onChange={(event) => setTaskForm((current) => ({ ...current, name: event.target.value }))}
+                    className="border border-[var(--fc-border)] bg-black/30 px-4 py-3 text-[var(--fc-text)] outline-none transition focus:border-[var(--fc-accent)]"
+                    placeholder="Morgendliche Zusammenfassung"
+                  />
+                </label>
+
+                <label className="grid gap-2 text-sm text-[var(--fc-text-muted)]">
+                  Auftrag
+                  <textarea
+                    value={taskForm.message}
+                    onChange={(event) => setTaskForm((current) => ({ ...current, message: event.target.value }))}
+                    className="min-h-32 border border-[var(--fc-border)] bg-black/30 px-4 py-3 text-[var(--fc-text)] outline-none transition focus:border-[var(--fc-accent)]"
+                    placeholder="Pruefe neue Dateien und schicke eine kurze Zusammenfassung."
+                  />
+                </label>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <label className="grid gap-2 text-sm text-[var(--fc-text-muted)]">
+                    Zeitplan
+                    <select
+                      value={taskForm.scheduleMode}
+                      onChange={(event) =>
+                        setTaskForm((current) => ({
+                          ...current,
+                          scheduleMode: event.target.value === "cron" ? "cron" : "every",
+                        }))}
+                      className="border border-[var(--fc-border)] bg-black/30 px-4 py-3 text-[var(--fc-text)] outline-none transition focus:border-[var(--fc-accent)]"
+                    >
+                      <option value="every">Intervall</option>
+                      <option value="cron">Cron-Ausdruck</option>
+                    </select>
+                  </label>
+
+                  {taskForm.scheduleMode === "every" ? (
+                    <label className="grid gap-2 text-sm text-[var(--fc-text-muted)]">
+                      Intervall
+                      <input
+                        value={taskForm.every}
+                        onChange={(event) =>
+                          setTaskForm((current) => ({ ...current, every: event.target.value }))}
+                        className="border border-[var(--fc-border)] bg-black/30 px-4 py-3 text-[var(--fc-text)] outline-none transition focus:border-[var(--fc-accent)]"
+                        placeholder="1h"
+                      />
+                    </label>
+                  ) : (
+                    <label className="grid gap-2 text-sm text-[var(--fc-text-muted)]">
+                      Cron-Ausdruck
+                      <input
+                        value={taskForm.cron}
+                        onChange={(event) =>
+                          setTaskForm((current) => ({ ...current, cron: event.target.value }))}
+                        className="border border-[var(--fc-border)] bg-black/30 px-4 py-3 text-[var(--fc-text)] outline-none transition focus:border-[var(--fc-accent)]"
+                        placeholder="0 8 * * *"
+                      />
+                    </label>
+                  )}
+                </div>
+
+                <label className="flex items-center gap-3 text-sm text-[var(--fc-text-muted)]">
+                  <input
+                    type="checkbox"
+                    checked={taskForm.enabled}
+                    onChange={(event) =>
+                      setTaskForm((current) => ({ ...current, enabled: event.target.checked }))}
+                    className="h-4 w-4 accent-[var(--fc-accent)]"
+                  />
+                  Aufgabe direkt aktiv schalten
+                </label>
               </div>
-            ) : null}
-            {snapshot.tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
+
+              {taskError ? <p className="mt-4 text-sm text-[var(--fc-accent-soft)]">{taskError}</p> : null}
+
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-[var(--fc-text-muted)]">
+                  Beispiele: <span className="text-[var(--fc-text)]">30m</span>, <span className="text-[var(--fc-text)]">1h</span>, <span className="text-[var(--fc-text)]">24h</span>
+                </p>
+                <button type="submit" className="fc-button fc-button-primary" disabled={isTaskPending}>
+                  {isTaskPending ? "Wird gespeichert..." : "Aufgabe anlegen"}
+                </button>
+              </div>
+            </form>
+
+            <div className="grid gap-4">
+              {snapshot.tasks.length === 0 ? (
+                <div className="border border-dashed border-[var(--fc-border)] p-5 text-sm leading-7 text-[var(--fc-text-muted)]">
+                  Noch keine wiederkehrenden Aufgaben vorhanden. Lege rechts die erste Routine an.
+                </div>
+              ) : null}
+              {snapshot.tasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  pendingTaskId={pendingTaskId}
+                  onAction={handleTaskAction}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
         <section id="verbindungen" className="panel-cut fc-panel">
           <div className="border-b border-[var(--fc-border)] pb-5">
             <p className="section-kicker">Verbindungen</p>
-            <h2 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">Kanaele und Zugang</h2>
+            <h2 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">Kanaele und Modellzugang</h2>
             <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--fc-text-muted)]">
-              Hier siehst du, welche Kanaele fuer deine Instanz verbunden sind. So bleibt klar, wo dein
-              Agent aktiv werden kann.
+              Hier siehst du, ueber welche Kanaele dein Agent erreichbar ist und welcher Modellzugang im
+              Hintergrund fuer deine Instanz bereitsteht.
             </p>
           </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {snapshot.connections.map((connection) => (
-              <ConnectionCard key={connection.id} connection={connection} />
-            ))}
+
+          <div className="mt-6 grid gap-6">
+            <div>
+              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Messenger</p>
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                {snapshot.connections.map((connection) => (
+                  <ConnectionCard key={connection.id} connection={connection} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Modellzugang</p>
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                {snapshot.providers.map((provider) => (
+                  <ProviderCard key={provider.id} provider={provider} />
+                ))}
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -414,17 +685,12 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
             </div>
 
             <div className="border border-[var(--fc-border)] bg-black/20 p-4">
-              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Provider</p>
-              <div className="mt-3 grid gap-3">
-                {snapshot.providers.map((provider) => (
-                  <div key={provider.id} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-[var(--fc-text)]">{provider.label}</span>
-                    <span className="text-[var(--fc-text-muted)]">
-                      {provider.configured ? "Aktiv" : "Nicht hinterlegt"}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Aufgaben</p>
+              <p className="mt-3 text-xl font-semibold text-[var(--fc-text)]">{snapshot.tasks.length}</p>
+              <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">
+                {snapshot.tasks.filter((task) => task.enabled).length} aktiv,{" "}
+                {snapshot.tasks.filter((task) => !task.enabled).length} pausiert
+              </p>
             </div>
           </div>
         </section>

@@ -9,9 +9,21 @@ import { buildDashboardSnapshot, type DashboardProvider } from "@/lib/dashboard"
 const execFileAsync = promisify(execFile);
 const OPENCLAW_CONFIG_PREFIX = "/home/node/.openclaw";
 const DEFAULT_CONNECTIONS = [
-  { id: "telegram", label: "Telegram", description: "Nachrichten direkt in Telegram senden und empfangen." },
-  { id: "discord", label: "Discord", description: "Community-Austausch und Automationen in Discord." },
-  { id: "whatsapp", label: "WhatsApp", description: "Direkte Antworten und Routinen in WhatsApp." },
+  {
+    id: "telegram",
+    label: "Telegram",
+    description: "Nachrichten direkt in Telegram senden und empfangen.",
+  },
+  {
+    id: "discord",
+    label: "Discord",
+    description: "Community-Austausch und Automationen in Discord.",
+  },
+  {
+    id: "whatsapp",
+    label: "WhatsApp",
+    description: "Direkte Antworten und Routinen in WhatsApp.",
+  },
 ] as const;
 
 type SessionStoreEntry = {
@@ -20,33 +32,9 @@ type SessionStoreEntry = {
   sessionFile?: string;
   model?: string;
   modelProvider?: string;
-  chatType?: string;
-  kind?: string;
 };
 
 type SessionStore = Record<string, SessionStoreEntry>;
-
-type CronCliOutput = {
-  jobs?: Array<{
-    id?: string;
-    name?: string;
-    cron?: string;
-    schedule?: string;
-    enabled?: boolean;
-    paused?: boolean;
-    lastRunAt?: string;
-    nextRunAt?: string;
-  }>;
-};
-
-type ChannelsCliOutput = {
-  chat?: Record<string, unknown>;
-  auth?: Array<{
-    id?: string;
-    provider?: string;
-    type?: string;
-  }>;
-};
 
 type SessionListCliOutput = {
   sessions?: Array<{
@@ -55,7 +43,6 @@ type SessionListCliOutput = {
     updatedAt?: number;
     model?: string;
     modelProvider?: string;
-    kind?: string;
   }>;
 };
 
@@ -71,14 +58,63 @@ type SessionLine = {
     role?: string;
     content?: SessionContentPart[];
     timestamp?: string;
-    usage?: {
-      input?: number;
-      output?: number;
-      totalTokens?: number;
-    };
-    provider?: string;
-    model?: string;
   };
+};
+
+type CronJobSchedule =
+  | {
+      kind?: "every";
+      everyMs?: number;
+      anchorMs?: number;
+    }
+  | {
+      kind?: "cron";
+      cron?: string;
+      timezone?: string;
+    };
+
+type CronJobState = {
+  lastStartedAtMs?: number;
+  lastFinishedAtMs?: number;
+  lastSucceededAtMs?: number;
+  lastFailedAtMs?: number;
+  nextRunAtMs?: number;
+  nextRunAt?: string;
+  lastRunAt?: string;
+  lastError?: string;
+};
+
+type CronJobFileEntry = {
+  id?: string;
+  name?: string;
+  enabled?: boolean;
+  createdAtMs?: number;
+  updatedAtMs?: number;
+  schedule?: CronJobSchedule;
+  payload?: {
+    kind?: string;
+    message?: string;
+  };
+  state?: CronJobState;
+};
+
+type CronJobsFile = {
+  version?: number;
+  jobs?: CronJobFileEntry[];
+};
+
+type ChannelsCliOutput = {
+  auth?: Array<{
+    id?: string;
+    provider?: string;
+    type?: string;
+  }>;
+};
+
+type ChannelStatusCliOutput = {
+  channelOrder?: string[];
+  channels?: Record<string, unknown>;
+  channelAccounts?: Record<string, unknown>;
 };
 
 export type FrozenclawThreadSummary = {
@@ -100,11 +136,24 @@ export type FrozenclawMessage = {
 export type FrozenclawTask = {
   id: string;
   name: string;
+  message: string | null;
   schedule: string;
   status: string;
+  enabled: boolean;
   lastRunAt: string | null;
   nextRunAt: string | null;
 };
+
+export type FrozenclawTaskCreateInput = {
+  name: string;
+  message: string;
+  scheduleMode: "every" | "cron";
+  every?: string | null;
+  cron?: string | null;
+  enabled: boolean;
+};
+
+export type FrozenclawTaskAction = "enable" | "disable" | "run" | "delete";
 
 export type FrozenclawConnection = {
   id: string;
@@ -112,6 +161,7 @@ export type FrozenclawConnection = {
   description: string;
   connected: boolean;
   authProfileId: string | null;
+  statusDetail: string;
 };
 
 export type FrozenclawWorkspaceSnapshot = {
@@ -152,6 +202,14 @@ function formatDateTime(value: Date | number | string | null) {
 
 function getContainerName(slug: string) {
   return `frozenclaw-${slug}`;
+}
+
+function parseJsonDocument<T>(raw: string, fallback: T) {
+  try {
+    return JSON.parse(extractFirstJsonDocument(raw)) as T;
+  } catch {
+    return fallback;
+  }
 }
 
 function cleanMessageText(raw: string) {
@@ -237,6 +295,55 @@ function extractFirstJsonDocument(raw: string) {
   }
 
   throw new Error("Das JSON-Dokument ist unvollstaendig.");
+}
+
+function resolveInstanceSlug(access: ResolvedLoginToken) {
+  if (!access.instanceSlug) {
+    throw new Error("Zu diesem Konto ist keine Instanz hinterlegt.");
+  }
+
+  return access.instanceSlug;
+}
+
+function formatEveryMs(everyMs: number) {
+  const units = [
+    { ms: 24 * 60 * 60 * 1000, label: "Tag", plural: "Tage" },
+    { ms: 60 * 60 * 1000, label: "Stunde", plural: "Stunden" },
+    { ms: 60 * 1000, label: "Minute", plural: "Minuten" },
+  ];
+
+  for (const unit of units) {
+    if (everyMs >= unit.ms && everyMs % unit.ms === 0) {
+      const amount = everyMs / unit.ms;
+      return `Alle ${amount} ${amount === 1 ? unit.label : unit.plural}`;
+    }
+  }
+
+  return `Alle ${Math.round(everyMs / 1000)} Sekunden`;
+}
+
+function resolveTaskScheduleLabel(job: CronJobFileEntry) {
+  if (job.schedule?.kind === "every" && typeof job.schedule.everyMs === "number") {
+    return formatEveryMs(job.schedule.everyMs);
+  }
+
+  if (job.schedule?.kind === "cron" && job.schedule.cron) {
+    return job.schedule.cron;
+  }
+
+  return "Nicht angegeben";
+}
+
+function resolveTaskStatus(job: CronJobFileEntry) {
+  if (job.enabled === false) {
+    return "Pausiert";
+  }
+
+  if (job.state?.lastError) {
+    return "Fehler";
+  }
+
+  return "Aktiv";
 }
 
 async function runOpenClawCli(slug: string, args: string[], timeoutMs = 120_000) {
@@ -325,14 +432,10 @@ async function readSessionMessages(slug: string, sessionId: string) {
 }
 
 async function listThreads(slug: string) {
-  let cliData: SessionListCliOutput = {};
-
-  try {
-    cliData = JSON.parse(extractFirstJsonDocument(await runOpenClawCli(slug, ["sessions", "--json"]))) as SessionListCliOutput;
-  } catch {
-    cliData = {};
-  }
-
+  const cliData = parseJsonDocument<SessionListCliOutput>(
+    await runOpenClawCli(slug, ["sessions", "--json"]),
+    {},
+  );
   const store = await readSessionStore(slug);
   const cliSessions = cliData.sessions ?? [];
   const result: FrozenclawThreadSummary[] = [];
@@ -342,7 +445,9 @@ async function listThreads(slug: string) {
       continue;
     }
 
-    const cliEntry = cliSessions.find((candidate) => candidate.sessionId === entry.sessionId || candidate.key === key);
+    const cliEntry = cliSessions.find(
+      (candidate) => candidate.sessionId === entry.sessionId || candidate.key === key,
+    );
     const messages = await readSessionMessages(slug, entry.sessionId);
 
     result.push({
@@ -364,62 +469,85 @@ async function listThreads(slug: string) {
   return result;
 }
 
-async function listTasks(slug: string) {
+async function readCronJobsFile(slug: string) {
   try {
-    const payload = JSON.parse(
-      extractFirstJsonDocument(await runOpenClawCli(slug, ["cron", "list", "--json"], 30_000)),
-    ) as CronCliOutput;
-
-    return (payload.jobs ?? []).map((job, index) => ({
-      id: job.id ?? `job-${index + 1}`,
-      name: job.name ?? `Aufgabe ${index + 1}`,
-      schedule: job.schedule ?? job.cron ?? "Nicht angegeben",
-      status: job.paused || job.enabled === false ? "Pausiert" : "Aktiv",
-      lastRunAt: formatDateTime(job.lastRunAt ?? null),
-      nextRunAt: formatDateTime(job.nextRunAt ?? null),
-    }));
+    const content = await readOpenClawFile(slug, `${OPENCLAW_CONFIG_PREFIX}/cron/jobs.json`);
+    return JSON.parse(content) as CronJobsFile;
   } catch {
-    return [] as FrozenclawTask[];
+    return {
+      version: 1,
+      jobs: [],
+    } satisfies CronJobsFile;
   }
 }
 
+async function listTasks(slug: string) {
+  const file = await readCronJobsFile(slug);
+
+  return (file.jobs ?? []).map((job, index) => ({
+    id: job.id ?? `task-${index + 1}`,
+    name: job.name?.trim() || `Aufgabe ${index + 1}`,
+    message: job.payload?.message?.trim() || null,
+    schedule: resolveTaskScheduleLabel(job),
+    status: resolveTaskStatus(job),
+    enabled: job.enabled !== false,
+    lastRunAt: formatDateTime(
+      job.state?.lastFinishedAtMs ??
+        job.state?.lastSucceededAtMs ??
+        job.state?.lastFailedAtMs ??
+        job.state?.lastRunAt ??
+        null,
+    ),
+    nextRunAt: formatDateTime(job.state?.nextRunAtMs ?? job.state?.nextRunAt ?? null),
+  }));
+}
+
 async function listConnections(slug: string) {
-  try {
-    const payload = JSON.parse(
-      extractFirstJsonDocument(await runOpenClawCli(slug, ["channels", "list", "--json"], 30_000)),
-    ) as ChannelsCliOutput;
-    const connectedIds = new Set<string>();
+  const listPayload = parseJsonDocument<ChannelsCliOutput>(
+    await runOpenClawCli(slug, ["channels", "list", "--json"], 30_000),
+    {},
+  );
+  const statusPayload = parseJsonDocument<ChannelStatusCliOutput>(
+    await runOpenClawCli(slug, ["channels", "status", "--json"], 30_000),
+    {},
+  );
+  const connectedIds = new Set<string>();
 
-    for (const key of Object.keys(payload.chat ?? {})) {
-      connectedIds.add(key.toLowerCase());
-    }
-
-    for (const profile of payload.auth ?? []) {
-      if (profile.provider) {
-        connectedIds.add(profile.provider.toLowerCase());
-      }
-    }
-
-    return DEFAULT_CONNECTIONS.map((connection) => {
-      const authProfile = (payload.auth ?? []).find(
-        (profile) => profile.provider?.toLowerCase() === connection.id,
-      );
-
-      return {
-        id: connection.id,
-        label: connection.label,
-        description: connection.description,
-        connected: connectedIds.has(connection.id),
-        authProfileId: authProfile?.id ?? null,
-      };
-    });
-  } catch {
-    return DEFAULT_CONNECTIONS.map((connection) => ({
-      ...connection,
-      connected: false,
-      authProfileId: null,
-    }));
+  for (const key of statusPayload.channelOrder ?? []) {
+    connectedIds.add(key.toLowerCase());
   }
+
+  for (const key of Object.keys(statusPayload.channels ?? {})) {
+    connectedIds.add(key.toLowerCase());
+  }
+
+  for (const key of Object.keys(statusPayload.channelAccounts ?? {})) {
+    connectedIds.add(key.toLowerCase());
+  }
+
+  for (const profile of listPayload.auth ?? []) {
+    if (profile.provider) {
+      connectedIds.add(profile.provider.toLowerCase());
+    }
+  }
+
+  return DEFAULT_CONNECTIONS.map((connection) => {
+    const authProfile = (listPayload.auth ?? []).find(
+      (profile) => profile.provider?.toLowerCase() === connection.id,
+    );
+    const connected = connectedIds.has(connection.id);
+
+    return {
+      id: connection.id,
+      label: connection.label,
+      description: connection.description,
+      connected,
+      authProfileId: authProfile?.id ?? null,
+      statusDetail: connected
+        ? `Verbindung aktiv${authProfile?.id ? ` (${authProfile.id})` : ""}.`
+        : "Noch nicht verbunden. Die Einrichtung folgt als naechster Schritt in der Frozenclaw UI.",
+    };
+  });
 }
 
 function resolveModelLabel(access: ResolvedLoginToken, threads: FrozenclawThreadSummary[]) {
@@ -430,15 +558,35 @@ function resolveModelLabel(access: ResolvedLoginToken, threads: FrozenclawThread
   return threads[0]?.model ?? null;
 }
 
-export async function buildFrozenclawWorkspace(access: ResolvedLoginToken, selectedSessionId?: string | null) {
+function buildCronScheduleArgs(input: FrozenclawTaskCreateInput) {
+  if (input.scheduleMode === "every") {
+    const every = input.every?.trim();
+
+    if (!every) {
+      throw new Error("Bitte ein Intervall angeben, zum Beispiel 1h oder 30m.");
+    }
+
+    return ["--every", every];
+  }
+
+  const cron = input.cron?.trim();
+
+  if (!cron) {
+    throw new Error("Bitte einen Cron-Ausdruck angeben.");
+  }
+
+  return ["--cron", cron];
+}
+
+export async function buildFrozenclawWorkspace(
+  access: ResolvedLoginToken,
+  selectedSessionId?: string | null,
+) {
   const dashboard = await buildDashboardSnapshot(access);
   const threads = access.instanceSlug ? await listThreads(access.instanceSlug) : [];
   const tasks = access.instanceSlug ? await listTasks(access.instanceSlug) : [];
   const connections = access.instanceSlug ? await listConnections(access.instanceSlug) : [];
-  const currentSessionId =
-    selectedSessionId ??
-    threads[0]?.sessionId ??
-    null;
+  const currentSessionId = selectedSessionId ?? threads[0]?.sessionId ?? null;
   const messages =
     access.instanceSlug && currentSessionId
       ? await readSessionMessages(access.instanceSlug, currentSessionId)
@@ -463,11 +611,12 @@ export async function buildFrozenclawWorkspace(access: ResolvedLoginToken, selec
   } satisfies FrozenclawWorkspaceSnapshot;
 }
 
-export async function sendFrozenclawMessage(access: ResolvedLoginToken, message: string, sessionId?: string | null) {
-  if (!access.instanceSlug) {
-    throw new Error("Zu diesem Konto ist keine Instanz hinterlegt.");
-  }
-
+export async function sendFrozenclawMessage(
+  access: ResolvedLoginToken,
+  message: string,
+  sessionId?: string | null,
+) {
+  const slug = resolveInstanceSlug(access);
   const trimmedMessage = message.trim();
 
   if (!trimmedMessage) {
@@ -476,10 +625,81 @@ export async function sendFrozenclawMessage(access: ResolvedLoginToken, message:
 
   const effectiveSessionId = sessionId?.trim() || crypto.randomUUID();
   await runOpenClawCli(
-    access.instanceSlug,
+    slug,
     ["agent", "--session-id", effectiveSessionId, "--message", trimmedMessage, "--json"],
     180_000,
   );
 
   return buildFrozenclawWorkspace(access, effectiveSessionId);
+}
+
+export async function createFrozenclawTask(
+  access: ResolvedLoginToken,
+  input: FrozenclawTaskCreateInput,
+  selectedSessionId?: string | null,
+) {
+  const slug = resolveInstanceSlug(access);
+  const name = input.name.trim();
+  const message = input.message.trim();
+
+  if (!name) {
+    throw new Error("Bitte einen Namen fuer die Aufgabe eingeben.");
+  }
+
+  if (!message) {
+    throw new Error("Bitte eine Anweisung fuer die Aufgabe eingeben.");
+  }
+
+  const args = [
+    "cron",
+    "add",
+    "--name",
+    name,
+    "--message",
+    message,
+    ...buildCronScheduleArgs(input),
+  ];
+
+  if (!input.enabled) {
+    args.push("--disabled");
+  }
+
+  await runOpenClawCli(slug, args, 60_000);
+  return buildFrozenclawWorkspace(access, selectedSessionId);
+}
+
+export async function performFrozenclawTaskAction(
+  access: ResolvedLoginToken,
+  taskId: string,
+  action: FrozenclawTaskAction,
+  selectedSessionId?: string | null,
+) {
+  const slug = resolveInstanceSlug(access);
+  const normalizedTaskId = taskId.trim();
+
+  if (!normalizedTaskId) {
+    throw new Error("Aufgabe nicht gefunden.");
+  }
+
+  if (action === "enable") {
+    await runOpenClawCli(slug, ["cron", "enable", normalizedTaskId], 60_000);
+    return buildFrozenclawWorkspace(access, selectedSessionId);
+  }
+
+  if (action === "disable") {
+    await runOpenClawCli(slug, ["cron", "disable", normalizedTaskId], 60_000);
+    return buildFrozenclawWorkspace(access, selectedSessionId);
+  }
+
+  if (action === "run") {
+    await runOpenClawCli(slug, ["cron", "run", normalizedTaskId], 180_000);
+    return buildFrozenclawWorkspace(access, selectedSessionId);
+  }
+
+  if (action === "delete") {
+    await runOpenClawCli(slug, ["cron", "rm", normalizedTaskId], 60_000);
+    return buildFrozenclawWorkspace(access, selectedSessionId);
+  }
+
+  throw new Error("Unbekannte Aufgabenaktion.");
 }
