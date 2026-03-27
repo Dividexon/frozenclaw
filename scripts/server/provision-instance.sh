@@ -271,7 +271,7 @@ fi
 
 cat > "$CADDY_SNIPPET" <<EOF
 @webui_runtime_cookie_${SAFE_MATCHER_SUFFIX} {
-	path /api/* /auth/* /oauth/* /ws/* /socket.io/* /assets/* /_app/* /static/* /manifest.json /opensearch.xml
+	path /assets/* /_app/* /static/* /manifest.json /opensearch.xml
 	header Cookie *fc_webui_slug=$SLUG*
 }
 
