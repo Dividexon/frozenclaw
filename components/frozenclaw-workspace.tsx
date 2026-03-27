@@ -402,7 +402,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[16rem_minmax(0,1fr)_20rem]">
+    <div className="grid gap-6 xl:grid-cols-[16rem_minmax(0,1fr)]">
       <aside className="panel-cut fc-panel h-fit xl:sticky xl:top-6">
         <p className="section-kicker">Frozenclaw UI</p>
         <h1 className="mt-3 font-display text-4xl uppercase text-[var(--fc-text)]">Chat und Steuerung</h1>
@@ -433,7 +433,6 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
           {sectionLink("chat", "Chat")}
           {sectionLink("aufgaben", "Aufgaben")}
           {sectionLink("verbindungen", "Verbindungen")}
-          {sectionLink("uebersicht", "Uebersicht")}
         </nav>
       </aside>
 
@@ -646,55 +645,6 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
         </section>
       </div>
 
-      <aside className="space-y-6">
-        <section id="uebersicht" className="panel-cut fc-panel">
-          <p className="section-kicker">Uebersicht</p>
-          <h2 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">Aktueller Zustand</h2>
-
-          <div className="mt-6 grid gap-4">
-            <div className="border border-[var(--fc-border)] bg-black/20 p-4">
-              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Instanz</p>
-              <p className="mt-3 text-xl font-semibold text-[var(--fc-text)]">
-                {snapshot.instanceSlug ?? "Nicht hinterlegt"}
-              </p>
-              <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">{snapshot.instanceStatusLabel}</p>
-            </div>
-
-            <div className="border border-[var(--fc-border)] bg-black/20 p-4">
-              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Modell</p>
-              <p className="mt-3 text-xl font-semibold text-[var(--fc-text)]">
-                {snapshot.modelLabel ?? "Automatisch"}
-              </p>
-              <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">
-                Der sichtbare Chat bleibt einfach. Modellumschaltungen laufen im Hintergrund ueber deinen Plan.
-              </p>
-            </div>
-
-            <div className="border border-[var(--fc-border)] bg-black/20 p-4">
-              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Verbrauch</p>
-              <p className="mt-3 text-xl font-semibold text-[var(--fc-text)]">{usageText}</p>
-              {snapshot.usedStandardTokens !== null ? (
-                <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">
-                  Bisher genutzt: {formatStandardTokens(snapshot.usedStandardTokens)}
-                </p>
-              ) : (
-                <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">
-                  Im Standardplan rechnest du direkt mit deinem eigenen API-Key ab.
-                </p>
-              )}
-            </div>
-
-            <div className="border border-[var(--fc-border)] bg-black/20 p-4">
-              <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Aufgaben</p>
-              <p className="mt-3 text-xl font-semibold text-[var(--fc-text)]">{snapshot.tasks.length}</p>
-              <p className="mt-2 text-sm leading-7 text-[var(--fc-text-muted)]">
-                {snapshot.tasks.filter((task) => task.enabled).length} aktiv,{" "}
-                {snapshot.tasks.filter((task) => !task.enabled).length} pausiert
-              </p>
-            </div>
-          </div>
-        </section>
-      </aside>
     </div>
   );
 }

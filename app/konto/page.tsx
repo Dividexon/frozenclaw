@@ -227,8 +227,8 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
             </nav>
           </aside>
 
-          <div className="space-y-6">
-            <section id="uebersicht" className="panel-cut fc-panel">
+          <div className="flex flex-col gap-6">
+            <section id="uebersicht" className="panel-cut fc-panel order-2">
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--fc-border)] pb-5">
                 <div>
                   <p className="section-kicker">Übersicht</p>
@@ -316,16 +316,20 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                     {dashboard.nextAction.description}
                   </p>
                   <div className="mt-6 flex flex-wrap gap-4">
-                    {dashboard.nextAction.href ? (
+                    {access.agentUrl ? (
+                      <a
+                        href={access.agentUrl}
+                        className="fc-button fc-button-primary"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        Chat öffnen
+                      </a>
+                    ) : null}
+                    {dashboard.nextAction.href && dashboard.nextAction.href !== access.agentUrl ? (
                       <a
                         href={dashboard.nextAction.href}
-                        className="fc-button fc-button-primary"
-                        target={dashboard.nextAction.href === access.agentUrl ? "_blank" : undefined}
-                        rel={
-                          dashboard.nextAction.href === access.agentUrl
-                            ? "noreferrer noopener"
-                            : undefined
-                        }
+                        className="fc-button fc-button-secondary"
                       >
                         {dashboard.nextAction.label}
                       </a>
@@ -390,7 +394,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
               ) : null}
             </section>
 
-            <section id="agent" className="panel-cut fc-panel">
+            <section id="agent" className="panel-cut fc-panel order-1">
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--fc-border)] pb-5">
                 <div>
                   <p className="section-kicker">Agent</p>
@@ -517,7 +521,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
               </div>
             </section>
 
-            <section id="automationen" className="panel-cut fc-panel">
+            <section id="automationen" className="panel-cut fc-panel order-3">
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--fc-border)] pb-5">
                 <div>
                   <p className="section-kicker">Automationen</p>
@@ -569,7 +573,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                 )}
               </div>
             </section>
-            <section id="plan-verbrauch" className="panel-cut fc-panel">
+            <section id="plan-verbrauch" className="panel-cut fc-panel order-4">
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--fc-border)] pb-5">
                 <div>
                   <p className="section-kicker">Plan & Verbrauch</p>
@@ -705,7 +709,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
               </div>
             </section>
 
-            <section id="einstellungen" className="panel-cut fc-panel">
+            <section id="einstellungen" className="panel-cut fc-panel order-5">
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--fc-border)] pb-5">
                 <div>
                   <p className="section-kicker">Einstellungen</p>
