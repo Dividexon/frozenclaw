@@ -359,8 +359,35 @@ docker run -d \
   -v "${WEBUI_DATA_DIR}:/app/backend/data" \
   "$OPENWEBUI_IMAGE"
 
-docker exec "$WEBUI_CONTAINER_NAME" sh -lc \
-  "sed -i 's#<title>Open WebUI</title>#<title>Frozenclaw</title>#' /app/build/index.html"
+docker exec "$WEBUI_CONTAINER_NAME" sh -lc '
+python - <<'"'"'PY'"'"'
+from pathlib import Path
+
+path = Path("/app/build/index.html")
+text = path.read_text()
+text = text.replace("<title>Open WebUI</title>", "<title>Frozenclaw</title>")
+
+marker = "<title>Frozenclaw</title>"
+snippet = """<title>Frozenclaw</title>
+
+        <script>
+            (() => {
+                const match = window.location.pathname.match(/^\\/agent\\/[^/]+(\\/.*)?$/);
+                if (!match) {
+                    return;
+                }
+
+                const rest = match[1] || "/";
+                const target = `${rest}${window.location.search}${window.location.hash}`;
+                window.history.replaceState({}, "", target);
+            })();
+        </script>"""
+
+if marker in text and "window.history.replaceState" not in text:
+    text = text.replace(marker, snippet, 1)
+
+path.write_text(text)
+PY'
 
 caddy validate --config /etc/caddy/Caddyfile
 systemctl reload caddy
