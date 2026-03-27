@@ -5,10 +5,10 @@ import { resolveSessionAccessFromCookies } from "@/lib/auth";
 import { getFreeTierAvailability } from "@/lib/trial";
 
 const launchSignals = [
-  "Eigene OpenClaw-Instanz pro Kunde",
+  "Eigene Instanz pro Kunde",
+  "Chat direkt im Browser",
   "Hosting in Deutschland",
   "Free Tier, BYOK und Managed",
-  "Bereitstellung in der Regel am selben Tag",
 ];
 
 const steps = [
@@ -16,19 +16,19 @@ const steps = [
     id: "01",
     title: "Konto anlegen und starten",
     copy:
-      "Du registrierst dich mit E-Mail und Passwort, landest direkt im Dashboard und entscheidest dort über Free Tier oder bezahlten Plan.",
+      "Du registrierst dich mit E-Mail und Passwort, landest direkt im Dashboard und kannst dort Free Tier oder einen bezahlten Plan nutzen.",
   },
   {
     id: "02",
     title: "Instanz wird bereitgestellt",
     copy:
-      "Frozenclaw richtet deine Instanz auf deutscher Infrastruktur ein und stellt den Zugang für dich bereit.",
+      "Frozenclaw richtet deine Instanz auf eigener Infrastruktur in Deutschland ein und hält den Zugang für dich bereit.",
   },
   {
     id: "03",
-    title: "OpenClaw öffnen und nutzen",
+    title: "Chat im Browser öffnen",
     copy:
-      "Du meldest dich an, öffnest deine Instanz und kannst direkt mit dem Agenten arbeiten.",
+      "Du öffnest deinen Chat direkt aus dem Dashboard und arbeitest ohne zusätzliche Verbindungsschritte in der Browser-Oberfläche.",
   },
 ];
 
@@ -37,19 +37,19 @@ const features = [
     kicker: "Eigene Instanz",
     title: "Jeder Zugang läuft in einer eigenen Umgebung.",
     copy:
-      "Jede Bestellung und jeder Free-Tier-Zugang bekommt einen eigenen Laufzeitkontext mit eigener URL und eigener OpenClaw-Instanz.",
+      "Jede Bestellung und jeder Free-Tier-Zugang bekommt einen eigenen Laufzeitkontext mit eigener URL, eigener Agentenlaufzeit und eigener Chat-Oberfläche.",
   },
   {
     kicker: "Weniger Infrastruktur",
     title: "Du musst Server und Betrieb nicht selbst übernehmen.",
     copy:
-      "Frozenclaw übernimmt Hosting, Bereitstellung und Erreichbarkeit, damit du dich auf den Agenten konzentrieren kannst.",
+      "Frozenclaw übernimmt Hosting, Bereitstellung und Erreichbarkeit, damit du dich auf Aufgaben, Automationen und deinen Agenten konzentrieren kannst.",
   },
   {
     kicker: "Klarer Einstieg",
     title: "Das Angebot ist bewusst in wenige Stufen geschnitten.",
     copy:
-      "Free Tier für den kurzen Test, BYOK für eigenes Modell-Budget und Managed für Nutzer, die Modellzugang direkt mitbuchen wollen.",
+      "Free Tier für den kurzen Produkttest, BYOK für eigenes Modellbudget und Managed für Nutzer, die Modellzugang direkt mitbuchen wollen.",
   },
 ];
 
@@ -57,13 +57,13 @@ const freeTierIncludes = [
   "1 gehostete Testinstanz",
   "GPT-4o mini als Testmodell",
   "100.000 Tokens einmalig pro E-Mail-Adresse",
-  "E-Mail + Passwort statt Mail-Warten",
+  "Chat direkt im Browser",
   "Upgrade auf bezahlte Pläne jederzeit möglich",
   "Global auf 100 Free-Tier-Konten begrenzt",
 ];
 
 const byokIncludes = [
-  "1 gehostete OpenClaw-Instanz",
+  "1 gehostete Instanz mit Browser-Chat",
   "Eigener API-Key des Kunden",
   "Hosting in Deutschland",
   "Startanleitung für die ersten Schritte",
@@ -72,7 +72,7 @@ const byokIncludes = [
 ];
 
 const managedStarterIncludes = [
-  "1 gehostete OpenClaw-Instanz",
+  "1 gehostete Instanz mit Browser-Chat",
   "GPT-5.2 als festes Modell",
   "500.000 Tokens pro Monat",
   "Verbrauch wird automatisch mitgerechnet",
@@ -81,7 +81,7 @@ const managedStarterIncludes = [
 ];
 
 const managedPlusIncludes = [
-  "1 gehostete OpenClaw-Instanz",
+  "1 gehostete Instanz mit Browser-Chat",
   "GPT-5.2 als festes Modell",
   "3 Mio. Tokens pro Monat",
   "Verbrauch wird automatisch mitgerechnet",
@@ -90,7 +90,7 @@ const managedPlusIncludes = [
 ];
 
 const managedAdvancedIncludes = [
-  "1 gehostete OpenClaw-Instanz",
+  "1 gehostete Instanz mit Browser-Chat",
   "GPT-5.2 als festes Modell",
   "5 Mio. Tokens pro Monat",
   "Verbrauch wird automatisch mitgerechnet",
@@ -124,7 +124,7 @@ const useCases = [
 const specRows = [
   ["Zielgruppe", "Founder, Power-User, kleine Teams"],
   ["Region", "Deutschland"],
-  ["Zugang", "Eigene URL pro Instanz"],
+  ["Zugang", "Eigene URL und Browser-Chat pro Instanz"],
   ["Free Tier", "GPT-4o mini mit 100.000 Tokens"],
   ["Managed", "GPT-5.2 mit Starter, Plus und Advanced"],
   ["Support", "E-Mail + Startanleitung"],
@@ -152,14 +152,14 @@ const faqs = [
       "Managed Starter liegt bei 9,90 EUR mit 500.000 Tokens pro Monat. Managed Plus liegt bei 39 EUR mit 3 Mio. Tokens pro Monat. Managed Advanced liegt bei 59 EUR mit 5 Mio. Tokens pro Monat.",
   },
   {
-    question: "Brauche ich eigene Server oder Docker-Kenntnisse?",
+    question: "Wie nutze ich den Chat?",
     answer:
-      "Nein. Du musst keinen eigenen Server betreiben und keine Infrastruktur selbst dauerhaft am Laufen halten.",
+      "Du öffnest deine Instanz direkt aus dem Dashboard. Frozenclaw leitet dich in die Chat-Oberfläche im Browser. Die direkte OpenClaw-Verbindung bleibt nur als erweiterter Fallback sichtbar.",
   },
   {
     question: "Warum ist der Tokenverbrauch am Anfang oft höher?",
     answer:
-      "Beim ersten Einlesen einer frischen Instanz kann OpenClaw deutlich mehr Tokens verbrauchen, weil initialer Kontext und Workspace-Dateien mit verarbeitet werden. Danach läuft der Verbrauch in der Regel deutlich normaler.",
+      "Beim ersten Einlesen einer frischen Instanz kann deutlich mehr Kontext verarbeitet werden. Danach läuft der Verbrauch in der Regel deutlich normaler.",
   },
 ];
 
@@ -280,21 +280,22 @@ export default async function Home() {
           <div className="space-y-8">
             <div className="fc-chip">
               <span className="fc-chip-dot" />
-              Gehostetes OpenClaw aus Deutschland
+              Eigene Agenteninstanzen aus Deutschland
             </div>
 
             <div className="space-y-5">
               <p className="font-display text-sm uppercase tracking-[0.28em] text-[var(--fc-accent-soft)]">
-                Gehostetes OpenClaw aus Deutschland
+                Browser-Chat statt Infrastrukturstress
               </p>
               <h1 className="font-display text-6xl uppercase leading-[0.88] text-[var(--fc-text)] sm:text-7xl lg:text-[7.5rem]">
-                Dein eigener
+                Dein persönlicher
                 <span className="block text-[var(--fc-accent)]">KI-Agent.</span>
               </h1>
-                <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
-                  Frozenclaw hostet deine private OpenClaw-Instanz auf eigener Infrastruktur in
-                  einer kontrollierten Umgebung in Deutschland.
-                </p>
+              <p className="max-w-2xl text-lg leading-8 text-[var(--fc-text-muted)] sm:text-xl">
+                Frozenclaw hostet deine private Agenteninstanz auf eigener Infrastruktur in einer
+                kontrollierten Umgebung in Deutschland und stellt dir den Chat direkt im Browser
+                bereit.
+              </p>
             </div>
 
             <div className="flex flex-wrap gap-4">
@@ -358,8 +359,8 @@ export default async function Home() {
                   <strong className="stat-value">GPT-5.2</strong>
                 </div>
                 <div className="stat-block">
-                  <span className="stat-label">Standort</span>
-                  <strong className="stat-value">Nur EU</strong>
+                  <span className="stat-label">Zugang</span>
+                  <strong className="stat-value">Browser-Chat</strong>
                 </div>
               </div>
             </div>
@@ -368,7 +369,7 @@ export default async function Home() {
 
         <section id="ueberblick" className="mx-auto w-[94%] max-w-7xl pb-10">
           <div className="data-strip">
-            <span>OpenClaw Hosting</span>
+            <span>Browser-Chat</span>
             <span>Private Instanz</span>
             <span>Hosting in Deutschland</span>
             <span>Free Tier zum Testen</span>
@@ -411,7 +412,7 @@ export default async function Home() {
                     Leistungsumfang
                   </p>
                   <h3 className="mt-2 font-display text-4xl uppercase text-[var(--fc-text)]">
-                    Gehostetes OpenClaw
+                    Gehosteter Browser-Chat
                   </h3>
                 </div>
                 <span className="fc-chip">Private Instanz pro Kunde</span>
@@ -450,7 +451,7 @@ export default async function Home() {
                   Für Nutzer, die einen Agenten wollen, aber keinen Server betreiben möchten.
                 </h3>
                 <p className="mt-4 text-base leading-7 text-[var(--fc-text-muted)]">
-                  Der Start richtet sich an Founder, Power-User und kleine Teams, die OpenClaw
+                  Der Start richtet sich an Founder, Power-User und kleine Teams, die einen Agenten
                   praktisch nutzen wollen, ohne sich um den Betrieb kümmern zu müssen.
                 </p>
               </div>
@@ -592,12 +593,12 @@ export default async function Home() {
             </div>
 
             <div className="panel-cut fc-panel">
-              <p className="section-kicker">Nach der Bestellung</p>
+              <p className="section-kicker">Nach dem Start</p>
               <ol className="mt-4 space-y-4 text-base text-[var(--fc-text-muted)]">
                 <li>01. Konto mit E-Mail und Passwort anlegen.</li>
                 <li>02. Im Dashboard testen oder bezahlten Plan wählen.</li>
-                <li>03. Du erhältst Zugang zu deinem Dashboard.</li>
-                <li>04. Du öffnest OpenClaw und arbeitest direkt los.</li>
+                <li>03. Chat direkt aus deinem Dashboard öffnen.</li>
+                <li>04. Kanäle, Routinen und Cronjobs danach Schritt für Schritt aufbauen.</li>
               </ol>
             </div>
           </div>
@@ -628,8 +629,8 @@ export default async function Home() {
               <p className="font-display text-3xl text-[var(--fc-text)]">Frozenclaw</p>
             </div>
             <p className="mt-2 max-w-xl text-xs leading-6 text-[var(--fc-text-muted)]">
-              Gehostetes OpenClaw aus Deutschland für Founder, Power-User und kleine Teams, die
-              ihren eigenen Agenten nutzen möchten, ohne den Server selbst zu betreiben.
+              Gehostete Agenteninstanzen aus Deutschland für Founder, Power-User und kleine Teams,
+              die ihren eigenen Agenten nutzen möchten, ohne den Server selbst zu betreiben.
             </p>
           </div>
           <div className="flex flex-wrap gap-4 md:justify-end">
