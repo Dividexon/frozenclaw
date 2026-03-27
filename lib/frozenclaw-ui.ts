@@ -1,14 +1,9 @@
 import "server-only";
 
-import fs from "node:fs/promises";
-import path from "node:path";
 import crypto from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { ResolvedLoginToken } from "@/lib/login-links";
-import {
-  getCustomerConfigDir,
-} from "@/lib/customer-instances";
 import { buildDashboardSnapshot, type DashboardProvider } from "@/lib/dashboard";
 
 const execFileAsync = promisify(execFile);
@@ -155,18 +150,6 @@ function formatDateTime(value: Date | number | string | null) {
   }).format(date);
 }
 
-function mapContainerPathToHost(slug: string, containerPath: string | undefined) {
-  if (!containerPath) {
-    return null;
-  }
-
-  if (!containerPath.startsWith(OPENCLAW_CONFIG_PREFIX)) {
-    return null;
-  }
-
-  return path.join(getCustomerConfigDir(slug), containerPath.slice(OPENCLAW_CONFIG_PREFIX.length));
-}
-
 function getContainerName(slug: string) {
   return `frozenclaw-${slug}`;
 }
@@ -210,19 +193,6 @@ function buildThreadTitle(messages: FrozenclawMessage[]) {
 
   const title = firstUserMessage.text.replace(/\s+/g, " ").trim();
   return title.length > 54 ? `${title.slice(0, 54)}...` : title;
-}
-
-async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
-  try {
-    const content = await fs.readFile(filePath, "utf8");
-    return JSON.parse(content) as T;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return fallback;
-    }
-
-    throw error;
-  }
 }
 
 function extractFirstJsonDocument(raw: string) {
@@ -282,22 +252,40 @@ async function runOpenClawCli(slug: string, args: string[], timeoutMs = 120_000)
   return `${stdout}${stderr}`;
 }
 
-async function readSessionStore(slug: string) {
-  return readJsonFile<SessionStore>(
-    path.join(getCustomerConfigDir(slug), "agents", "main", "sessions", "sessions.json"),
-    {},
+async function readOpenClawFile(slug: string, filePath: string) {
+  const { stdout } = await execFileAsync(
+    "docker",
+    ["exec", getContainerName(slug), "cat", filePath],
+    {
+      timeout: 30_000,
+      maxBuffer: 8 * 1024 * 1024,
+    },
   );
+
+  return stdout;
+}
+
+async function readSessionStore(slug: string) {
+  try {
+    const content = await readOpenClawFile(
+      slug,
+      `${OPENCLAW_CONFIG_PREFIX}/agents/main/sessions/sessions.json`,
+    );
+    return JSON.parse(content) as SessionStore;
+  } catch {
+    return {} as SessionStore;
+  }
 }
 
 async function readSessionMessages(slug: string, sessionId: string) {
   const store = await readSessionStore(slug);
   const entry = Object.values(store).find((candidate) => candidate.sessionId === sessionId);
-  const mappedPath =
-    mapContainerPathToHost(slug, entry?.sessionFile) ??
-    path.join(getCustomerConfigDir(slug), "agents", "main", "sessions", `${sessionId}.jsonl`);
+  const sessionFile =
+    entry?.sessionFile ??
+    `${OPENCLAW_CONFIG_PREFIX}/agents/main/sessions/${sessionId}.jsonl`;
 
   try {
-    const content = await fs.readFile(mappedPath, "utf8");
+    const content = await readOpenClawFile(slug, sessionFile);
     const lines = content
       .split(/\r?\n/u)
       .map((line) => line.trim())
@@ -331,12 +319,8 @@ async function readSessionMessages(slug: string, sessionId: string) {
     }
 
     return messages;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return [] as FrozenclawMessage[];
-    }
-
-    throw error;
+  } catch {
+    return [] as FrozenclawMessage[];
   }
 }
 

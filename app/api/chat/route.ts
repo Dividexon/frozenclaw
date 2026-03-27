@@ -14,11 +14,21 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Sitzung abgelaufen." }, { status: 401 });
   }
 
-  const { searchParams } = new URL(request.url);
-  const sessionId = searchParams.get("sessionId");
-  const snapshot = await buildFrozenclawWorkspace(access, sessionId);
+  try {
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get("sessionId");
+    const snapshot = await buildFrozenclawWorkspace(access, sessionId);
 
-  return NextResponse.json(snapshot);
+    return NextResponse.json(snapshot);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Der Chat konnte nicht geladen werden.",
+      },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(request: Request) {
