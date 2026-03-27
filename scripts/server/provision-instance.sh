@@ -288,6 +288,11 @@ handle @webui_runtime_referrer_${SAFE_MATCHER_SUFFIX} {
 	reverse_proxy 127.0.0.1:$WEBUI_PORT
 }
 
+@webui_followup_referrer_${SAFE_MATCHER_SUFFIX} header Referer *$APP_BASE_URL/agent/$SLUG*
+handle @webui_followup_referrer_${SAFE_MATCHER_SUFFIX} {
+	reverse_proxy 127.0.0.1:$WEBUI_PORT
+}
+
 @webui_assets_${SAFE_MATCHER_SUFFIX} path /_app/* /static/* /manifest.json
 handle @webui_assets_${SAFE_MATCHER_SUFFIX} {
 	reverse_proxy 127.0.0.1:$WEBUI_PORT
