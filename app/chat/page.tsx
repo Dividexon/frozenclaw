@@ -37,7 +37,7 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
           <h1 className="section-title mt-3 text-5xl">Sitzung erforderlich</h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--fc-text-muted)]">
             Bitte melde dich zuerst an. Danach kannst du deinen Agenten direkt aus dem Dashboard
-            oder ueber die Zugangsseite oeffnen.
+            oder über die Zugangsseite öffnen.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/anmelden" className="fc-button fc-button-primary">
@@ -69,7 +69,7 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
       <main className="mx-auto min-h-screen w-[94%] max-w-5xl py-12 text-[var(--fc-text)]">
         <section className="panel-cut fc-panel">
           <p className="section-kicker">Chat</p>
-          <h1 className="section-title mt-3 text-5xl">Chat voruebergehend nicht erreichbar</h1>
+          <h1 className="section-title mt-3 text-5xl">Chat vorübergehend nicht erreichbar</h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--fc-text-muted)]">{loadError}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/konto" className="fc-button fc-button-primary">

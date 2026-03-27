@@ -33,6 +33,22 @@ const INITIAL_TASK_FORM: TaskFormState = {
   enabled: true,
 };
 
+async function readApiResponse<T>(response: Response): Promise<(T & { error?: string }) | null> {
+  const text = await response.text();
+
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text) as T & { error?: string };
+  } catch {
+    return {
+      error: `Unerwartete Serverantwort (${response.status}).`,
+    } as T & { error?: string };
+  }
+}
+
 function formatStandardTokens(value: number | null) {
   if (value === null) {
     return "Nicht aktiv";
@@ -177,15 +193,15 @@ function TaskCard({
         <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">{task.message}</p>
       ) : null}
       <div className="mt-4 grid gap-2 text-sm text-[var(--fc-text-muted)]">
-        <p>Letzter Lauf: {task.lastRunAt ?? "Noch nicht ausgefuehrt"}</p>
-        <p>Naechster Lauf: {task.nextRunAt ?? "Nicht geplant"}</p>
+        <p>Letzter Lauf: {task.lastRunAt ?? "Noch nicht ausgeführt"}</p>
+        <p>Nächster Lauf: {task.nextRunAt ?? "Nicht geplant"}</p>
       </div>
       <div className="mt-5 flex flex-wrap gap-2">
-        {smallActionButton("Jetzt ausfuehren", () => onAction(task.id, "run"), isPending)}
+        {smallActionButton("Jetzt ausführen", () => onAction(task.id, "run"), isPending)}
         {task.enabled
           ? smallActionButton("Pausieren", () => onAction(task.id, "disable"), isPending)
           : smallActionButton("Aktivieren", () => onAction(task.id, "enable"), isPending)}
-        {smallActionButton("Loeschen", () => onAction(task.id, "delete"), isPending)}
+        {smallActionButton("Löschen", () => onAction(task.id, "delete"), isPending)}
       </div>
     </div>
   );
@@ -267,12 +283,12 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
         credentials: "same-origin",
       });
 
-      if (!response.ok) {
-        setChatError("Die Unterhaltung konnte nicht geladen werden.");
+      const payload = await readApiResponse<FrozenclawWorkspaceSnapshot>(response);
+
+      if (!response.ok || !payload) {
+        setChatError(payload?.error ?? "Die Unterhaltung konnte nicht geladen werden.");
         return;
       }
-
-      const payload = (await response.json()) as FrozenclawWorkspaceSnapshot;
       applySnapshot(payload);
     } catch {
       setChatError("Die Unterhaltung konnte gerade nicht geladen werden.");
@@ -314,10 +330,10 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
           }),
         });
 
-        const payload = (await response.json()) as FrozenclawWorkspaceSnapshot & { error?: string };
+        const payload = await readApiResponse<FrozenclawWorkspaceSnapshot>(response);
 
-        if (!response.ok) {
-          setChatError(payload.error ?? "Die Nachricht konnte nicht gesendet werden.");
+        if (!response.ok || !payload) {
+          setChatError(payload?.error ?? "Die Nachricht konnte nicht gesendet werden.");
           return;
         }
 
@@ -352,10 +368,10 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
           }),
         });
 
-        const payload = (await response.json()) as FrozenclawWorkspaceSnapshot & { error?: string };
+        const payload = await readApiResponse<FrozenclawWorkspaceSnapshot>(response);
 
-        if (!response.ok) {
-          setTaskError(payload.error ?? "Die Aufgabe konnte nicht erstellt werden.");
+        if (!response.ok || !payload) {
+          setTaskError(payload?.error ?? "Die Aufgabe konnte nicht erstellt werden.");
           return;
         }
 
@@ -385,16 +401,16 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
           }),
         });
 
-        const payload = (await response.json()) as FrozenclawWorkspaceSnapshot & { error?: string };
+        const payload = await readApiResponse<FrozenclawWorkspaceSnapshot>(response);
 
-        if (!response.ok) {
-          setTaskError(payload.error ?? "Die Aufgabenaktion konnte nicht ausgefuehrt werden.");
+        if (!response.ok || !payload) {
+          setTaskError(payload?.error ?? "Die Aufgabenaktion konnte nicht ausgeführt werden.");
           return;
         }
 
         applySnapshot(payload);
       } catch {
-        setTaskError("Die Aufgabenaktion konnte gerade nicht ausgefuehrt werden.");
+        setTaskError("Die Aufgabenaktion konnte gerade nicht ausgeführt werden.");
       } finally {
         setPendingTaskId(null);
       }
@@ -407,7 +423,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
         <p className="section-kicker">Frozenclaw UI</p>
         <h1 className="mt-3 font-display text-4xl uppercase text-[var(--fc-text)]">Chat und Steuerung</h1>
         <p className="mt-4 text-base leading-8 text-[var(--fc-text-muted)]">
-          Die gleiche Instanz wie bisher, aber in einer klareren Oberflaeche fuer Chat, Aufgaben und Verbindungen.
+          Die gleiche Instanz wie bisher, aber in einer klareren Oberfläche für Chat, Aufgaben und Verbindungen.
         </p>
 
         <div className="mt-6 grid gap-3">
@@ -478,13 +494,13 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
                 <textarea
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
-                  placeholder="Was soll dein Agent als Naechstes tun?"
+                  placeholder="Was soll dein Agent als Nächstes tun?"
                   className="mt-3 min-h-32 w-full border border-[var(--fc-border)] bg-black/30 px-4 py-4 text-sm text-[var(--fc-text)] outline-none transition focus:border-[var(--fc-accent)]"
                 />
                 {chatError ? <p className="mt-3 text-sm text-[var(--fc-accent-soft)]">{chatError}</p> : null}
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm text-[var(--fc-text-muted)]">
-                    Antworten laufen ueber dieselbe OpenClaw-Instanz wie bisher.
+                    Antworten laufen über dieselbe OpenClaw-Instanz wie bisher.
                   </p>
                   <button type="submit" className="fc-button fc-button-primary" disabled={isChatPending}>
                     {isChatPending ? "Wird gesendet..." : "Nachricht senden"}
@@ -616,10 +632,10 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
         <section id="verbindungen" className="panel-cut fc-panel">
           <div className="border-b border-[var(--fc-border)] pb-5">
             <p className="section-kicker">Verbindungen</p>
-            <h2 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">Kanaele und Modellzugang</h2>
+            <h2 className="mt-3 text-3xl font-semibold text-[var(--fc-text)]">Kanäle und Modellzugang</h2>
             <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--fc-text-muted)]">
-              Hier siehst du, ueber welche Kanaele dein Agent erreichbar ist und welcher Modellzugang im
-              Hintergrund fuer deine Instanz bereitsteht.
+              Hier siehst du, über welche Kanäle dein Agent erreichbar ist und welcher Modellzugang im
+              Hintergrund für deine Instanz bereitsteht.
             </p>
           </div>
 
