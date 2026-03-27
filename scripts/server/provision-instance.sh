@@ -80,6 +80,7 @@ CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
 CONFIG_DIR="${CUSTOMER_DIR}/config"
 WORKSPACE_DIR="${CUSTOMER_DIR}/workspace"
 WEBUI_DATA_DIR="${CUSTOMER_DIR}/webui"
+SAFE_MATCHER_SUFFIX="${SLUG//-/}"
 AGENT_DIR="${CONFIG_DIR}/agents/main/agent"
 SESSIONS_DIR="${CONFIG_DIR}/agents/main/sessions"
 INSTANCE_ENV="${CUSTOMER_DIR}/instance.env"
@@ -269,16 +270,27 @@ EOF
 fi
 
 cat > "$CADDY_SNIPPET" <<EOF
-@webui_assets path /_app/* /static/* /manifest.json
-handle @webui_assets {
+@webui_runtime_${SAFE_MATCHER_SUFFIX} {
+	path /api/* /auth/* /oauth/* /ws/* /socket.io/* /assets/* /_app/* /static/* /manifest.json /opensearch.xml
+	header Cookie *fc_webui_slug=$SLUG*
+}
+
+handle @webui_runtime_${SAFE_MATCHER_SUFFIX} {
+	reverse_proxy 127.0.0.1:$WEBUI_PORT
+}
+
+@webui_assets_${SAFE_MATCHER_SUFFIX} path /_app/* /static/* /manifest.json
+handle @webui_assets_${SAFE_MATCHER_SUFFIX} {
 	reverse_proxy 127.0.0.1:$WEBUI_PORT
 }
 
 handle /agent/$SLUG {
+	header Set-Cookie "fc_webui_slug=$SLUG; Path=/; Secure; SameSite=Lax"
 	reverse_proxy 127.0.0.1:$WEBUI_PORT
 }
 
 handle_path /agent/$SLUG/* {
+	header Set-Cookie "fc_webui_slug=$SLUG; Path=/; Secure; SameSite=Lax"
 	reverse_proxy 127.0.0.1:$WEBUI_PORT
 }
 EOF
