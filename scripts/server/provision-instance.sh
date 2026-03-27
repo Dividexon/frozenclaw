@@ -269,6 +269,11 @@ EOF
 fi
 
 cat > "$CADDY_SNIPPET" <<EOF
+@webui_assets path /_app/* /static/* /manifest.json
+handle @webui_assets {
+	reverse_proxy 127.0.0.1:$WEBUI_PORT
+}
+
 handle /agent/$SLUG {
 	reverse_proxy 127.0.0.1:$WEBUI_PORT
 }
@@ -325,6 +330,9 @@ docker run -d \
   -e ENABLE_SIGNUP=False \
   -v "${WEBUI_DATA_DIR}:/app/backend/data" \
   "$OPENWEBUI_IMAGE"
+
+docker exec "$WEBUI_CONTAINER_NAME" sh -lc \
+  "sed -i 's#<title>Open WebUI</title>#<title>Frozenclaw</title>#' /app/build/index.html"
 
 caddy validate --config /etc/caddy/Caddyfile
 systemctl reload caddy
