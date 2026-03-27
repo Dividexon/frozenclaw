@@ -36,7 +36,7 @@ export default function RegistrierenPage() {
             </div>
             <div className="signal-row">
               <span className="signal-index">+</span>
-              <span>Eigene gehostete Testinstanz</span>
+              <span>Eigene gehostete Testinstanz mit Browser-Chat</span>
             </div>
             <div className="signal-row">
               <span className="signal-index">+</span>
@@ -65,11 +65,11 @@ export default function RegistrierenPage() {
             </div>
             <div className="signal-row">
               <span className="signal-index">+</span>
-              <span>Im Dashboard kannst du auf Standard oder Managed wechseln</span>
+              <span>Dein Chat öffnet direkt im Browser</span>
             </div>
             <div className="signal-row">
               <span className="signal-index">+</span>
-              <span>Bestehende Instanz und Konto bleiben dabei erhalten</span>
+              <span>Bestehende Instanz und Konto bleiben beim Upgrade erhalten</span>
             </div>
           </div>
 

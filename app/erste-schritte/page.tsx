@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Erste Schritte | Frozenclaw",
   description:
-    "Praktische Starthilfe für Frozenclaw: OpenClaw öffnen, erste Aufgaben testen, Kanäle anbinden und Cronjobs sinnvoll einsetzen.",
+    "Praktische Starthilfe für Frozenclaw: Chat öffnen, erste Aufgaben testen, Kanäle anbinden und Cronjobs sinnvoll einsetzen.",
 };
 
 const quickStartSteps = [
@@ -14,9 +14,9 @@ const quickStartSteps = [
       "Prüfe zuerst im Dashboard, ob deine Instanz erreichbar ist und ob dein Plan oder dein API-Key sauber hinterlegt ist.",
   },
   {
-    title: "OpenClaw starten",
+    title: "Chat öffnen",
     description:
-      "Öffne danach deine Instanz direkt aus Frozenclaw. So landest du mit dem richtigen Link und dem aktuellen Gateway-Zugang in der Oberfläche.",
+      "Öffne danach deinen Chat direkt aus Frozenclaw. So landest du mit dem richtigen Link sofort in deiner Oberfläche.",
   },
   {
     title: "Mit einer kleinen Aufgabe beginnen",
@@ -41,7 +41,7 @@ const nextSteps = [
   {
     title: "Kanäle anbinden",
     description:
-      "OpenClaw wird deutlich nützlicher, wenn Antworten dort ankommen, wo du ohnehin arbeitest. Typische erste Ziele sind Telegram, Discord oder andere in deiner OpenClaw-Konfiguration verfügbare Kanäle.",
+      "Dein Agent wird deutlich nützlicher, wenn Antworten dort ankommen, wo du ohnehin arbeitest. Typische erste Ziele sind Telegram, Discord oder andere in deiner Konfiguration verfügbare Kanäle.",
   },
   {
     title: "Cronjobs für Routinen nutzen",
@@ -59,11 +59,11 @@ const practicalTips = [
   "Halte den ersten Workflow bewusst klein. Ein funktionierender Ablauf ist wertvoller als zehn halbfertige Ideen.",
   "Teste neue Kanäle zuerst manuell, bevor du geplante Läufe darauf loslässt.",
   "Wenn du wiederkehrende Aufgaben anlegst, beginne mit einem einfachen Zeitplan statt mit vielen parallelen Jobs.",
-  "Bei unerwartetem Verhalten zuerst Dashboard und Zugangsseite prüfen, bevor du OpenClaw komplett neu aufsetzt.",
+  "Bei unerwartetem Verhalten zuerst Dashboard und Zugangsseite prüfen, bevor du deinen Agenten komplett neu aufsetzt.",
 ];
 
 const supportHints = [
-  "Wenn OpenClaw eine neue Verbindung anfordert, nutze den aktuellen Gateway-Zugang aus Frozenclaw statt alter Browser-Tabs.",
+  "Wenn der Chat nicht lädt, öffne ihn direkt neu aus dem Dashboard statt aus einem alten Browser-Tab.",
   "Wenn Antworten ausbleiben, zuerst Modellzugang oder Provider-Status prüfen.",
   "Wenn eine Verbindung in einem Browser hängt, den Link direkt aus Frozenclaw neu öffnen und nicht auf alte lokale Zustände vertrauen.",
 ];
@@ -78,7 +78,7 @@ export default function ErsteSchrittePage() {
         </h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--fc-text-muted)]">
           Diese Seite ist keine technische Referenz, sondern eine praktische Starthilfe. Der
-          einfachste Weg ist: Instanz öffnen, eine kleine Aufgabe testen, danach Kanäle und
+          einfachste Weg ist: Chat öffnen, eine kleine Aufgabe testen, danach Kanäle und
           Routinen sauber aufbauen.
         </p>
         <div className="mt-8 flex flex-wrap gap-4">
@@ -86,7 +86,7 @@ export default function ErsteSchrittePage() {
             Zum Dashboard
           </Link>
           <Link href="/anmelden" className="fc-button fc-button-secondary">
-            OpenClaw über dein Konto öffnen
+            Chat über dein Konto öffnen
           </Link>
         </div>
       </section>

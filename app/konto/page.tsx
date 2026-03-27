@@ -396,8 +396,8 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                   <p className="section-kicker">Agent</p>
                   <h2 className="mt-3 text-4xl font-semibold text-[var(--fc-text)]">Chat und Zugang</h2>
                   <p className="mt-4 text-base leading-8 text-[var(--fc-text-muted)]">
-                    Dein Agent ist über die Chat-Oberfläche erreichbar. Klicke einfach auf "Chat
-                    öffnen" — kein Token-Setup nötig.
+                    Dein Agent ist über die Chat-Oberfläche erreichbar. Klicke einfach auf Chat
+                    öffnen – kein Token-Setup nötig.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-4">

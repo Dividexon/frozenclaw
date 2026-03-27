@@ -99,26 +99,27 @@ export function AgentLaunchBridge({ slug, token }: AgentLaunchBridgeProps) {
   return (
     <div className="mx-auto flex min-h-screen w-[94%] max-w-3xl items-center justify-center py-16 text-[var(--fc-text)]">
       <section className="panel-cut fc-panel w-full">
-        <p className="section-kicker">OpenClaw</p>
-        <h1 className="section-title mt-3 text-5xl">Agent wird geoeffnet</h1>
+        <p className="section-kicker">Chat</p>
+        <h1 className="section-title mt-3 text-5xl">Chat wird geöffnet</h1>
         <p className="mt-5 text-base leading-8 text-[var(--fc-text-muted)]">
-          Frozenclaw richtet gerade die Verbindung fuer deinen Browser ein und leitet dich dann
-          direkt in deine OpenClaw-Instanz weiter.
+          Frozenclaw richtet gerade die Verbindung für deinen Browser ein und leitet dich danach in
+          deine Oberfläche weiter.
         </p>
 
         {missingToken ? (
           <div className="mt-6 border border-[var(--fc-accent)]/40 bg-[var(--fc-accent)]/10 px-4 py-4 text-sm text-[var(--fc-text)]">
-            Fuer diese Instanz fehlt ein Gateway-Token.
+            Für diese Instanz fehlt ein Gateway-Token.
           </div>
         ) : (
           <div className="mt-6 border border-[var(--fc-border)] bg-black/20 px-4 py-4 text-sm text-[var(--fc-text-muted)]">
-            Wenn Firefox noch alte Zugangsdaten gespeichert hatte, werden sie hier zuerst ersetzt.
+            Wenn Firefox oder ein anderer Browser noch alte Zugangsdaten gespeichert hatte, werden
+            sie hier zuerst ersetzt.
           </div>
         )}
 
         <div className="mt-8 flex flex-wrap gap-4">
           <a href={targetPath} className="fc-button fc-button-secondary">
-            Direkt zu OpenClaw
+            Direkt zum Chat
           </a>
           <a href="/konto" className="fc-button fc-button-secondary">
             Zum Dashboard

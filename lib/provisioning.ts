@@ -56,20 +56,21 @@ function generateManagedTrackingToken() {
   return crypto.randomBytes(24).toString("base64url");
 }
 
-export function buildAgentUrl(slug: string | null, token: string | null) {
+export function buildAgentUrl(slug: string | null, _token: string | null) {
   if (!slug) {
     return null;
   }
 
+  void _token;
+
   const config = getAppConfig();
-  const pathValue = `/agent-start/${slug}`;
-  const query = token ? `?token=${encodeURIComponent(token)}` : "";
+  const pathValue = `${config.agentBasePath}/${slug}/`;
 
   if (!config.appBaseUrl) {
-    return `${pathValue}${query}`;
+    return pathValue;
   }
 
-  return `${config.appBaseUrl}${pathValue}${query}`;
+  return `${config.appBaseUrl}${pathValue}`;
 }
 
 export function buildSetupUrl(slug: string | null, token: string | null) {

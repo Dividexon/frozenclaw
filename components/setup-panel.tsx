@@ -539,8 +539,8 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
         </summary>
         <div className="px-5 pb-5">
           <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
-            OpenClaw verlangt beim ersten Browser-Zugriff den Gateway-Token manuell. Die
-            WebSocket-URL lässt du unverändert. Das Passwort-Feld bleibt leer.
+            Für den normalen Produktpfad brauchst du diesen Teil nicht. Er ist nur als Fallback für
+            die direkte OpenClaw-Verbindung gedacht, wenn du den Chat bewusst umgehen willst.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3 border border-[var(--fc-border)] bg-black/30 px-4 py-3">
             <code className="break-all text-sm text-[var(--fc-text)]">{token}</code>
@@ -553,7 +553,7 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
             </button>
           </div>
           <ol className="mt-4 space-y-2 text-sm leading-7 text-[var(--fc-text-muted)]">
-            <li>1. OpenClaw öffnen.</li>
+            <li>1. Direkte OpenClaw-Verbindung öffnen.</li>
             <li>2. WebSocket-URL unverändert lassen.</li>
             <li>3. Gateway-Token einfügen.</li>
             <li>4. Passwort leer lassen.</li>
@@ -562,7 +562,7 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
           {state?.agentUrl ? (
             <div className="mt-6">
               <a href={state.agentUrl} className="fc-button fc-button-primary" target="_blank">
-                OpenClaw öffnen
+                Chat öffnen
               </a>
             </div>
           ) : null}
