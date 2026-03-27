@@ -86,8 +86,8 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-[94%] max-w-[1600px] py-12 text-[var(--fc-text)]">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <main className="mx-auto flex h-screen w-[94%] max-w-[1600px] flex-col overflow-hidden py-6 text-[var(--fc-text)]">
+      <header className="mb-4 flex flex-none flex-wrap items-center justify-between gap-4">
         <div>
           <p className="section-kicker">Frozenclaw</p>
           <h1 className="mt-3 font-display text-5xl uppercase text-[var(--fc-text)]">Dein Agent</h1>
@@ -100,7 +100,9 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
         </div>
       </header>
 
-      <FrozenclawWorkspace initialSnapshot={snapshot} />
+      <div className="min-h-0 flex-1">
+        <FrozenclawWorkspace initialSnapshot={snapshot} />
+      </div>
     </main>
   );
 }

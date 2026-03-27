@@ -89,7 +89,7 @@ function ThreadList({
           Neu
         </button>
       </div>
-      <div className="grid max-h-[34rem] gap-2 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
         {threads.length === 0 ? (
           <div className="border border-dashed border-[var(--fc-border)] p-4 text-sm leading-7 text-[var(--fc-text-muted)]">
             Noch keine Sitzung vorhanden. Schreibe die erste Nachricht und Frozenclaw legt die Unterhaltung an.
@@ -402,8 +402,8 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[16rem_minmax(0,1fr)]">
-      <aside className="panel-cut fc-panel h-fit xl:sticky xl:top-6">
+    <div className="grid h-full min-h-0 gap-6 xl:grid-cols-[16rem_minmax(0,1fr)]">
+      <aside className="panel-cut fc-panel h-full min-h-0 overflow-y-auto">
         <p className="section-kicker">Frozenclaw UI</p>
         <h1 className="mt-3 font-display text-4xl uppercase text-[var(--fc-text)]">Chat und Steuerung</h1>
         <p className="mt-4 text-base leading-8 text-[var(--fc-text-muted)]">
@@ -436,8 +436,8 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
         </nav>
       </aside>
 
-      <div className="space-y-6">
-        <section id="chat" className="panel-cut fc-panel">
+      <div className="min-h-0 space-y-6 overflow-y-auto pr-1">
+        <section id="chat" className="panel-cut fc-panel flex min-h-[36rem] flex-col xl:max-h-[calc(100vh-11rem)]">
           <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--fc-border)] pb-5">
             <div>
               <p className="section-kicker">Chat</p>
@@ -449,7 +449,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 xl:grid-cols-[18rem_minmax(0,1fr)]">
+          <div className="mt-6 grid min-h-0 flex-1 gap-4 xl:grid-cols-[18rem_minmax(0,1fr)]">
             <ThreadList
               threads={snapshot.threads}
               selectedThreadId={selectedThreadId}
@@ -459,7 +459,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
               onCreate={handleNewThread}
             />
 
-            <div className="flex min-h-[34rem] flex-col border border-[var(--fc-border)] bg-black/20">
+            <div className="flex min-h-0 flex-1 flex-col border border-[var(--fc-border)] bg-black/20">
               <div className="flex-1 space-y-4 overflow-y-auto p-4">
                 {snapshot.messages.length === 0 ? (
                   <div className="border border-dashed border-[var(--fc-border)] p-5 text-sm leading-7 text-[var(--fc-text-muted)]">
