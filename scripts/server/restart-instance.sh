@@ -30,4 +30,7 @@ if [[ -z "$SLUG" ]]; then
   exit 1
 fi
 
+WEBUI_CONTAINER_NAME="frozenclaw-webui-${SLUG}"
+
 docker restart "frozenclaw-$SLUG" >/dev/null
+docker restart "$WEBUI_CONTAINER_NAME" >/dev/null || true

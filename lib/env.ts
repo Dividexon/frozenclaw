@@ -18,6 +18,7 @@ export type AppConfig = {
   setupBasePath: string;
   customerRootDir: string;
   openClawImage: string;
+  openwebuiImage: string;
   openClawRepoDir: string;
   serverTimezone: string;
   smtpHost: string | null;
@@ -143,6 +144,7 @@ export function getAppConfig() {
       customerRootDir:
         process.env.CUSTOMER_ROOT_DIR ?? path.join(process.cwd(), "data", "customers"),
       openClawImage: process.env.OPENCLAW_IMAGE ?? "frozenclaw/openclaw:latest",
+      openwebuiImage: process.env.OPENWEBUI_IMAGE ?? "ghcr.io/open-webui/open-webui:main",
       openClawRepoDir: process.env.OPENCLAW_REPO_DIR ?? "/opt/frozenclaw/vendor/openclaw",
       serverTimezone: process.env.SERVER_TIMEZONE ?? "Europe/Berlin",
       smtpHost: process.env.SMTP_HOST ?? null,

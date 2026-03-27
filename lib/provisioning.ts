@@ -127,13 +127,17 @@ function pickNextPort() {
     .all() as Array<{ instance_port: number }>;
   const taken = new Set(rows.map((row) => row.instance_port));
 
-  for (let port = config.provisioningPortStart; port <= config.provisioningPortEnd; port += 1) {
-    if (!taken.has(port)) {
+  for (
+    let port = config.provisioningPortStart;
+    port <= config.provisioningPortEnd - 1;
+    port += 2
+  ) {
+    if (!taken.has(port) && !taken.has(port + 1)) {
       return port;
     }
   }
 
-  throw new Error("Kein freier Port mehr im konfigurierten Bereich verfügbar.");
+  throw new Error("Kein freies Port-Paar mehr im konfigurierten Bereich verfügbar.");
 }
 
 function ensureIdentity(orderId: number) {

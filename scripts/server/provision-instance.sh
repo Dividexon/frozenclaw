@@ -66,6 +66,7 @@ if [[ -z "$ORDER_ID" || -z "$SLUG" || -z "$PORT" || -z "$TOKEN" ]]; then
 fi
 
 OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-frozenclaw/openclaw:latest}"
+OPENWEBUI_IMAGE="${OPENWEBUI_IMAGE:-ghcr.io/open-webui/open-webui:main}"
 CUSTOMER_ROOT_DIR="${CUSTOMER_ROOT_DIR:-/opt/frozenclaw/customers}"
 SERVER_TIMEZONE="${SERVER_TIMEZONE:-Europe/Berlin}"
 APP_BASE_URL="${APP_BASE_URL:-http://46.225.143.215}"
@@ -73,9 +74,12 @@ APP_SYSTEM_USER="${APP_SYSTEM_USER:-frozenclaw}"
 APP_SYSTEM_GROUP="${APP_SYSTEM_GROUP:-frozenclaw}"
 OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH="${OPENCLAW_CONTROL_UI_DISABLE_DEVICE_AUTH:-true}"
 CONTAINER_NAME="frozenclaw-${SLUG}"
+WEBUI_PORT=$((PORT + 1))
+WEBUI_CONTAINER_NAME="frozenclaw-webui-${SLUG}"
 CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
 CONFIG_DIR="${CUSTOMER_DIR}/config"
 WORKSPACE_DIR="${CUSTOMER_DIR}/workspace"
+WEBUI_DATA_DIR="${CUSTOMER_DIR}/webui"
 AGENT_DIR="${CONFIG_DIR}/agents/main/agent"
 SESSIONS_DIR="${CONFIG_DIR}/agents/main/sessions"
 INSTANCE_ENV="${CUSTOMER_DIR}/instance.env"
@@ -89,7 +93,7 @@ CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 OPENAI_MANAGED_API_KEY="${OPENAI_MANAGED_API_KEY:-}"
 MANAGED_MODEL_ALIAS="${MANAGED_MODEL#*/}"
 
-mkdir -p "$CONFIG_DIR" "$WORKSPACE_DIR" "$AGENT_DIR" /etc/caddy/customers.d
+mkdir -p "$CONFIG_DIR" "$WORKSPACE_DIR" "$AGENT_DIR" "$WEBUI_DATA_DIR" /etc/caddy/customers.d
 
 if ! docker image inspect "$OPENCLAW_IMAGE" >/dev/null 2>&1; then
   /opt/frozenclaw/app/scripts/server/install-openclaw-base.sh
@@ -121,6 +125,7 @@ INSTANCE_PORT=$PORT
 GATEWAY_TOKEN=$TOKEN
 CONTAINER_NAME=$CONTAINER_NAME
 OPENCLAW_IMAGE=$OPENCLAW_IMAGE
+OPENWEBUI_IMAGE=$OPENWEBUI_IMAGE
 USAGE_MODE=$USAGE_MODE
 MANAGED_PROVIDER=$MANAGED_PROVIDER
 MANAGED_MODEL=$MANAGED_MODEL
@@ -265,17 +270,19 @@ fi
 
 cat > "$CADDY_SNIPPET" <<EOF
 handle /agent/$SLUG {
-	reverse_proxy 127.0.0.1:$PORT
+	reverse_proxy 127.0.0.1:$WEBUI_PORT
 }
 
 handle_path /agent/$SLUG/* {
-	reverse_proxy 127.0.0.1:$PORT
+	reverse_proxy 127.0.0.1:$WEBUI_PORT
 }
 EOF
 
 chown -R "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$CUSTOMER_DIR"
 chmod 750 "$CUSTOMER_DIR" "$CONFIG_DIR" "$WORKSPACE_DIR" "${CONFIG_DIR}/agents" "${CONFIG_DIR}/agents/main" "$AGENT_DIR"
 chmod 640 "$INSTANCE_ENV" "$PROVIDER_ENV" "$OPENCLAW_CONFIG_JSON" "$AUTH_PROFILES_JSON"
+chown "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$WEBUI_DATA_DIR"
+chmod 750 "$WEBUI_DATA_DIR"
 if [[ -f "$MANAGED_PLUGIN_FILE" ]]; then
   chown "$APP_SYSTEM_USER:$APP_SYSTEM_GROUP" "$WORKSPACE_DIR"
   chmod 750 "$WORKSPACE_DIR"
@@ -300,6 +307,22 @@ docker run -d \
   "$OPENCLAW_IMAGE" \
   node dist/index.js gateway --bind lan --port 18789 --allow-unconfigured
 
+docker rm -f "$WEBUI_CONTAINER_NAME" >/dev/null 2>&1 || true
+
+docker run -d \
+  --name "$WEBUI_CONTAINER_NAME" \
+  --restart unless-stopped \
+  --add-host=host.docker.internal:host-gateway \
+  -p "127.0.0.1:${WEBUI_PORT}:8080" \
+  -e OPENAI_API_BASE_URL="http://host.docker.internal:${PORT}/v1" \
+  -e OPENAI_API_KEY="${TOKEN}" \
+  -e WEBUI_AUTH=False \
+  -e WEBUI_SECRET_KEY="$(openssl rand -hex 32)" \
+  -e DEFAULT_MODELS="" \
+  -e ENABLE_SIGNUP=False \
+  -v "${WEBUI_DATA_DIR}:/app/backend/data" \
+  "$OPENWEBUI_IMAGE"
+
 caddy validate --config /etc/caddy/Caddyfile
 systemctl reload caddy
 
@@ -308,12 +331,29 @@ for _ in $(seq 1 30); do
   CODE="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/healthz" || true)"
   if [[ "$CODE" != "000" ]]; then
     echo "OpenClaw-Instanz $SLUG ist erreichbar."
-    exit 0
+    break
   fi
 
   sleep 2
 done
 
-echo "OpenClaw-Instanz $SLUG wurde nicht rechtzeitig erreichbar." >&2
-docker logs "$CONTAINER_NAME" --tail 200 >&2 || true
+if [[ "$CODE" == "000" ]]; then
+  echo "OpenClaw-Instanz $SLUG wurde nicht rechtzeitig erreichbar." >&2
+  docker logs "$CONTAINER_NAME" --tail 200 >&2 || true
+  exit 1
+fi
+
+CODE="000"
+for _ in $(seq 1 40); do
+  CODE="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${WEBUI_PORT}/health" || true)"
+  if [[ "$CODE" == "200" ]]; then
+    echo "OpenWebUI-Instanz $SLUG ist erreichbar."
+    exit 0
+  fi
+
+  sleep 3
+done
+
+echo "OpenWebUI-Instanz $SLUG wurde nicht rechtzeitig erreichbar." >&2
+docker logs "$WEBUI_CONTAINER_NAME" --tail 200 >&2 || true
 exit 1

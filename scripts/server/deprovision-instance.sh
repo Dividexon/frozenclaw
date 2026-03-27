@@ -31,10 +31,13 @@ if [[ -z "$SLUG" ]]; then
 fi
 
 CUSTOMER_ROOT_DIR="${CUSTOMER_ROOT_DIR:-/opt/frozenclaw/customers}"
+CUSTOMER_DIR="${CUSTOMER_ROOT_DIR}/${SLUG}"
+WEBUI_CONTAINER_NAME="frozenclaw-webui-${SLUG}"
 CADDY_SNIPPET="/etc/caddy/customers.d/${SLUG}.caddy"
 
 docker rm -f "frozenclaw-$SLUG" >/dev/null 2>&1 || true
+docker rm -f "$WEBUI_CONTAINER_NAME" >/dev/null 2>&1 || true
 rm -f "$CADDY_SNIPPET"
-rm -rf "${CUSTOMER_ROOT_DIR:?}/${SLUG}"
+rm -rf "${CUSTOMER_DIR:?}"
 caddy validate --config /etc/caddy/Caddyfile
 systemctl reload caddy
