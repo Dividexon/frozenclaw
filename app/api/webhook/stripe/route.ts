@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { clearProviderKeys } from "@/lib/customer-instances";
 import { getDb, logOrderEvent } from "@/lib/db";
-import { buildManagedOrderSeed } from "@/lib/managed";
+import { applyPaidTopUp, buildManagedOrderSeed, syncBillingPeriod } from "@/lib/managed";
 import { queueProvisioning, startRuntimeRecovery } from "@/lib/provisioning";
 import { getStripe } from "@/lib/stripe";
-import { isPlanId, plans, type UsageMode } from "@/lib/plans";
+import { findPlanIdByAmountCents, isPlanId, plans, type UsageMode } from "@/lib/plans";
 
 export const runtime = "nodejs";
 
@@ -34,35 +34,100 @@ function findProcessedTopUpEvent(eventId: string) {
     .get(eventId) as { id: number } | undefined;
 }
 
-function updateSubscriptionState(
-  subscriptionId: string,
-  next: {
-    customerId: string | null;
-    status: string | null;
-  },
-) {
-  getDb()
+function findOrderBySubscriptionId(subscriptionId: string) {
+  return getDb()
     .prepare(
       `
-        UPDATE orders
-        SET
-          stripe_customer_id = COALESCE(@customerId, stripe_customer_id),
-          stripe_subscription_id = @subscriptionId,
-          stripe_subscription_status = @status,
-          updated_at = datetime('now')
-        WHERE stripe_subscription_id = @subscriptionId
+        SELECT id
+        FROM orders
+        WHERE stripe_subscription_id = ?
            OR stripe_session_id IN (
              SELECT stripe_session_id
              FROM orders
-             WHERE stripe_subscription_id = @subscriptionId
+             WHERE stripe_subscription_id = ?
            )
+        LIMIT 1
       `,
     )
-    .run({
-      customerId: next.customerId,
-      subscriptionId,
-      status: next.status,
-    });
+    .get(subscriptionId, subscriptionId) as { id: number } | undefined;
+}
+
+function toSqliteDateFromUnix(value?: number | null) {
+  if (!value || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return new Date(value * 1000).toISOString().slice(0, 19).replace("T", " ");
+}
+
+function resolvePlanFromStripeAmount(amountCents: number | null | undefined) {
+  const planId = findPlanIdByAmountCents(amountCents);
+  return planId && isPlanId(planId) ? planId : null;
+}
+
+function getSubscriptionPlanInfo(subscription: {
+  items?: {
+    data?: Array<{
+      price?: {
+        unit_amount?: number | null;
+      } | null;
+    }>;
+  };
+}) {
+  const amountCents = subscription.items?.data?.[0]?.price?.unit_amount ?? null;
+  const planId = resolvePlanFromStripeAmount(amountCents);
+
+  return {
+    amountCents,
+    planId,
+    usageMode: planId ? plans[planId].usageMode : null,
+  };
+}
+
+function getSubscriptionPeriodInfo(subscription: unknown) {
+  const current = subscription as {
+    current_period_start?: number | null;
+    current_period_end?: number | null;
+  };
+
+  return {
+    periodStart: toSqliteDateFromUnix(current.current_period_start ?? null),
+    periodEnd: toSqliteDateFromUnix(current.current_period_end ?? null),
+  };
+}
+
+function getInvoicePlanInfo(invoice: {
+  lines?: {
+    data?: Array<{
+      price?: {
+        unit_amount?: number | null;
+      } | null;
+      period?: {
+        start?: number | null;
+        end?: number | null;
+      } | null;
+    }>;
+  };
+}) {
+  const line = invoice.lines?.data?.[0];
+  const amountCents = line?.price?.unit_amount ?? null;
+  const planId = resolvePlanFromStripeAmount(amountCents);
+
+  return {
+    amountCents,
+    planId,
+    usageMode: planId ? plans[planId].usageMode : null,
+    periodStart: toSqliteDateFromUnix(line?.period?.start ?? null),
+    periodEnd: toSqliteDateFromUnix(line?.period?.end ?? null),
+  };
+}
+
+function getInvoiceSubscriptionId(invoice: unknown) {
+  const current = invoice as {
+    subscription?: string | null;
+  };
+
+  return typeof current.subscription === "string" ? current.subscription : null;
 }
 
 export async function POST(request: Request) {
@@ -149,6 +214,8 @@ export async function POST(request: Request) {
             amountCents,
           });
         }
+
+        applyPaidTopUp(topUpOrderId, standardTokens);
 
         logOrderEvent(topUpOrderId, "topup_checkout_completed", {
           stripeEventId: event.id,
@@ -307,35 +374,79 @@ export async function POST(request: Request) {
       }
     } else if (event.type === "customer.subscription.updated") {
       const subscription = event.data.object;
-      updateSubscriptionState(subscription.id, {
-        customerId: typeof subscription.customer === "string" ? subscription.customer : null,
-        status: subscription.status,
-      });
+      const order = findOrderBySubscriptionId(subscription.id);
+      const planInfo = getSubscriptionPlanInfo(subscription);
+      const periodInfo = getSubscriptionPeriodInfo(subscription);
+
+      if (order && planInfo.planId && planInfo.usageMode) {
+        syncBillingPeriod({
+          orderId: order.id,
+          planId: planInfo.planId,
+          usageMode: planInfo.usageMode,
+          customerId: typeof subscription.customer === "string" ? subscription.customer : null,
+          subscriptionId: subscription.id,
+          subscriptionStatus: subscription.status,
+          periodStart: periodInfo.periodStart,
+          periodEnd: periodInfo.periodEnd,
+        });
+      }
 
       logOrderEvent(null, "subscription_updated", {
         stripeEventId: event.id,
         subscriptionId: subscription.id,
         status: subscription.status,
+        planId: planInfo.planId,
       });
     } else if (event.type === "customer.subscription.deleted") {
       const subscription = event.data.object;
-      updateSubscriptionState(subscription.id, {
-        customerId: typeof subscription.customer === "string" ? subscription.customer : null,
-        status: subscription.status,
-      });
+      const order = findOrderBySubscriptionId(subscription.id);
+      const planInfo = getSubscriptionPlanInfo(subscription);
+      const periodInfo = getSubscriptionPeriodInfo(subscription);
+
+      if (order && planInfo.planId && planInfo.usageMode) {
+        syncBillingPeriod({
+          orderId: order.id,
+          planId: planInfo.planId,
+          usageMode: planInfo.usageMode,
+          customerId: typeof subscription.customer === "string" ? subscription.customer : null,
+          subscriptionId: subscription.id,
+          subscriptionStatus: subscription.status,
+          periodStart: periodInfo.periodStart,
+          periodEnd: periodInfo.periodEnd,
+        });
+      }
 
       logOrderEvent(null, "subscription_deleted", {
         stripeEventId: event.id,
         subscriptionId: subscription.id,
         status: subscription.status,
+        planId: planInfo.planId,
       });
     } else if (event.type === "invoice.paid" || event.type === "invoice.payment_failed") {
       const invoice = event.data.object;
+      const planInfo = getInvoicePlanInfo(invoice);
+      const subscriptionId = getInvoiceSubscriptionId(invoice);
+      const order = subscriptionId ? findOrderBySubscriptionId(subscriptionId) : undefined;
+
+      if (event.type === "invoice.paid" && order && planInfo.planId && planInfo.usageMode && subscriptionId) {
+        syncBillingPeriod({
+          orderId: order.id,
+          planId: planInfo.planId,
+          usageMode: planInfo.usageMode,
+          customerId: typeof invoice.customer === "string" ? invoice.customer : null,
+          subscriptionId,
+          subscriptionStatus: invoice.status ?? null,
+          periodStart: planInfo.periodStart,
+          periodEnd: planInfo.periodEnd,
+        });
+      }
+
       logOrderEvent(null, event.type === "invoice.paid" ? "invoice_paid" : "invoice_payment_failed", {
         stripeEventId: event.id,
         invoiceId: invoice.id,
         customerId: typeof invoice.customer === "string" ? invoice.customer : null,
         status: invoice.status ?? null,
+        planId: planInfo.planId,
       });
     } else {
       logOrderEvent(null, "webhook_ignored", {

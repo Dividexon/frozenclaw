@@ -317,6 +317,9 @@ docker run -d \
   -e OPENAI_API_BASE_URL="http://host.docker.internal:${PORT}/v1" \
   -e OPENAI_API_KEY="${TOKEN}" \
   -e WEBUI_AUTH=False \
+  -e ENABLE_PERSISTENT_CONFIG=False \
+  -e WEBUI_NAME="Frozenclaw" \
+  -e WEBUI_FAVICON_URL="${APP_BASE_URL}/favicon.ico" \
   -e WEBUI_SECRET_KEY="$(openssl rand -hex 32)" \
   -e DEFAULT_MODELS="" \
   -e ENABLE_SIGNUP=False \

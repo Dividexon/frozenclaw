@@ -38,6 +38,11 @@ function migrate(db: DbInstance) {
       managed_model TEXT,
       included_standard_tokens INTEGER NOT NULL DEFAULT 0,
       included_budget_cents INTEGER NOT NULL DEFAULT 0,
+      billing_period_start TEXT,
+      billing_period_end TEXT,
+      current_period_used_standard_tokens INTEGER NOT NULL DEFAULT 0,
+      current_period_used_cost_micros INTEGER NOT NULL DEFAULT 0,
+      topup_balance_standard_tokens INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -164,6 +169,30 @@ function migrate(db: DbInstance) {
     db.exec("ALTER TABLE orders ADD COLUMN included_budget_cents INTEGER NOT NULL DEFAULT 0");
   }
 
+  if (!orderColumnSet.has("billing_period_start")) {
+    db.exec("ALTER TABLE orders ADD COLUMN billing_period_start TEXT");
+  }
+
+  if (!orderColumnSet.has("billing_period_end")) {
+    db.exec("ALTER TABLE orders ADD COLUMN billing_period_end TEXT");
+  }
+
+  if (!orderColumnSet.has("current_period_used_standard_tokens")) {
+    db.exec(
+      "ALTER TABLE orders ADD COLUMN current_period_used_standard_tokens INTEGER NOT NULL DEFAULT 0"
+    );
+  }
+
+  if (!orderColumnSet.has("current_period_used_cost_micros")) {
+    db.exec(
+      "ALTER TABLE orders ADD COLUMN current_period_used_cost_micros INTEGER NOT NULL DEFAULT 0"
+    );
+  }
+
+  if (!orderColumnSet.has("topup_balance_standard_tokens")) {
+    db.exec("ALTER TABLE orders ADD COLUMN topup_balance_standard_tokens INTEGER NOT NULL DEFAULT 0");
+  }
+
   if (!usageColumnSet.has("standard_tokens_charged")) {
     db.exec(
       "ALTER TABLE usage_events ADD COLUMN standard_tokens_charged INTEGER NOT NULL DEFAULT 0"
@@ -247,6 +276,36 @@ function migrate(db: DbInstance) {
         ) usage ON usage.order_id = o.id
         WHERE COALESCE(usage.used_standard_tokens, 0) >= COALESCE(o.included_standard_tokens, 0)
       )
+  `);
+  db.exec(`
+    UPDATE orders
+    SET topup_balance_standard_tokens = COALESCE((
+      SELECT SUM(tp.standard_tokens)
+      FROM topup_purchases tp
+      WHERE tp.order_id = orders.id
+        AND tp.status = 'paid'
+    ), 0)
+    WHERE COALESCE(topup_balance_standard_tokens, 0) = 0
+      AND id IN (
+        SELECT DISTINCT order_id
+        FROM topup_purchases
+        WHERE status = 'paid'
+      )
+  `);
+  db.exec(`
+    UPDATE orders
+    SET current_period_used_standard_tokens = COALESCE((
+      SELECT SUM(ue.standard_tokens_charged)
+      FROM usage_events ue
+      WHERE ue.order_id = orders.id
+    ), 0),
+        current_period_used_cost_micros = COALESCE((
+      SELECT SUM(ue.cost_total_micros)
+      FROM usage_events ue
+      WHERE ue.order_id = orders.id
+    ), 0)
+    WHERE COALESCE(current_period_used_standard_tokens, 0) = 0
+      AND COALESCE(current_period_used_cost_micros, 0) = 0
   `);
 }
 

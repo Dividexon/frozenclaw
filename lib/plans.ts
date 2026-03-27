@@ -135,3 +135,15 @@ export const plans: Record<PlanId, PlanDefinition> = {
 export function isPlanId(value: string): value is PlanId {
   return value in plans;
 }
+
+export function findPlanIdByAmountCents(amountCents: number | null | undefined) {
+  if (!Number.isFinite(amountCents)) {
+    return null;
+  }
+
+  return (
+    (Object.values(plans).find(
+      (plan) => plan.active && plan.amountCents === amountCents,
+    )?.id ?? null)
+  );
+}
