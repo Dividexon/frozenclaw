@@ -18,6 +18,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get("slug")?.trim() ?? "";
   const token = searchParams.get("token")?.trim() ?? "";
+  const next = searchParams.get("next")?.trim() ?? "/konto";
+  const redirectTarget = next.startsWith("/") ? next : "/konto";
 
   if (!slug || !token) {
     return NextResponse.redirect(new URL("/anmelden", baseUrl));
@@ -30,7 +32,7 @@ export async function GET(request: Request) {
   }
 
   const session = createSessionForEmail(access.email);
-  const response = NextResponse.redirect(new URL("/konto", baseUrl));
+  const response = NextResponse.redirect(new URL(redirectTarget, baseUrl));
 
   response.cookies.set(getSessionCookieName(), session.token, {
     httpOnly: true,

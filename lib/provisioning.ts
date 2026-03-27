@@ -61,10 +61,12 @@ export function buildAgentUrl(slug: string | null, _token: string | null) {
     return null;
   }
 
-  void _token;
-
   const config = getAppConfig();
-  const pathValue = `${config.agentBasePath}/${slug}/`;
+  const query =
+    _token
+      ? `?slug=${encodeURIComponent(slug)}&setupToken=${encodeURIComponent(_token)}`
+      : "";
+  const pathValue = `/chat${query}`;
 
   if (!config.appBaseUrl) {
     return pathValue;
