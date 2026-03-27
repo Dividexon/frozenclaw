@@ -394,9 +394,11 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
               <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--fc-border)] pb-5">
                 <div>
                   <p className="section-kicker">Agent</p>
-                  <h2 className="mt-3 text-4xl font-semibold text-[var(--fc-text)]">
-                    Zugriff und Modellzugang
-                  </h2>
+                  <h2 className="mt-3 text-4xl font-semibold text-[var(--fc-text)]">Chat und Zugang</h2>
+                  <p className="mt-4 text-base leading-8 text-[var(--fc-text-muted)]">
+                    Dein Agent ist über die Chat-Oberfläche erreichbar. Klicke einfach auf "Chat
+                    öffnen" — kein Token-Setup nötig.
+                  </p>
                 </div>
                 <div className="flex flex-wrap gap-4">
                   {access.agentUrl ? (
@@ -406,7 +408,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                       target="_blank"
                       rel="noreferrer noopener"
                     >
-                      OpenClaw öffnen
+                      Chat öffnen
                     </a>
                   ) : null}
                   {access.activationUrl ? (
@@ -493,7 +495,7 @@ export default async function KontoPage({ searchParams }: KontoPageProps) {
                       <span>
                         {access.usageMode === "managed"
                           ? "Modellwechsel im Managed-Tarif nicht vorgesehen"
-                          : "Provider und Schlüssel werden über die Zugangsseite verwaltet"}
+                          : "Chat-Oberfläche öffnet direkt im Browser ohne weitere Konfiguration"}
                       </span>
                     </div>
                     <div className="signal-row">

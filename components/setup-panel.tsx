@@ -461,7 +461,7 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
           </Link>
           {state?.agentUrl ? (
             <a href={state.agentUrl} className="fc-button fc-button-primary" target="_blank">
-              OpenClaw Ã¶ffnen
+              Chat öffnen
             </a>
           ) : null}
         </div>
@@ -533,39 +533,41 @@ export function SetupPanel({ slug, token, initialState }: SetupPanelProps) {
         </form>
       </div>
 
-      <div className="rounded-none border border-[var(--fc-border)] bg-black/20 p-5">
-        <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">
-          OpenClaw-Verbindung
-        </p>
-        <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
-          OpenClaw verlangt beim ersten Browser-Zugriff den Gateway-Token manuell. Die
-          WebSocket-URL lässt du unverändert. Das Passwort-Feld bleibt leer.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3 border border-[var(--fc-border)] bg-black/30 px-4 py-3">
-          <code className="break-all text-sm text-[var(--fc-text)]">{token}</code>
-          <button
-            type="button"
-            className="fc-button fc-button-secondary"
-            onClick={copyGatewayToken}
-          >
-            {copied ? "Kopiert" : "Gateway-Token kopieren"}
-          </button>
-        </div>
-        <ol className="mt-4 space-y-2 text-sm leading-7 text-[var(--fc-text-muted)]">
-          <li>1. OpenClaw öffnen.</li>
-          <li>2. WebSocket-URL unverändert lassen.</li>
-          <li>3. Gateway-Token einfügen.</li>
-          <li>4. Passwort leer lassen.</li>
-          <li>5. Verbinden.</li>
-        </ol>
-        {state?.agentUrl ? (
-          <div className="mt-6">
-            <a href={state.agentUrl} className="fc-button fc-button-primary" target="_blank">
-              OpenClaw öffnen
-            </a>
+      <details className="rounded-none border border-[var(--fc-border)] bg-black/20">
+        <summary className="cursor-pointer px-5 py-4 text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)] hover:text-[var(--fc-text)]">
+          Erweitert: Direkte OpenClaw-Verbindung
+        </summary>
+        <div className="px-5 pb-5">
+          <p className="mt-3 text-sm leading-7 text-[var(--fc-text-muted)]">
+            OpenClaw verlangt beim ersten Browser-Zugriff den Gateway-Token manuell. Die
+            WebSocket-URL lässt du unverändert. Das Passwort-Feld bleibt leer.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 border border-[var(--fc-border)] bg-black/30 px-4 py-3">
+            <code className="break-all text-sm text-[var(--fc-text)]">{token}</code>
+            <button
+              type="button"
+              className="fc-button fc-button-secondary"
+              onClick={copyGatewayToken}
+            >
+              {copied ? "Kopiert" : "Gateway-Token kopieren"}
+            </button>
           </div>
-        ) : null}
-      </div>
+          <ol className="mt-4 space-y-2 text-sm leading-7 text-[var(--fc-text-muted)]">
+            <li>1. OpenClaw öffnen.</li>
+            <li>2. WebSocket-URL unverändert lassen.</li>
+            <li>3. Gateway-Token einfügen.</li>
+            <li>4. Passwort leer lassen.</li>
+            <li>5. Verbinden.</li>
+          </ol>
+          {state?.agentUrl ? (
+            <div className="mt-6">
+              <a href={state.agentUrl} className="fc-button fc-button-primary" target="_blank">
+                OpenClaw öffnen
+              </a>
+            </div>
+          ) : null}
+        </div>
+      </details>
     </div>
   );
 }
