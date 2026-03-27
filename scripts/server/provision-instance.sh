@@ -270,12 +270,21 @@ EOF
 fi
 
 cat > "$CADDY_SNIPPET" <<EOF
-@webui_runtime_${SAFE_MATCHER_SUFFIX} {
+@webui_runtime_cookie_${SAFE_MATCHER_SUFFIX} {
 	path /api/* /auth/* /oauth/* /ws/* /socket.io/* /assets/* /_app/* /static/* /manifest.json /opensearch.xml
 	header Cookie *fc_webui_slug=$SLUG*
 }
 
-handle @webui_runtime_${SAFE_MATCHER_SUFFIX} {
+handle @webui_runtime_cookie_${SAFE_MATCHER_SUFFIX} {
+	reverse_proxy 127.0.0.1:$WEBUI_PORT
+}
+
+@webui_runtime_referrer_${SAFE_MATCHER_SUFFIX} {
+	path /api/* /auth/* /oauth/* /ws/* /socket.io/* /assets/* /_app/* /static/* /manifest.json /opensearch.xml
+	header Referer *$APP_BASE_URL/agent/$SLUG*
+}
+
+handle @webui_runtime_referrer_${SAFE_MATCHER_SUFFIX} {
 	reverse_proxy 127.0.0.1:$WEBUI_PORT
 }
 
