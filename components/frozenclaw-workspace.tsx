@@ -25,6 +25,11 @@ type TaskFormState = {
   enabled: boolean;
 };
 
+type ConnectionSetupState = {
+  id: string;
+  label: string;
+};
+
 const INITIAL_TASK_FORM: TaskFormState = {
   name: "",
   message: "",
@@ -94,6 +99,39 @@ function smallActionButton(label: string, onClick: () => void, disabled = false)
   );
 }
 
+function buildConnectionPrompt(connection: FrozenclawConnection) {
+  const base =
+    `Wir richten jetzt ${connection.label} in Frozenclaw ein. ` +
+    "Führe mich auf Deutsch Schritt für Schritt durch die Einrichtung. " +
+    "Verwende nur einfache Sprache und gib immer nur den nächsten konkreten Schritt aus. " +
+    "Wenn dir eine Angabe fehlt, frage gezielt danach. " +
+    "Sage mir am Ende auch, wie ich die Verbindung kurz testen soll.";
+
+  if (connection.id === "telegram") {
+    return (
+      `${base} ` +
+      "Berücksichtige, dass der Nutzer nicht technisch ist. " +
+      "Erkläre, wie ein Telegram-Bot angelegt wird, wo das Bot-Token zu finden ist und wie der erste Test abläuft."
+    );
+  }
+
+  if (connection.id === "discord") {
+    return (
+      `${base} ` +
+      "Erkläre, wie eine Discord-Anwendung oder ein Bot erstellt wird, welche Berechtigungen nötig sind und wie der Bot in einen Server eingeladen wird."
+    );
+  }
+
+  if (connection.id === "whatsapp") {
+    return (
+      `${base} ` +
+      "Falls WhatsApp aktuell nicht direkt eingerichtet werden kann, sag das offen und nenne den derzeit praktikablen Weg oder die aktuelle Grenze."
+    );
+  }
+
+  return base;
+}
+
 function MessageBubble({ message }: { message: FrozenclawMessage }) {
   const isAssistant = message.role === "assistant";
   const isSystem = message.role === "system";
@@ -161,7 +199,17 @@ function TaskCard({
   );
 }
 
-function ConnectionCard({ connection }: { connection: FrozenclawConnection }) {
+function ConnectionCard({
+  connection,
+  isActiveSetup,
+  onStartSetup,
+}: {
+  connection: FrozenclawConnection;
+  isActiveSetup: boolean;
+  onStartSetup: (connection: FrozenclawConnection) => void;
+}) {
+  const buttonLabel = connection.connected ? "Neu verbinden" : "Verbinden";
+
   return (
     <div className="border border-[var(--fc-border)] bg-black/20 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -174,6 +222,11 @@ function ConnectionCard({ connection }: { connection: FrozenclawConnection }) {
         </span>
       </div>
       <p className="mt-4 text-sm leading-7 text-[var(--fc-text-muted)]">{connection.statusDetail}</p>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button type="button" className="fc-button fc-button-secondary min-h-0 px-4 py-3" onClick={() => onStartSetup(connection)}>
+          {isActiveSetup ? "Setup erneut starten" : buttonLabel}
+        </button>
+      </div>
     </div>
   );
 }
@@ -205,6 +258,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [selectedThreadId, setSelectedThreadId] = useState(initialSnapshot.selectedThreadId);
   const [activeSection, setActiveSection] = useState<WorkspaceSection>("chat");
+  const [activeConnectionSetup, setActiveConnectionSetup] = useState<ConnectionSetupState | null>(null);
   const [messageResetIndex, setMessageResetIndex] = useState(0);
   const [draft, setDraft] = useState("");
   const [chatError, setChatError] = useState<string | null>(null);
@@ -242,10 +296,13 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
     setMessageResetIndex(snapshot.messages.length);
     setDraft("");
     setChatError(null);
+    setActiveConnectionSetup(null);
   }
 
-  function submitCurrentMessage() {
-    if (!draft.trim()) {
+  function submitMessage(message: string) {
+    const trimmedMessage = message.trim();
+
+    if (!trimmedMessage) {
       setChatError("Bitte zuerst eine Nachricht eingeben.");
       return;
     }
@@ -262,7 +319,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
           credentials: "same-origin",
           body: JSON.stringify({
             sessionId: selectedThreadId,
-            message: draft,
+            message: trimmedMessage,
           }),
         });
 
@@ -283,7 +340,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    submitCurrentMessage();
+    submitMessage(draft);
   }
 
   function handleChatKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -297,7 +354,18 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
       return;
     }
 
-    submitCurrentMessage();
+    submitMessage(draft);
+  }
+
+  function handleConnectionSetup(connection: FrozenclawConnection) {
+    const prompt = buildConnectionPrompt(connection);
+    setActiveConnectionSetup({
+      id: connection.id,
+      label: connection.label,
+    });
+    setActiveSection("chat");
+    setDraft("");
+    submitMessage(prompt);
   }
 
   function handleTaskCreate(event: React.FormEvent<HTMLFormElement>) {
@@ -438,6 +506,34 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
                     Neu
                   </button>
                 </div>
+
+                {activeConnectionSetup ? (
+                  <div className="border-b border-[var(--fc-border)] bg-[rgba(255,77,77,0.08)] px-4 py-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-[var(--fc-accent-soft)]">
+                      Einrichtungsmodus
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm leading-7 text-[var(--fc-text)]">
+                        Frozenclaw führt dich gerade durch die Verbindung mit {activeConnectionSetup.label}.
+                      </p>
+                      <button
+                        type="button"
+                        className="fc-button fc-button-secondary min-h-0 px-4 py-3"
+                        onClick={() => {
+                          const connection = snapshot.connections.find(
+                            (entry) => entry.id === activeConnectionSetup.id,
+                          );
+
+                          if (connection) {
+                            handleConnectionSetup(connection);
+                          }
+                        }}
+                      >
+                        Prompt erneut senden
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
                   {visibleMessages.length === 0 ? (
@@ -614,7 +710,12 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
                 <p className="text-sm uppercase tracking-[0.18em] text-[var(--fc-text-muted)]">Messenger</p>
                 <div className="mt-4 grid gap-4 md:grid-cols-3">
                   {snapshot.connections.map((connection) => (
-                    <ConnectionCard key={connection.id} connection={connection} />
+                    <ConnectionCard
+                      key={connection.id}
+                      connection={connection}
+                      isActiveSetup={activeConnectionSetup?.id === connection.id}
+                      onStartSetup={handleConnectionSetup}
+                    />
                   ))}
                 </div>
               </div>
