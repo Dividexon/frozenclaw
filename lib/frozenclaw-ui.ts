@@ -183,6 +183,15 @@ export type FrozenclawWorkspaceSnapshot = {
   instanceSlug: string | null;
 };
 
+function normalizeModelName(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return normalized.includes("/") ? normalized.split("/").pop() ?? normalized : normalized;
+}
+
 function formatDateTime(value: Date | number | string | null) {
   if (!value) {
     return null;
@@ -367,6 +376,32 @@ function resolveTaskStatus(job: CronJobFileEntry) {
   }
 
   return "Aktiv";
+}
+
+function getCompatibleManagedThread(
+  access: ResolvedLoginToken,
+  threads: FrozenclawThreadSummary[],
+  preferredSessionId?: string | null,
+) {
+  if (access.usageMode !== "managed" || !access.managed?.model) {
+    return preferredSessionId?.trim()
+      ? threads.find((thread) => thread.sessionId === preferredSessionId.trim()) ?? null
+      : threads[0] ?? null;
+  }
+
+  const managedModelName = normalizeModelName(access.managed.model);
+  const preferredThread = preferredSessionId?.trim()
+    ? threads.find((thread) => thread.sessionId === preferredSessionId.trim()) ?? null
+    : null;
+
+  const isCompatible = (thread: FrozenclawThreadSummary | null) =>
+    Boolean(thread && normalizeModelName(thread.model) === managedModelName);
+
+  if (isCompatible(preferredThread)) {
+    return preferredThread;
+  }
+
+  return threads.find((thread) => normalizeModelName(thread.model) === managedModelName) ?? null;
 }
 
 async function runOpenClawCli(slug: string, args: string[], timeoutMs = 120_000) {
@@ -609,7 +644,8 @@ export async function buildFrozenclawWorkspace(
   const threads = access.instanceSlug ? await listThreads(access.instanceSlug) : [];
   const tasks = access.instanceSlug ? await listTasks(access.instanceSlug) : [];
   const connections = access.instanceSlug ? await listConnections(access.instanceSlug) : [];
-  const currentSessionId = selectedSessionId ?? threads[0]?.sessionId ?? null;
+  const currentThread = getCompatibleManagedThread(access, threads, selectedSessionId);
+  const currentSessionId = currentThread?.sessionId ?? null;
   const messages =
     access.instanceSlug && currentSessionId
       ? await readSessionMessages(access.instanceSlug, currentSessionId)
@@ -648,7 +684,10 @@ export async function sendFrozenclawMessage(
     throw new Error("Bitte zuerst eine Nachricht eingeben.");
   }
 
-  const effectiveSessionId = sessionId?.trim() || crypto.randomUUID();
+  const compatibleThread = access.instanceSlug
+    ? getCompatibleManagedThread(access, await listThreads(access.instanceSlug), sessionId)
+    : null;
+  const effectiveSessionId = compatibleThread?.sessionId ?? sessionId?.trim() ?? crypto.randomUUID();
   await runOpenClawCli(
     slug,
     ["agent", "--session-id", effectiveSessionId, "--message", trimmedMessage, "--json"],
