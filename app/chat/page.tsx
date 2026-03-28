@@ -73,7 +73,7 @@ export default async function ChatPage({ searchParams }: ChatPageProps) {
           <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--fc-text-muted)]">{loadError}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/konto" className="fc-button fc-button-primary">
-              Zurueck zum Dashboard
+              Zurück zum Dashboard
             </Link>
           </div>
         </section>
