@@ -8,6 +8,7 @@ import { buildDashboardSnapshot, type DashboardProvider } from "@/lib/dashboard"
 
 const execFileAsync = promisify(execFile);
 const OPENCLAW_CONFIG_PREFIX = "/home/node/.openclaw";
+const MIN_FREE_TIER_CHAT_TOKENS = 12_000;
 const DEFAULT_CONNECTIONS = [
   {
     id: "telegram",
@@ -303,6 +304,28 @@ function resolveInstanceSlug(access: ResolvedLoginToken) {
   }
 
   return access.instanceSlug;
+}
+
+function assertFreeTierCanSend(access: ResolvedLoginToken) {
+  if (access.plan !== "trial") {
+    return;
+  }
+
+  if (access.freeTierLocked || !access.managed || access.managed.remainingStandardTokens <= 0) {
+    throw new Error(
+      "Dein Free-Tier-Kontingent ist verbraucht. Bitte wähle jetzt einen bezahlten Plan, um weiterzuschreiben.",
+    );
+  }
+
+  if (access.managed.remainingStandardTokens < MIN_FREE_TIER_CHAT_TOKENS) {
+    const minimumTokensLabel = new Intl.NumberFormat("de-DE").format(MIN_FREE_TIER_CHAT_TOKENS);
+
+    throw new Error(
+      `Dein Free-Tier-Restkontingent reicht sehr wahrscheinlich nicht mehr für eine weitere Nachricht. ` +
+        `Auf dieser Instanz braucht ein einzelner OpenClaw-Durchlauf oft mehr als ${minimumTokensLabel} Tokens. ` +
+        `Bitte wähle jetzt einen bezahlten Plan, um weiterzuschreiben.`,
+    );
+  }
 }
 
 function formatEveryMs(everyMs: number) {
@@ -616,6 +639,8 @@ export async function sendFrozenclawMessage(
   message: string,
   sessionId?: string | null,
 ) {
+  assertFreeTierCanSend(access);
+
   const slug = resolveInstanceSlug(access);
   const trimmedMessage = message.trim();
 
