@@ -244,9 +244,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
     setChatError(null);
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  function submitCurrentMessage() {
     if (!draft.trim()) {
       setChatError("Bitte zuerst eine Nachricht eingeben.");
       return;
@@ -281,6 +279,25 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
         setChatError("Die Nachricht konnte gerade nicht gesendet werden.");
       }
     });
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    submitCurrentMessage();
+  }
+
+  function handleChatKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (isChatPending) {
+      return;
+    }
+
+    submitCurrentMessage();
   }
 
   function handleTaskCreate(event: React.FormEvent<HTMLFormElement>) {
@@ -440,6 +457,7 @@ export function FrozenclawWorkspace({ initialSnapshot }: FrozenclawWorkspaceProp
                   <textarea
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
+                    onKeyDown={handleChatKeyDown}
                     placeholder="Was soll dein Agent als Nächstes tun?"
                     className="mt-3 min-h-32 w-full border border-[var(--fc-border)] bg-black/30 px-4 py-4 text-sm text-[var(--fc-text)] outline-none transition focus:border-[var(--fc-accent)]"
                   />
